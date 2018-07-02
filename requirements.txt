@@ -1,0 +1,9 @@
+pyyaml
+celery==4.1.1
+requests==2.7.0
+log4mongo
+redis
+dcdatabase
+hermes
+crm_notate
+blindAl
