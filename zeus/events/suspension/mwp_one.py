@@ -1,11 +1,11 @@
-import requests
 import logging
+import requests
 from requests.packages.urllib3.exceptions import InsecurePlatformWarning, InsecureRequestWarning
+
+from zeus.events.suspension.interface import Product
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 requests.packages.urllib3.disable_warnings(InsecurePlatformWarning)
-
-from zeus.events.suspension.interface import Product
 
 
 class MWPOne(Product):

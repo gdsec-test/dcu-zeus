@@ -3,8 +3,8 @@
 # from mock import patch
 # from nose.tools import assert_true, assert_multi_line_equal
 #
-# from zeus.events.netvio.netvio import Netvio
-# from zeus.events.netvio.soap import SoapBase
+# from zeus.events.support_tools.netvio import Netvio
+# from zeus.events.support_tools.soap import SoapBase
 #
 #
 # class TestNetvio:
@@ -23,7 +23,7 @@
 #     def test_constructor(self):
 #         assert_true(self._nv._config.NETVIO_API_URL == 'https://netvio.api.int.test-godaddy.com/Api.svc?wsdl')
 #
-#     @patch('zeus.events.netvio.netvio.strftime')
+#     @patch('zeus.events.support_tools.netvio.strftime')
 #     def test_create_message(self, strftime):
 #         strftime.return_value = '2017-12-06T23:01:22'
 #         expected_message = '''

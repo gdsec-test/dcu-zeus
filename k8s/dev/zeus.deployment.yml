@@ -72,9 +72,9 @@ spec:
           - name: NETVIO_SSL_KEY
             value: /netvio_certs/tls.key
           - name: OCM_SSL_CERT
-            value: /certs/tls.crt
+            value: /ocm_certs/tls.crt
           - name: OCM_SSL_KEY
-            value: /certs/tls.key
+            value: /ocm_certs/tls.key
 
           volumeMounts:
           - name: encryption-keys
@@ -84,7 +84,7 @@ spec:
             mountPath: /netvio_certs
             readOnly: true
           - name: tls-ocm-files
-            mountPath: /certs
+            mountPath: /ocm_certs
             readOnly: true
 
         -
@@ -96,7 +96,7 @@ spec:
               command:
                 - redis-cli
                 - ping
-            initialDelaySeconds: 30
+            initialDelaySeconds: 15
             timeoutSeconds: 5
 
       volumes:

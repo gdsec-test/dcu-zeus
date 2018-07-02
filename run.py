@@ -41,7 +41,7 @@ registered = RegisteredHandler(config)
 def route_request(data, request_type):
     if data.get('hosted_status') == 'HOSTED':
         hosted.process(data, request_type)
-    elif data.get('hosted_status') == 'REGISTERED':
+    elif data.get('hosted_status') in ['REGISTERED', 'FOREIGN']:
         registered.process(data, request_type)
     return 'Unsupported Hosted Status'
 

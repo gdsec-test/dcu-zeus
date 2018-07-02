@@ -3,6 +3,7 @@ from nose.tools import assert_false
 from mock import patch
 
 from zeus.handlers.registered_handler import RegisteredHandler
+from zeus.utils.slack import SlackFailures
 
 from settings import TestingConfig
 
@@ -34,9 +35,9 @@ class TestRegisteredHandler:
         data = {'hosted_status': 'REGISTERED'}
         assert_false(self._registered.intentionally_malicious(data))
 
-    @patch.object(RegisteredHandler, '_slack_no_shopper')
-    def test_intentionally_malicious_no_shoppers(self, _slack_no_shopper):
-        _slack_no_shopper.return_value = None
+    @patch.object(SlackFailures, 'failed_to_determine_shoppers')
+    def test_intentionally_malicious_no_shoppers(self, failed_to_determine_shoppers):
+        failed_to_determine_shoppers.return_value = None
         data = {'hosted_status': 'REGISTERED', 'type': 'PHISHING'}
         assert_false(self._registered.intentionally_malicious(data))
 
@@ -47,9 +48,9 @@ class TestRegisteredHandler:
         data = {'hosted_status': 'REGISTERED'}
         assert_false(self._registered.suspend(data))
 
-    @patch.object(RegisteredHandler, '_slack_no_shopper')
-    def test_suspend_no_shoppers(self, _slack_no_shopper):
-        _slack_no_shopper.return_value = None
+    @patch.object(SlackFailures, 'failed_to_determine_shoppers')
+    def test_suspend_no_shoppers(self, failed_to_determine_shoppers):
+        failed_to_determine_shoppers.return_value = None
         data = {'hosted_status': 'REGISTERED', 'type': 'PHISHING'}
         assert_false(self._registered.suspend(data))
 

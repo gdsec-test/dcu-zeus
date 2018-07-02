@@ -13,18 +13,20 @@ from zeus.utils.functions import get_list_of_ids_to_notify, \
     get_shopper_id_from_dict, \
     get_host_brand_from_dict, \
     get_host_abuse_email_from_dict, get_host_info_from_dict
-from zeus.utils.slack import ThrottledSlack
+from zeus.utils.slack import ThrottledSlack, SlackFailures
 
 
 class RegisteredHandler(Handler):
-    supported_types = ['PHISHING', 'MALWARE']
+    TYPES = ['PHISHING', 'MALWARE']
+    REGISTERED = 'REGISTERED'
+    FOREIGN = 'FOREIGN'
 
     def __init__(self, app_settings):
         self._logger = logging.getLogger(__name__)
         self.registered_mailer = RegisteredMailer(app_settings)
         self.fraud_mailer = FraudMailer(app_settings)
         self.crm = ThrottledCRM(app_settings)
-        self.slack = ThrottledSlack(app_settings)
+        self.slack = SlackFailures(ThrottledSlack(app_settings))
         self._throttle = Persist(app_settings.REDIS, app_settings.SUSPEND_DOMAIN_LOCK_TIME)
         self.HOLD_TIME = app_settings.HOLD_TIME
         self.domain_service = DomainService(app_settings.DOMAIN_SERVICE)
@@ -45,52 +47,43 @@ class RegisteredHandler(Handler):
     def customer_warning(self, data):
         hosted_brand = get_host_brand_from_dict(data)
         recipients = get_host_abuse_email_from_dict(data)
+        shopper_id_list = get_list_of_ids_to_notify(data)
         ip = get_host_info_from_dict(data).get('ip')
         ticket_id = data.get('ticketId')
         domain = data.get('sourceDomainOrIp')
         report_type = data.get('type')
         source = data.get('source')
 
-        if data.get('hosted_status') not in ['REGISTERED', 'FOREIGN']:
+        if not self._validate_required_args(data, [self.REGISTERED, self.FOREIGN]):  # Registered or Foreign is OK
             return False
 
-        if report_type not in self.supported_types:
-            return False
-
-        shopper_id_list = get_list_of_ids_to_notify(data)
-        if not shopper_id_list:
-            self._logger.info("No shoppers found")
-            return False
-
-        # Place in Review
         self.basic_review.place_in_review(ticket_id, datetime.utcnow() + timedelta(seconds=self.HOLD_TIME),
                                           '24hr_notice_sent')
-
-        note = note_mappings['registered']['customerWarning']['crm']
-        note.format(domain=domain, type=report_type, location=source)
-        self.crm.notate_crm_account(shopper_id_list, ticket_id, note)
-
-        # Send emails to 3rd Party Hosting Provider and Registrant
         self.registered_mailer.send_hosting_provider_notice(ticket_id, domain, source, hosted_brand, recipients, ip)
-        self.registered_mailer.send_registrant_warning(ticket_id, domain, shopper_id_list, source)
+
+        if data.get('hosted_status') == self.REGISTERED:
+            note = note_mappings['registered']['customerWarning']['crm']
+            note.format(domain=domain, type=report_type, location=source)
+            self.crm.notate_crm_account(shopper_id_list, ticket_id, note)
+
+            if not self.registered_mailer.send_registrant_warning(ticket_id, domain, shopper_id_list, source):
+                self.slack.failed_sending_email(ticket_id)
+        return True
 
     def intentionally_malicious(self, data):
         shopper_id = get_shopper_id_from_dict(data)
+        shopper_id_list = get_list_of_ids_to_notify(data)
         ticket_id = data.get('ticketId')
         domain = data.get('sourceDomainOrIp')
         source = data.get('source')
         target = data.get('target')
         report_type = data.get('type')
 
-        if data.get('hosted_status') not in ['REGISTERED']:
+        if not self._validate_required_args(data):
             return False
 
-        if report_type not in self.supported_types:
-            return False
-
-        shopper_id_list = get_list_of_ids_to_notify(data)
-        if not shopper_id_list:
-            self._slack_no_shopper(ticket_id)
+        if not self._throttle.can_suspend_domain(domain):
+            self._logger.info('Domain {} already suspended'.format(domain))
             return False
 
         note = note_mappings['registered']['intentionallyMalicious']['crm']
@@ -98,59 +91,56 @@ class RegisteredHandler(Handler):
         self.crm.notate_crm_account([shopper_id], ticket_id, note)
 
         self.fraud_mailer.send_malicious_domain_notification(ticket_id, domain, shopper_id, source, target)
-        self.registered_mailer.send_shopper_intentional_suspension(ticket_id, domain, shopper_id_list, report_type)
+        if not self.registered_mailer.send_shopper_intentional_suspension(ticket_id, domain, shopper_id_list, report_type):
+            self.slack.failed_sending_email(ticket_id)
 
-        self._suspend_domain(data, ticket_id, note)
+        return self._suspend_domain(data, ticket_id, note)
 
     def suspend(self, data):
         shopper_id = get_shopper_id_from_dict(data)
+        shopper_id_list = get_list_of_ids_to_notify(data)
         ticket_id = data.get('ticketId')
         domain = data.get('sourceDomainOrIp')
         source = data.get('source')
         report_type = data.get('type')
 
-        if data.get('hosted_status') not in ['REGISTERED']:
+        if not self._validate_required_args(data):
             return False
 
-        if report_type not in self.supported_types:
-            return False
-
-        shopper_id_list = get_list_of_ids_to_notify(data)
-        if not shopper_id_list:
-            self._slack_no_shopper(ticket_id)
+        if not self._throttle.can_suspend_domain(domain):
+            self._logger.info('Domain {} already suspended'.format(domain))
             return False
 
         note = note_mappings['registered']['suspension']['crm']
         note.format(domain=domain, type=report_type, location=source)
         self.crm.notate_crm_account([shopper_id], ticket_id, note)
 
-        self.registered_mailer.send_shopper_suspension(ticket_id, domain, shopper_id_list, source, report_type)
+        if not self.registered_mailer.send_shopper_suspension(ticket_id, domain, shopper_id_list, source, report_type):
+            self.slack.failed_sending_email(ticket_id)
 
-        self._suspend_domain(data, ticket_id, note)
+        return self._suspend_domain(data, ticket_id, note)
 
     def _suspend_domain(self, data, ticket_id, reason):
         domain = data.get('sourceDomainOrIp')
 
-        if not self._throttle.can_suspend_domain(domain):
-            self._logger.info('Domain {} already suspended'.format(domain))
-            return False
-
         self._logger.info('Suspending domain {} for incident {}'.format(domain, ticket_id))
         if not self.domain_service.suspend_domain(domain, self.ENTERED_BY, reason):
-            self._slack_suspend_failed(domain)
+            self.slack.failed_domain_suspension(domain)
             return False
         return True
 
-    def _slack_no_shopper(self, ticket_id):
-        message = 'No action taken for {} - unable to determine shopper'.format(ticket_id)
-        slack_suspension_failure_key = '{}_suspend_failed_no_shopper'.format(ticket_id)
+    def _validate_required_args(self, data, hosted_status=None):
+        ticket_id = data.get('ticketId')
 
-        self._logger.warning(message)
-        self.slack.send_message(slack_suspension_failure_key, message)
+        if not hosted_status:
+            hosted_status = [self.REGISTERED]
 
-    def _slack_suspend_failed(self, domain):
-        message = 'Suspension Failed for Domain: {}'.format(domain)
-        slack_suspension_failure_key = '{}_not_suspended'
-
-        self._logger.warning(message)
-        self.slack.send_message(slack_suspension_failure_key.format(domain), message)
+        if data.get('hosted_status') not in hosted_status:
+            self.slack.invalid_hosted_status(ticket_id)
+        elif data.get('type') not in self.TYPES:
+            self.slack.invalid_abuse_type(ticket_id)
+        elif not get_list_of_ids_to_notify(data):
+            self.slack.failed_to_determine_shoppers(ticket_id)
+        else:
+            return True
+        return False

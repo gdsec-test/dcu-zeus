@@ -20,7 +20,7 @@ class FraudMailer(Mailer):
             {'email': config_by_name[self.env].NON_PROD_EMAIL_ADDRESS}] if self.env != 'prod' else []
 
     def send_new_domain_notification(self, ticket_id, domain, shopper_id, domain_create_date, report_type, source,
-                                     target='Unknown Brand'):
+                                     target):
         """
         Sends a potentially fraudulent new domain to fraud
         :param shopper_id:
@@ -46,7 +46,7 @@ class FraudMailer(Mailer):
                                        'DOMAIN_CREATION_DATE': str(domain_create_date),
                                        'DOMAIN': domain,
                                        'MALICIOUS_ACTIVITY': report_type,
-                                       'BRAND_TARGETED': target,
+                                       'BRAND_TARGETED': target or 'Unknown Brand',
                                        'SANITIZED_URL': self.sanitize_url(source)}
 
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
@@ -60,7 +60,7 @@ class FraudMailer(Mailer):
         return False
 
     def send_new_shopper_notification(self, ticket_id, domain, shopper_id, shopper_create_date, report_type, source,
-                                      target='Unknown Brand'):
+                                      target):
         """
         Sends a potentially fraudulent new shopper to fraud
         :param ticket_id:
@@ -86,10 +86,11 @@ class FraudMailer(Mailer):
                                        'SHOPPER_CREATION_DATE': str(shopper_create_date),
                                        'DOMAIN': domain,
                                        'MALICIOUS_ACTIVITY': report_type,
-                                       'BRAND_TARGETED': target,
+                                       'BRAND_TARGETED': target or 'Unknown Brand',
                                        'SANITIZED_URL': self.sanitize_url(source)}
 
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
+                print kwargs
                 resp = send_mail(template, substitution_values, **kwargs)
                 resp.update({'type': message_type, 'template': 3693})
                 generate_event(ticket_id, success_message, **resp)
@@ -100,7 +101,7 @@ class FraudMailer(Mailer):
         return False
 
     def send_malicious_domain_notification(self, ticket_id, domain, shopper_id, report_type, source,
-                                           target='Unknown Brand'):
+                                           target):
         """
         Sends a malicious notification to fraud
         :param ticket_id:
@@ -124,7 +125,7 @@ class FraudMailer(Mailer):
                 substitution_values = {'ACCOUNT_NUMBER': shopper_id,
                                        'DOMAIN': domain,
                                        'MALICIOUS_ACTIVITY': report_type,
-                                       'BRAND_TARGETED': target,
+                                       'BRAND_TARGETED': target or 'Unknown Brand',
                                        'SANITIZED_URL': self.sanitize_url(source)}
 
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
@@ -138,7 +139,7 @@ class FraudMailer(Mailer):
         return False
 
     def send_new_hosting_account_notification(self, ticket_id, domain, shopper_id, account_create_date, report_type,
-                                              source, target='Unknown Brand'):
+                                              source, target):
         """
         Sends a potentially fraudulent new hosting account to fraud.
         This template utilizes a variation of the New Shopper Account template.
@@ -165,7 +166,7 @@ class FraudMailer(Mailer):
                                        'SHOPPER_CREATION_DATE': str(account_create_date),
                                        'DOMAIN': domain,
                                        'MALICIOUS_ACTIVITY': report_type,
-                                       'BRAND_TARGETED': target,
+                                       'BRAND_TARGETED': target or 'Unknown Brand',
                                        'SANITIZED_URL': self.sanitize_url(source)}
 
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
@@ -179,7 +180,7 @@ class FraudMailer(Mailer):
         return False
 
     def send_malicious_hosting_notification(self, ticket_id, domain, shopper_id, guid, source, report_type,
-                                            target='Unknown Brand'):
+                                            target):
         """
         Sends a malicious notification to fraud
         Using DMV Fraud template; DOMAIN = item reported to Fraud (guid here, for hosting)
@@ -205,7 +206,7 @@ class FraudMailer(Mailer):
                 substitution_values = {'ACCOUNT_NUMBER': shopper_id,
                                        'DOMAIN': guid,  # Template requires DOMAIN param
                                        'MALICIOUS_ACTIVITY': report_type,
-                                       'BRAND_TARGETED': target,
+                                       'BRAND_TARGETED': target or 'Unknown Brand',
                                        'SANITIZED_URL': self.sanitize_url(source)}
 
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
