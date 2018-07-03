@@ -39,11 +39,12 @@ registered = RegisteredHandler(config)
 
 
 def route_request(data, request_type):
-    if data.get('hosted_status') == 'HOSTED':
+    hosted_status = data.get('hosted_status')
+    if hosted_status == 'HOSTED':
         hosted.process(data, request_type)
-    elif data.get('hosted_status') in ['REGISTERED', 'FOREIGN']:
+    elif hosted_status in ['REGISTERED', 'FOREIGN']:
         registered.process(data, request_type)
-    return 'Unsupported Hosted Status'
+    return 'Unsupported Hosted Status', hosted_status
 
 
 @celery.task()
@@ -75,7 +76,6 @@ def customer_warning(ticket_id):
     data = db.get_incident(ticket_id)
     if not data:
         return
-
     route_request(data.get('hosted_status'), 'customer_warning')
 
 
@@ -84,7 +84,6 @@ def intentionally_malicious(ticket_id):
     data = db.get_incident(ticket_id)
     if not data:
         return
-
     route_request(data.get('hosted_status'), 'intentionally_malicious')
 
 
@@ -93,5 +92,4 @@ def suspend(ticket_id):
     data = db.get_incident(ticket_id)
     if not data:
         return
-
     route_request(data.get('hosted_status'), 'suspend')
