@@ -38,33 +38,33 @@ spec:
           - name: BROKER_PASS
             valueFrom:
               secretKeyRef:
-                name: amqp-happy
+                name: amqp-zeus
                 key: password
           - name: DB_PASS
             valueFrom:
               secretKeyRef:
-                name: db-happy
+                name: db-zeus
                 key: password
 
           - name: DIABLOUSER
             valueFrom:
               secretKeyRef:
-                name: auth-happy-envs
+                name: auth-zeus-envs
                 key: diablouser
           - name: DIABLOPASS
             valueFrom:
               secretKeyRef:
-                name: auth-happy-envs
+                name: auth-zeus-envs
                 key: diablopass
           - name: MWPONEUSER
             valueFrom:
               secretKeyRef:
-                name: auth-happy-envs
+                name: auth-zeus-envs
                 key: mwponeuser
           - name: MWPONEPASS
             valueFrom:
               secretKeyRef:
-                name: auth-happy-envs
+                name: auth-zeus-envs
                 key: mwponepass
 
           - name: NETVIO_SSL_CERT
