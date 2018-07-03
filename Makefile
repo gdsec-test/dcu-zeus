@@ -4,8 +4,7 @@ DOCKERREPO=docker-dcu-local.artifactory.secureserver.net/zeus
 DATE=$(shell date)
 
 # libraries we need to stage for pip to install inside Docker build
-PRIVATE_PIPS=git@github.secureserver.net:ITSecurity/blindAl.git \
-git@github.secureserver.net:ITSecurity/dcdatabase.git \
+PRIVATE_PIPS=git@github.secureserver.net:ITSecurity/dcdatabase.git \
 git@github.secureserver.net:ITSecurity/crm_notate.git \
 git@github.secureserver.net:ITSecurity/hermes.git
 

@@ -17,7 +17,7 @@ WORKDIR /tmp
 ADD . /tmp
 
 # pip install private pips staged by Makefile
-RUN for entry in blindAl dcdatabase crm_notate hermes; \
+RUN for entry in dcdatabase crm_notate hermes; \
     do \
     pip install --compile "/tmp/private_pips/$entry"; \
     done
