@@ -17,17 +17,17 @@ class Suspension(Product):
                           'vertigo': Vertigo(app_settings),
                           'legacy': Legacy(app_settings)}
 
-    def suspend(self, product, identifier):
+    def suspend(self, product, identifier, data):
         product = product.lower()
         if product not in self._products:
             return self.UNSUPPORTED_PRODUCT.format(product)
-        self._products[product].suspend(identifier)
+        self._products[product].suspend(identifier, data)
 
-    def reinstate(self, product, identifier):
+    def reinstate(self, product, identifier, data):
         product = product.lower()
         if product not in self._products:
             return self.UNSUPPORTED_PRODUCT.format(product)
-        self._products[product].reinstate(identifier)
+        self._products[product].reinstate(identifier, data)
 
     def cancel(self, product, identifier):
         product = product.lower()
