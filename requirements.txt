@@ -6,4 +6,3 @@ redis==2.10.5
 dcdatabase
 hermes
 crm_notate
-blindAl
