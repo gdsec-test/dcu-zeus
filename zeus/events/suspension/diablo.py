@@ -22,7 +22,7 @@ class Diablo(Product):
         :return:
         """
 
-        body = json.dumps({"reason": "testing HA suspension", "type": "abuse", "enable_ftp": True}, ensure_ascii=False)
+        body = json.dumps({"reason": "DCU Suspension", "type": "abuse", "enable_ftp": True}, ensure_ascii=False)
 
         try:
             with requests.Session() as session:
@@ -42,7 +42,7 @@ class Diablo(Product):
         Waiting on user perm update by Diablo Dev for this to work
         :return:
         """
-        body = json.dumps({"reason": "testing HA suspension"}, ensure_ascii=False)
+        body = json.dumps({"reason": "DCU Reinstatement"}, ensure_ascii=False)
 
         try:
             with requests.session() as session:
@@ -51,7 +51,7 @@ class Diablo(Product):
             if r.status_code == 200:
                 return True
             else:
-                logging.error('Failed to reisntate GUID: {}, request status code: {}').format(guid, r.status_code)
+                logging.error('Failed to reinstate GUID: {}, request status code: {}').format(guid, r.status_code)
 
         except Exception as e:
             logging.error(e.message)
