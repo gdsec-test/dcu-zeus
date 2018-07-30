@@ -75,6 +75,10 @@ spec:
             value: /ocm_certs/tls.crt
           - name: OCM_SSL_KEY
             value: /ocm_certs/tls.key
+          - name: ZEUS_SSL_CERT
+            value: /zeus_certs/tls.crt
+          - name: ZEUS_SSL_KEY
+            value: /zeus_certs/tls.key
 
           volumeMounts:
           - name: encryption-keys
@@ -85,6 +89,9 @@ spec:
             readOnly: true
           - name: tls-ocm-files
             mountPath: /ocm_certs
+            readOnly: true
+          - name: tls-zeus-files
+            mountPath: /zeus_certs
             readOnly: true
 
         -
@@ -109,3 +116,6 @@ spec:
         - name: tls-ocm-files
           secret:
             secretName: tls-phishnet
+        - name: tls-zeus-files
+          secret:
+            secretName: tls-zeus
