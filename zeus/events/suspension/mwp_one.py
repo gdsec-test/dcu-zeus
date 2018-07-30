@@ -1,4 +1,5 @@
 import logging
+
 import requests
 from requests.packages.urllib3.exceptions import InsecurePlatformWarning, InsecureRequestWarning
 
@@ -9,36 +10,38 @@ requests.packages.urllib3.disable_warnings(InsecurePlatformWarning)
 
 
 class MWPOne(Product):
+    headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
+
     def __init__(self, app_settings):
         self.mwpone_url = app_settings.MWPONE_URL
         self.mwponeauth = (app_settings.MWPONEUSER, app_settings.MWPONEPASS)
-        self.headers = {"Accept": "application/json", "Content-Type": "application/json"}
 
     def suspend(self, accountid):
+        url = self.mwpone_url + accountid + '?suspendAccount'
+
         try:
-            with requests.session() as session:
-                r = session.post(self.mwpone_url + accountid + '?suspendAccount', auth=self.mwponeauth,
-                                 headers=self.headers, verify=False)
-            if r.text == 'true':
+            response = requests.post(url, auth=self.mwponeauth, headers=self.headers, verify=False)
+
+            if response.text == 'true':
                 logging.info('Managed Wordpress 1.0 account {} has been suspended'.format(accountid))
-            return True
+                return True
 
         except Exception as e:
-            logging.error(e.message)
-            return False
+            logging.error("Failed to suspend account {}. {}".format(accountid, e.message))
+        return False
 
     def reinstate(self, accountid):
+        url = self.mwpone_url + accountid + '?unsuspendAccount'
+
         try:
-            with requests.session() as session:
-                r = session.post(self.mwpone_url + accountid + '?unsuspendAccount', auth=self.mwponeauth,
-                                 headers=self.headers, verify=False)
-            if r.text == 'true':
+            response = requests.post(url, auth=self.mwponeauth, headers=self.headers, verify=False)
+            if response.text == 'true':
                 logging.info('Managed Wordpress 1.0 account {} has been reinstated'.format(accountid))
-            return True
+                return True
 
         except Exception as e:
-            logging.error(e.message)
-            return False
+            logging.error("Failed to reinstate account {}. {}".format(accountid, e.message))
+        return False
 
     def cancel(self):
         pass

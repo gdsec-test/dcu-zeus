@@ -11,51 +11,45 @@ requests.packages.urllib3.disable_warnings(InsecurePlatformWarning)
 
 
 class Diablo(Product):
+    headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
+
     def __init__(self, app_settings):
         self.url = app_settings.DIABLO_URL
         self.auth = (app_settings.DIABLOUSER, app_settings.DIABLOPASS)
-        self.headers = {"Accept": "application/json", "Content-Type": "application/json"}
 
     def suspend(self, guid):
-        """
-        Waiting on user perm update by Diablo Dev for this to work
-        :return:
-        """
-
-        body = json.dumps({"reason": "DCU Suspension", "type": "abuse", "enable_ftp": True}, ensure_ascii=False)
+        url = self.url + guid + '?suspend'
 
         try:
-            with requests.Session() as session:
-                r = session.post(self.url + guid + '?suspend', auth=self.auth, headers=self.headers,
-                                 data=body, verify=False)
-            if r.status_code == 200:
-                return True
-            else:
-                logging.error('Failed to suspend GUID: {}, request status code: {}').format(guid, r.status_code)
+            body = json.dumps({'reason': 'DCU Suspension', 'type': 'abuse', 'enable_ftp': True}, ensure_ascii=False)
+
+            response = requests.post(url, auth=self.auth, headers=self.headers, data=body, verify=False)
+            response.raise_for_status()
+
+            return response.status_code == 200
 
         except Exception as e:
-            logging.error(e.message)
-            return False
+            logging.error('Failed to suspend GUID: {}. {}').format(guid, e.message)
+        return False
 
     def reinstate(self, guid):
         """
         Waiting on user perm update by Diablo Dev for this to work
         :return:
         """
-        body = json.dumps({"reason": "DCU Reinstatement"}, ensure_ascii=False)
+        url = self.url + guid + '?reinstate'
 
         try:
-            with requests.session() as session:
-                r = session.post(self.url + guid + '?reinstate', auth=self.auth, headers=self.headers,
-                                 data=body, verify=False)
-            if r.status_code == 200:
-                return True
-            else:
-                logging.error('Failed to reinstate GUID: {}, request status code: {}').format(guid, r.status_code)
+            body = json.dumps({'reason': 'DCU Reinstatement'}, ensure_ascii=False)
+
+            response = requests.post(url, auth=self.auth, headers=self.headers, data=body, verify=False)
+            response.raise_for_status()
+
+            return response.status_code == 200
 
         except Exception as e:
-            logging.error(e.message)
-            return False
+            logging.error('Failed to reinstate GUID: {}. {}'.format(guid, e.message))
+        return False
 
     def cancel(self):
         pass

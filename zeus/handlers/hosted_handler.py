@@ -7,9 +7,8 @@ from zeus.events.suspension.suspension import Suspension
 from zeus.persist.persist import Persist
 from zeus.reviews.reviews import BasicReview
 from zeus.utils.functions import get_host_info_from_dict, get_host_shopper_id_from_dict
-from zeus.utils.slack import ThrottledSlack, SlackFailures
-
 from zeus.utils.scribe import HostedScribe
+from zeus.utils.slack import ThrottledSlack, SlackFailures
 
 
 class HostedHandler:
@@ -65,11 +64,12 @@ class HostedHandler:
             return False
 
         if not self._throttle.can_suspend_hosting_product(guid):
-            self._logger.info('Hosting {} already suspended'.format(guid))
+            self._logger.info("Hosting {} already suspended".format(guid))
             return False
 
         self.scribe.intentionally_malicious(ticket_id, guid, source, report_type, shopper_id)
-        if not self.hosted_mailer.send_shopper_hosted_intentional_suspension(ticket_id, domain, shopper_id, report_type):
+        if not self.hosted_mailer.send_shopper_hosted_intentional_suspension(ticket_id, domain, shopper_id,
+                                                                             report_type):
             self.slack.failed_sending_email(ticket_id)
 
         return self.suspend_product(data, guid)
@@ -84,7 +84,7 @@ class HostedHandler:
             return False
 
         if not self._throttle.can_suspend_hosting_product(guid):
-            self._logger.info('Hosting {} already suspended'.format(guid))
+            self._logger.info("Hosting {} already suspended".format(guid))
             return False
 
         self.scribe.suspension(ticket_id, guid, source, report_type, shopper_id)

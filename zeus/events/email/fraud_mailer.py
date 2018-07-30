@@ -32,11 +32,11 @@ class FraudMailer(Mailer):
         :param ticket_id:
         :return:
         """
-        template = 'fraud.new_domain_registration'
+        template = "fraud.new_domain_registration"
 
-        message_type = 'fraud_new_domain_registration'
-        exception_type = 'fraud_new_domain_registration_email_exception'
-        success_message = 'fraud_new_domain_registration_email_sent'
+        message_type = "fraud_new_domain_registration"
+        exception_type = "fraud_new_domain_registration_email_exception"
+        success_message = "fraud_new_domain_registration_email_sent"
 
         kwargs = self.generate_kwargs_for_hermes()
 
@@ -55,7 +55,7 @@ class FraudMailer(Mailer):
                 generate_event(ticket_id, success_message, **resp)
                 return True
         except Exception as e:
-            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
+            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
         return False
 
@@ -72,11 +72,11 @@ class FraudMailer(Mailer):
         :param target:
         :return:
         """
-        template = 'fraud.new_shopper_account'
+        template = "fraud.new_shopper_account"
 
-        message_type = 'fraud_new_shopper_account'
-        exception_type = 'fraud_new_shopper_account_email_exception'
-        success_message = 'fraud_new_shopper_account_email_sent'
+        message_type = "fraud_new_shopper_account"
+        exception_type = "fraud_new_shopper_account_email_exception"
+        success_message = "fraud_new_shopper_account_email_sent"
 
         kwargs = self.generate_kwargs_for_hermes()
 
@@ -96,7 +96,7 @@ class FraudMailer(Mailer):
                 generate_event(ticket_id, success_message, **resp)
                 return True
         except Exception as e:
-            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
+            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
         return False
 
@@ -112,11 +112,11 @@ class FraudMailer(Mailer):
         :param target:
         :return:
         """
-        template = 'fraud.intentionally_malicious_domain'
+        template = "fraud.intentionally_malicious_domain"
 
-        message_type = 'fraud_intentionally_malicious_domain'
-        exception_type = 'fraud_intentionally_malicious_domain_email_exception'
-        success_message = 'fraud_intentionally_malicious_domain_email_sent'
+        message_type = "fraud_intentionally_malicious_domain"
+        exception_type = "fraud_intentionally_malicious_domain_email_exception"
+        success_message = "fraud_intentionally_malicious_domain_email_sent"
 
         kwargs = self.generate_kwargs_for_hermes()
 
@@ -134,7 +134,7 @@ class FraudMailer(Mailer):
                 generate_event(ticket_id, success_message, **resp)
                 return True
         except Exception as e:
-            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
+            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
         return False
 
@@ -152,11 +152,11 @@ class FraudMailer(Mailer):
         :param target:
         :return:
         """
-        template = 'fraud.new_shopper_account'
+        template = "fraud.new_shopper_account"
 
-        message_type = 'fraud_new_hosting_account'
-        exception_type = 'fraud_new_hosting_account_email_exception'
-        success_message = 'fraud_new_hosting_account_email_sent'
+        message_type = "fraud_new_hosting_account"
+        exception_type = "fraud_new_hosting_account_email_exception"
+        success_message = "fraud_new_hosting_account_email_sent"
 
         kwargs = self.generate_kwargs_for_hermes()
 
@@ -175,7 +175,7 @@ class FraudMailer(Mailer):
                 generate_event(ticket_id, success_message, **resp)
                 return True
         except Exception as e:
-            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
+            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
         return False
 
@@ -193,11 +193,11 @@ class FraudMailer(Mailer):
         :param target:
         :return:
         """
-        template = 'fraud.intentionally_malicious_domain'
+        template = "fraud.intentionally_malicious_domain"
 
-        message_type = 'fraud_intentionally_malicious_domain'
-        exception_type = 'fraud_intentionally_malicious_domain_email_exception'
-        success_message = 'fraud_intentionally_malicious_domain_email_sent'
+        message_type = "fraud_intentionally_malicious_domain"
+        exception_type = "fraud_intentionally_malicious_domain_email_exception"
+        success_message = "fraud_intentionally_malicious_domain_email_sent"
 
         kwargs = self.generate_kwargs_for_hermes()
 
@@ -215,6 +215,6 @@ class FraudMailer(Mailer):
                 generate_event(ticket_id, success_message, **resp)
                 return True
         except Exception as e:
-            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
+            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
         return False

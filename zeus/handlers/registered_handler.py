@@ -83,7 +83,7 @@ class RegisteredHandler(Handler):
             return False
 
         if not self._throttle.can_suspend_domain(domain):
-            self._logger.info('Domain {} already suspended'.format(domain))
+            self._logger.info("Domain {} already suspended".format(domain))
             return False
 
         note = note_mappings['registered']['intentionallyMalicious']['crm']
@@ -91,7 +91,8 @@ class RegisteredHandler(Handler):
         self.crm.notate_crm_account([shopper_id], ticket_id, note)
 
         self.fraud_mailer.send_malicious_domain_notification(ticket_id, domain, shopper_id, source, target)
-        if not self.registered_mailer.send_shopper_intentional_suspension(ticket_id, domain, shopper_id_list, report_type):
+        if not self.registered_mailer.send_shopper_intentional_suspension(ticket_id, domain, shopper_id_list,
+                                                                          report_type):
             self.slack.failed_sending_email(ticket_id)
 
         return self._suspend_domain(data, ticket_id, note)
@@ -108,7 +109,7 @@ class RegisteredHandler(Handler):
             return False
 
         if not self._throttle.can_suspend_domain(domain):
-            self._logger.info('Domain {} already suspended'.format(domain))
+            self._logger.info("Domain {} already suspended".format(domain))
             return False
 
         note = note_mappings['registered']['suspension']['crm']
@@ -123,7 +124,7 @@ class RegisteredHandler(Handler):
     def _suspend_domain(self, data, ticket_id, reason):
         domain = data.get('sourceDomainOrIp')
 
-        self._logger.info('Suspending domain {} for incident {}'.format(domain, ticket_id))
+        self._logger.info("Suspending domain {} for incident {}".format(domain, ticket_id))
         if not self.domain_service.suspend_domain(domain, self.ENTERED_BY, reason):
             self.slack.failed_domain_suspension(domain)
             return False

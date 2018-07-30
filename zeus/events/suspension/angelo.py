@@ -1,8 +1,9 @@
 import json
 import logging
-import requests
 
+import requests
 from requests.packages.urllib3.exceptions import InsecurePlatformWarning, InsecureRequestWarning
+
 from zeus.events.suspension.interface import Product
 from zeus.utils.functions import get_host_shopper_id_from_dict
 
@@ -11,11 +12,10 @@ requests.packages.urllib3.disable_warnings(InsecurePlatformWarning)
 
 
 class Angelo(Product):
+    headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
 
     def __init__(self, app_settings):
         self.auth = (app_settings.PLESKUSER, app_settings.PLESKPASS)
-        self.body = json.dumps({"disable_panel": "true", "reason": "DCU Abuse", "type": "abuse"}, ensure_ascii=False)
-        self.headers = {"Accept": "application/json", "Content-Type": "application/json"}
         self.url = app_settings.PLESK_URL
 
     def suspend(self, guid, data):
@@ -24,7 +24,7 @@ class Angelo(Product):
         :param data:
         :return: True if suspended or False if not
         """
-        return self._plesk_post(guid, data, '?suspend')
+        return self._suspend_or_reinstate(guid, data, '?suspend')
 
     def reinstate(self, guid, data):
         """
@@ -32,36 +32,37 @@ class Angelo(Product):
         :param data:
         :return: True if reinstated or False if not
         """
-        return self._plesk_post(guid, data, '?reinstate')
+        return self._suspend_or_reinstate(guid, data, '?reinstate')
 
-    def cancel(self): pass
+    def cancel(self):
+        pass
 
-    def block_content(self): pass
+    def block_content(self):
+        pass
 
-    def unblock_content(self): pass
+    def unblock_content(self):
+        pass
 
-    def delete_content(self): pass
+    def delete_content(self):
+        pass
 
-    def _plesk_post(self, guid, data, flag):
+    def _suspend_or_reinstate(self, guid, data, flag):
         """
         :param guid: plesk guid
         :param data:
         :param flag: ?suspend or ?reinstate
         :return: True if post succeeded or False if post failed
         """
-        plesk_shopper = get_host_shopper_id_from_dict(data) + '/'
+        url = self.url + get_host_shopper_id_from_dict(data) + '/' + guid + flag
 
         try:
-            with requests.Session() as session:
-                r = session.post(self.url + plesk_shopper + guid + flag, auth=self.auth, headers=self.headers,
-                                 data=self.body, verify=False)
-            if r.status_code == 200:
-                return True
-            elif flag == '?suspend':
-                logging.error('Failed to suspend GUID: {}, request status code: {}').format(guid, r.status_code)
-            elif flag == '?reinstate':
-                logging.error('Failed to reinstate GUID: {}, request status code: {}').format(guid, r.status_code)
+            body = json.dumps({'disable_panel': 'true', 'reason': 'DCU Abuse', 'type': 'abuse'}, ensure_ascii=False)
+
+            response = requests.post(url, auth=self.auth, headers=self.headers, data=body, verify=False)
+            response.raise_for_status()
+
+            return response.status_code == 200
 
         except Exception as e:
-            logging.error(e.message)
+            logging.error("Failed to {} GUID {}. {}".format(flag[1:], guid, e.message))
         return False

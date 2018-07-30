@@ -14,7 +14,7 @@ class FraudHandler:
         self.mailer = FraudMailer(app_settings)
 
     def new_domain(self, data):
-        self._logger.info('Sending new domain registration to fraud for {}'.format(data.get('ticketId')))
+        self._logger.info("Sending new domain registration to fraud for {}".format(data.get('ticketId')))
 
         ticket_id = data.get('ticketId')
         domain = data.get('sourceDomainOrIp')
@@ -28,7 +28,7 @@ class FraudHandler:
                                                         report_type, source, target)
 
     def new_shopper(self, data):
-        self._logger.info('Sending new shopper account to fraud for {}'.format(data.get('ticketId')))
+        self._logger.info("Sending new shopper account to fraud for {}".format(data.get('ticketId')))
 
         shopper_id = get_shopper_id_from_dict(data)
         shopper_create_date = get_shopper_create_date_from_dict(data)
@@ -42,7 +42,7 @@ class FraudHandler:
                                                          report_type, source, target)
 
     def new_hosting_account(self, data):
-        self._logger.info('Sending new hosting account to fraud for {}'.format(data.get('ticketId')))
+        self._logger.info("Sending new hosting account to fraud for {}".format(data.get('ticketId')))
 
         shopper_id = get_host_shopper_id_from_dict(data)
         if not shopper_id:

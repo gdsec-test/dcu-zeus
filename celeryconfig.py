@@ -13,6 +13,8 @@ class CeleryConfig:
     CELERY_ACCEPT_CONTENT = ['json', 'pickle']
     CELERY_IMPORTS = 'run'
     CELERYD_HIJACK_ROOT_LOGGER = False
+    CELERY_ACKS_LATE = True
+    CELERYD_PREFETCH_MULTIPLIER = 1
     CELERY_SEND_EVENTS = False
 
     def __init__(self, app_settings):

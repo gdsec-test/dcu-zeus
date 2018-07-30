@@ -1,4 +1,5 @@
 from redis import Redis
+
 from zeus.persist.timeout import timeout
 
 
@@ -13,7 +14,7 @@ class Persist(object):
             self.redis = Redis(redis_host)
             self.ttl = lock_time
         except Exception as e:
-            raise RuntimeError('No Redis connection: {}'.format(e.message))
+            raise RuntimeError("No Redis connection: {}".format(e.message))
 
     @timeout()
     def _get_anti_spam_key(self, key):
@@ -25,7 +26,7 @@ class Persist(object):
         try:
             return self.redis.get(key)
         except Exception as e:
-            raise RuntimeError('No Redis connection to get key: {}'.format(e.message))
+            raise RuntimeError("No Redis connection to get key: {}".format(e.message))
 
     @timeout()
     def _set_anti_spam_key(self, key):
@@ -33,12 +34,10 @@ class Persist(object):
             self.redis.set(key, 1)
             self.redis.expire(key, self.ttl)
         except Exception as e:
-            raise RuntimeError('No Redis connection to set key: {}'.format(e.message))
+            raise RuntimeError("No Redis connection to set key: {}".format(e.message))
 
     def key_exists(self, domain):
-        if self._get_anti_spam_key(domain):
-            return True
-        return False
+        return self._get_anti_spam_key(domain)
 
     def set_key(self, domain):
         self._set_anti_spam_key(domain)

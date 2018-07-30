@@ -1,5 +1,3 @@
-# Zeus
-
 FROM alpine:3.5
 MAINTAINER DCU ENG <DCUEng@godaddy.com>
 

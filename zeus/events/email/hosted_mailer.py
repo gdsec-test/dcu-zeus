@@ -23,13 +23,13 @@ class HostedMailer(Mailer):
         :param source:
         :return:
         """
-        template = 'hosted.suspension_warning'
+        template = "hosted.suspension_warning"
 
-        message_type = 'hosted_24hr_warning'
-        exception_type = 'hosted_shopper_warning_email_exception'
-        success_message = 'hosted_shopper_warning_email_sent'
+        message_type = "hosted_24hr_warning"
+        exception_type = "hosted_shopper_warning_email_exception"
+        success_message = "hosted_shopper_warning_email_sent"
 
-        redis_key = '{}_warning_email'.format(domain)
+        redis_key = "{}_warning_email".format(domain)
 
         try:
             if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
@@ -42,9 +42,9 @@ class HostedMailer(Mailer):
                 generate_event(ticket_id, success_message, **resp)
                 return True
             else:
-                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
+                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
         except Exception as e:
-            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
+            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
         return False
 
@@ -58,13 +58,13 @@ class HostedMailer(Mailer):
         :param content_removed:
         :return:
         """
-        template = 'hosted.content_removed'
+        template = "hosted.content_removed"
 
-        message_type = 'hosted_content_removed_notice'
-        exception_type = 'hosted_content_removed_notice_email_exception'
-        success_message = 'hosted_content_removed_notice_email_sent'
+        message_type = "hosted_content_removed_notice"
+        exception_type = "hosted_content_removed_notice_email_exception"
+        success_message = "hosted_content_removed_notice_email_sent"
 
-        redis_key = '{}_cleaned_email'.format(domain)
+        redis_key = "{}_cleaned_email".format(domain)
 
         try:
             if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
@@ -78,9 +78,9 @@ class HostedMailer(Mailer):
                 generate_event(ticket_id, success_message, **resp)
                 return True
             else:
-                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
+                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
         except Exception as e:
-            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
+            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
         return False
 
@@ -93,13 +93,13 @@ class HostedMailer(Mailer):
         :param source:
         :return:
         """
-        template = 'hosted.suspend'
+        template = "hosted.suspend"
 
-        message_type = 'hosted_shopper_suspend_notice'
-        exception_type = 'hosted_shopper_suspend_email_exception'
-        success_message = 'hosted_shopper_suspend_notice_email_sent'
+        message_type = "hosted_shopper_suspend_notice"
+        exception_type = "hosted_shopper_suspend_email_exception"
+        success_message = "hosted_shopper_suspend_notice_email_sent"
 
-        redis_key = '{}_suspended_email'.format(domain)
+        redis_key = "{}_suspended_email".format(domain)
 
         try:
             if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
@@ -112,9 +112,9 @@ class HostedMailer(Mailer):
                 generate_event(ticket_id, success_message, **resp)
                 return True
             else:
-                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
+                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
         except Exception as e:
-            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
+            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
         return False
 
@@ -127,13 +127,13 @@ class HostedMailer(Mailer):
         :param report_type:
         :return:
         """
-        template = 'hosted.suspend_intentionally_malicious'
+        template = "hosted.suspend_intentionally_malicious"
 
-        message_type = 'hosted_shopper_suspend_intentional_notice'
-        exception_type = 'hosted_shopper_suspend_intentional_email_exception'
-        success_message = 'hosted_shopper_suspend_intentional_notice_email_sent'
+        message_type = "hosted_shopper_suspend_intentional_notice"
+        exception_type = "hosted_shopper_suspend_intentional_email_exception"
+        success_message = "hosted_shopper_suspend_intentional_notice_email_sent"
 
-        redis_key = '{}_intentional_suspended_email'.format(domain)
+        redis_key = "{}_intentional_suspended_email".format(domain)
 
         try:
             if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
@@ -146,8 +146,8 @@ class HostedMailer(Mailer):
                 generate_event(ticket_id, success_message, **resp)
                 return True
             else:
-                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
+                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
         except Exception as e:
-            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
+            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
         return False

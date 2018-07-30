@@ -29,11 +29,11 @@ class RegisteredMailer(Mailer):
         if not shopper_ids:
             return False
 
-        template = 'registered.suspension_warning'
+        template = "registered.suspension_warning"
 
-        message_type = 'reg-only_24hr_warning'
-        exception_type = 'reg-only_shopper_warning_email_exception'
-        success_message = 'reg-only_shopper_warning_email_sent'
+        message_type = "reg-only_24hr_warning"
+        exception_type = "reg-only_shopper_warning_email_exception"
+        success_message = "reg-only_shopper_warning_email_sent"
 
         try:
             if self._throttle.can_shopper_email_be_sent(domain) or self._CAN_FLOOD:
@@ -51,9 +51,9 @@ class RegisteredMailer(Mailer):
                     generate_event(ticket_id, success_message, **resp)
                 return True
             else:
-                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
+                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
         except Exception as e:
-            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
+            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
         return False
 
@@ -70,11 +70,11 @@ class RegisteredMailer(Mailer):
         if not shopper_ids:
             return False
 
-        template = 'registered.suspend'
+        template = "registered.suspend"
 
-        message_type = 'reg-only_domain_suspension'
-        exception_type = 'reg-only_shopper_suspend_email_exception'
-        success_message = 'reg-only_shopper_suspend_email_sent'
+        message_type = "reg-only_domain_suspension"
+        exception_type = "reg-only_shopper_suspend_email_exception"
+        success_message = "reg-only_shopper_suspend_email_sent"
 
         try:
             if self._throttle.can_shopper_email_be_sent(domain) or self._CAN_FLOOD:
@@ -93,7 +93,7 @@ class RegisteredMailer(Mailer):
                     generate_event(ticket_id, success_message, **resp)
                 return True
             else:
-                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
+                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
         except Exception as e:
             self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
@@ -111,11 +111,11 @@ class RegisteredMailer(Mailer):
         if not shopper_ids:
             return False
 
-        template = 'registered.suspend_intentionally_malicious'
+        template = "registered.suspend_intentionally_malicious"
 
-        message_type = 'reg-only_domain_suspension_intentional'
-        exception_type = 'reg-only_shopper_suspend_intentional_email_exception'
-        success_message = 'reg-only_shopper_suspend_intentional_email_sent'
+        message_type = "reg-only_domain_suspension_intentional"
+        exception_type = "reg-only_shopper_suspend_intentional_email_exception"
+        success_message = "reg-only_shopper_suspend_intentional_email_sent"
 
         try:
             if self._throttle.can_shopper_email_be_sent(domain) or self._CAN_FLOOD:
@@ -133,14 +133,14 @@ class RegisteredMailer(Mailer):
                     generate_event(ticket_id, success_message, **resp)
                 return True
             else:
-                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
+                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
         except Exception as e:
             self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
         return False
 
     def send_hosting_provider_notice(self, ticket_id, domain, source, hosting_brand, recipients,
-                                     ip_address='Unable to ascertain IP Address'):
+                                     ip_address="Unable to ascertain IP Address"):
         """
         Sends a notification to the abuse contact address found for the 3rd party hosting provider of registered domain
         :param ticket_id:
@@ -157,11 +157,11 @@ class RegisteredMailer(Mailer):
         if not recipients:
             return False
 
-        template = 'foreign.hosting_abuse_notice'
+        template = "foreign.hosting_abuse_notice"
 
-        message_type = 'hosting_abuse_notice'
-        exception_type = 'hosting_abuse_notice_email_exception'
-        success_message = 'hosting_abuse_notice_email_sent'
+        message_type = "hosting_abuse_notice"
+        exception_type = "hosting_abuse_notice_email_exception"
+        success_message = "hosting_abuse_notice_email_sent"
 
         kwargs = self.generate_kwargs_for_hermes()
 

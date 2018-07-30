@@ -18,11 +18,11 @@ class ThrottledCRM:
         if self._throttle.can_crm_be_notated(shopper_id_for_throttle):
             self._decorated.notate_crm_accounts(shopper_id_list, ticket_id, note)
         else:
-            self._logger.info('CRM for {} already notated for 24hr hold'.format(shopper_id_for_throttle))
+            self._logger.info("CRM for {} already notated for 24hr hold".format(shopper_id_for_throttle))
 
 
 class CRM:
-    NOTES = 'SNOW ID: {ticket} {entered_by} - Engineers. {notes}. Customer questions to hostsec@'
+    NOTES = "SNOW ID: {ticket} {entered_by} - Engineers. {notes}. Customer questions to hostsec@"
 
     def __init__(self, app_settings):
         self.env = os.getenv('sysenv', 'dev')

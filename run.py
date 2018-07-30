@@ -31,8 +31,6 @@ celery = Celery()
 celery.config_from_object(CeleryConfig(config))
 _logger = get_task_logger(__name__)
 
-db = PhishstoryMongo(config)
-
 fraud = FraudHandler(config)
 hosted = HostedHandler(config)
 registered = RegisteredHandler(config)
@@ -40,56 +38,50 @@ registered = RegisteredHandler(config)
 
 def route_request(data, request_type):
     hosted_status = data.get('hosted_status')
+
     if hosted_status == 'HOSTED':
-        hosted.process(data, request_type)
+        return hosted.process(data, request_type)
     elif hosted_status in ['REGISTERED', 'FOREIGN']:
-        registered.process(data, request_type)
-    return 'Unsupported Hosted Status', hosted_status
+        return registered.process(data, request_type)
+
+    return 'Unable to route request', hosted_status
+
+
+def get_database_handle():
+    return PhishstoryMongo(config)
 
 
 @celery.task()
 def fraud_new_domain(ticket_id):
-    data = db.get_incident(ticket_id)
-    if not data:
-        return
-    fraud.new_domain(data)
+    data = get_database_handle().get_incident(ticket_id)
+    return fraud.new_domain(data) if data else None
 
 
 @celery.task()
 def fraud_new_hosting_account(ticket_id):
-    data = db.get_incident(ticket_id)
-    if not data:
-        return
-    fraud.new_hosting_account(data)
+    data = get_database_handle().get_incident(ticket_id)
+    return fraud.new_hosting_account(data) if data else None
 
 
 @celery.task()
 def fraud_new_shopper(ticket_id):
-    data = db.get_incident(ticket_id)
-    if not data:
-        return
-    fraud.new_shopper(data)
+    data = get_database_handle().get_incident(ticket_id)
+    return fraud.new_shopper(data) if data else None
 
 
 @celery.task()
 def customer_warning(ticket_id):
-    data = db.get_incident(ticket_id)
-    if not data:
-        return
-    route_request(data.get('hosted_status'), 'customer_warning')
+    data = get_database_handle().get_incident(ticket_id)
+    return route_request(data.get('hosted_status'), 'customer_warning') if data else None
 
 
 @celery.task()
 def intentionally_malicious(ticket_id):
-    data = db.get_incident(ticket_id)
-    if not data:
-        return
-    route_request(data.get('hosted_status'), 'intentionally_malicious')
+    data = get_database_handle().get_incident(ticket_id)
+    return route_request(data.get('hosted_status'), 'intentionally_malicious') if data else None
 
 
 @celery.task()
 def suspend(ticket_id):
-    data = db.get_incident(ticket_id)
-    if not data:
-        return
-    route_request(data.get('hosted_status'), 'suspend')
+    data = get_database_handle().get_incident(ticket_id)
+    return route_request(data.get('hosted_status'), 'suspend') if data else None

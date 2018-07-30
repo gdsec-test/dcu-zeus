@@ -1,15 +1,15 @@
-import time
-import requests
 import io
-import os
 import logging
-import urllib3
+import os
+import time
 
-from suds.plugin import MessagePlugin
+import requests
+import urllib3
 from suds.client import Client
-from suds.transport.http import HttpAuthenticated
-from suds.transport import Reply
+from suds.plugin import MessagePlugin
 from suds.sax.text import Raw
+from suds.transport import Reply
+from suds.transport.http import HttpAuthenticated
 
 from settings import config_by_name
 
@@ -29,27 +29,23 @@ class RequestsTransport(HttpAuthenticated):
 
     def open(self, request):
         self.addcredentials(request)
-        with requests.session() as session:
-            resp = session.get(request.url,
-                               data=request.message,
-                               headers=request.headers,
-                               cert=self.cert,
-                               verify=False,
-                               timeout=300)
-        result = io.StringIO(resp.content.decode('utf-8'))
-        return result
-
-    def send(self, request):
-        self.addcredentials(request)
-        with requests.session() as session:
-            resp = session.post(request.url,
+        response = requests.get(request.url,
                                 data=request.message,
                                 headers=request.headers,
                                 cert=self.cert,
                                 verify=False,
                                 timeout=300)
-        result = Reply(resp.status_code, resp.headers, resp.content)
-        return result
+        return io.StringIO(response.content.decode('utf-8'))
+
+    def send(self, request):
+        self.addcredentials(request)
+        response = requests.post(request.url,
+                                 data=request.message,
+                                 headers=request.headers,
+                                 cert=self.cert,
+                                 verify=False,
+                                 timeout=300)
+        return Reply(response.status_code, response.headers, response.content)
 
 
 class SoapBase(object):
@@ -58,7 +54,7 @@ class SoapBase(object):
     _logger = logging.getLogger(__name__)
 
     def __init__(self):
-        env = os.getenv('sysenv') or 'dev'
+        env = os.getenv('sysenv', 'dev')
         if env != 'prod':
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self._config = config_by_name[env]()
@@ -74,7 +70,7 @@ class SoapBase(object):
 
                 try:
                     # self._url comes from the child
-                    self._logger.debug('Attempting to connect to the following WSDL: {}'.format(
+                    self._logger.debug("Attempting to connect to the following WSDL: {}".format(
                         self._url))
                     headers = {'Content-Type': 'text/xml;charset=UTF-8', 'SOAPAction': ''}
 
@@ -96,7 +92,7 @@ class SoapBase(object):
                         self.client.set_options(soapheaders=self.headers)
                 except Exception as e:
                     self._logger.exception(
-                        'Error connecting to {} API. Attempt {}/{} - Error: {}'.format(
+                        "Error connecting to {} API. Attempt {}/{} - Error: {}".format(
                             self._name,
                             self._retry_count,
                             self._retry_max,
@@ -107,7 +103,7 @@ class SoapBase(object):
                     time.sleep(self._sleep_time)
                     return get_connection()
             else:
-                self._logger.error('Unable to connect to {} API. after {} attempts'.format(
+                self._logger.error("Unable to connect to {} API. after {} attempts".format(
                     self._name,
                     self._retry_count
                 ))
@@ -125,7 +121,7 @@ class SoapBase(object):
             if self._retry_count <= self._retry_max:
 
                 try:
-                    self._logger.debug('Attempting to use the method {} on the WSDL {}.'.format(
+                    self._logger.debug("Attempting to use the method {} on the WSDL {}.".format(
                         method,
                         self._url
                     ))
@@ -135,7 +131,7 @@ class SoapBase(object):
                         return getattr(self.client.service, method)(**input_value)
                 except Exception as e:
                     self._logger.exception(
-                        'Error on request to {} API. Attempt {}/{} - Error: {}'.format(
+                        "Error on request to {} API. Attempt {}/{} - Error: {}".format(
                             self._name,
                             self._retry_count,
                             self._retry_max,
@@ -147,7 +143,7 @@ class SoapBase(object):
                     return run_req()
 
             else:
-                self._logger.error('Unable to make request to {} API after {} attempts'.format(
+                self._logger.error("Unable to make request to {} API after {} attempts".format(
                     self._name,
                     self._retry_count
                 ))

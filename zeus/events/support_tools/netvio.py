@@ -29,17 +29,17 @@ class Netvio(SoapBase):
 
         # Support for a list of multiple category id's
         # Categories are: 23=SOC-Compromised, 26=SOC-Malicious Activity, 32=SOC-Other
-        # Hard-coding SOC-Other, to make HA generated netvios easier to locate
+        # Hard-coding SOC-Other, to make HA generated netvios easier to locate @bxberry
         categories = 32
+
         category = ''
-        if type(categories) == int:
+        if isinstance(categories, int):
             category = '''
                 <TicketCategory>
                       <CategoryMtmID>{}</CategoryMtmID>
                     </TicketCategory>
             '''.format(categories)
-        elif type(categories) == list:
-            category = ''
+        elif isinstance(categories, list):
             for cat in categories:
                 category += '''
                 <TicketCategory>
@@ -113,12 +113,10 @@ class Netvio(SoapBase):
         :param values: Must be a string
         :return:
         """
-        self._logger.debug(
-            'Attempting to create the netvio ticket: {}, {}, {}, {}'.format(shopper_id,
-                                                                            guid,
-                                                                            abuse_type,
-                                                                            values))
-
+        self._logger.info("Attempting to create the netvio ticket: {}, {}, {}, {}".format(shopper_id,
+                                                                                          guid,
+                                                                                          abuse_type,
+                                                                                          values))
         message = self._create_message(shopper_id, guid, abuse_type, values)
         raw_message = Raw(message)
 
@@ -138,7 +136,7 @@ class Netvio(SoapBase):
         :param ticket_id: Must be an int32
         :return:
         """
-        self._logger.debug('Attempting to get the netvio ticket: {}'.format(ticket_id))
+        self._logger.info("Attempting to get the netvio ticket: {}".format(ticket_id))
 
         message = self._get_message(ticket_id)
         raw_message = Raw(message)
@@ -146,11 +144,11 @@ class Netvio(SoapBase):
         self.connect()
         results = self.req('Get', raw_message)
 
-        fail_message = 'Unable to get netvio ticket for {}'.format(ticket_id)
+        fail_message = "Unable to get netvio ticket for {}".format(ticket_id)
         if results:
             if results.IsSuccess is True:
                 return results.Tickets.Ticket
             else:
-                raise Exception('{}, the results were not successful: {}'.format(fail_message, results))
+                raise Exception("{}, the results were not successful: {}".format(fail_message, results))
         else:
-            raise Exception('{}, did not return any results'.format(fail_message))
+            raise Exception("{}, did not return any results".format(fail_message))
