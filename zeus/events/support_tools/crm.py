@@ -3,14 +3,14 @@ import os
 
 from crm_notate.message_factory import Message
 
-from zeus.persist.persist import Persist
+from zeus.persist.notification_timeouts import Throttle
 
 
 class ThrottledCRM:
     def __init__(self, app_settings):
         self._logger = logging.getLogger(__name__)
         self._decorated = CRM(app_settings)
-        self._throttle = Persist(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)  # one day throttle
+        self._throttle = Throttle(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)  # one day throttle
 
     def notate_crm_account(self, shopper_id_list, ticket_id, note):
         shopper_id_for_throttle = shopper_id_list[-1]

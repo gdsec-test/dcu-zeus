@@ -5,14 +5,15 @@ from hermes.messenger import send_mail
 from settings import config_by_name
 from zeus.events.email.interface import Mailer
 from zeus.events.user_logging.events import generate_event
-from zeus.persist.persist import Persist
+from zeus.persist.notification_timeouts import Throttle
+from zeus.utils.functions import sanitize_url
 
 
 class RegisteredMailer(Mailer):
     def __init__(self, app_settings):
         super(RegisteredMailer, self).__init__(app_settings)
         self._logger = logging.getLogger(__name__)
-        self._throttle = Persist(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)
+        self._throttle = Throttle(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)
         self._CAN_FLOOD = app_settings.CAN_FLOOD
         self.testing_email_address = [
             {'email': config_by_name[self.env].NON_PROD_EMAIL_ADDRESS}] if self.env != 'prod' else []
@@ -43,7 +44,7 @@ class RegisteredMailer(Mailer):
                 for shopper_id in shopper_ids:
                     substitution_values = {'ACCOUNT_NUMBER': shopper_id,
                                            'DOMAIN': domain,
-                                           'SANITIZED_URL': self.sanitize_url(source)}
+                                           'SANITIZED_URL': sanitize_url(source)}
 
                     resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
                     resp.update(
@@ -84,7 +85,7 @@ class RegisteredMailer(Mailer):
                 for shopper_id in shopper_ids:
                     substitution_values = {'ACCOUNT_NUMBER': shopper_id,
                                            'DOMAIN': domain,
-                                           'SANITIZED_URL': self.sanitize_url(source),
+                                           'SANITIZED_URL': sanitize_url(source),
                                            'MALICIOUS_ACTIVITY': report_type}
 
                     resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
@@ -167,7 +168,7 @@ class RegisteredMailer(Mailer):
 
         try:
             substitution_values = {'DOMAIN': domain,
-                                   'SANITIZED_URL': self.sanitize_url(source),
+                                   'SANITIZED_URL': sanitize_url(source),
                                    'IPADDRESS': ip_address}
 
             for email in recipients:

@@ -3,6 +3,23 @@ import logging
 
 import requests
 
+from zeus.persist.notification_timeouts import Throttle
+
+
+class ThrottledDomainService:
+
+    def __init__(self, app_settings):
+        self._decorated = DomainService(app_settings.DOMAIN_SERVICE)
+        self._throttle = Throttle(app_settings.REDIS, app_settings.SUSPEND_DOMAIN_LOCK_TIME)
+
+    def can_suspend_domain(self, domain):
+        return self._throttle.can_suspend_domain(domain)
+
+    def suspend_domain(self, domain, entered_by, reason):
+        if self.can_suspend_domain(domain):
+            return self._decorated.suspend_domain(domain, entered_by, reason)
+        return False
+
 
 class DomainService:
     VALID_STATES = ['ACTIVE']

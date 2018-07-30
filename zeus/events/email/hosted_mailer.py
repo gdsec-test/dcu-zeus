@@ -4,14 +4,14 @@ from hermes.messenger import send_mail
 
 from zeus.events.email.interface import Mailer
 from zeus.events.user_logging.events import generate_event
-from zeus.persist.persist import Persist
+from zeus.persist.notification_timeouts import Throttle
 
 
 class HostedMailer(Mailer):
     def __init__(self, app_settings):
         super(HostedMailer, self).__init__(app_settings)
         self._logger = logging.getLogger(__name__)
-        self._throttle = Persist(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)
+        self._throttle = Throttle(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)
         self._CAN_FLOOD = app_settings.CAN_FLOOD
 
     def send_hosted_warning(self, ticket_id, domain, shopper_id, source):

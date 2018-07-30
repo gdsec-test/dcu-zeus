@@ -3,8 +3,7 @@ from datetime import datetime, timedelta
 
 from zeus.events.email.fraud_mailer import FraudMailer
 from zeus.events.email.hosted_mailer import HostedMailer
-from zeus.events.suspension.suspension import Suspension
-from zeus.persist.persist import Persist
+from zeus.events.suspension.hosting_service import ThrottledHostingService
 from zeus.reviews.reviews import BasicReview
 from zeus.utils.functions import get_host_info_from_dict, get_host_shopper_id_from_dict
 from zeus.utils.scribe import HostedScribe
@@ -18,12 +17,13 @@ class HostedHandler:
         self._logger = logging.getLogger(__name__)
         self.hosted_mailer = HostedMailer(app_settings)
         self.fraud_mailer = FraudMailer(app_settings)
+
+        self.hosting_service = ThrottledHostingService(app_settings)
         self.scribe = HostedScribe(app_settings)
         self.slack = SlackFailures(ThrottledSlack(app_settings))
-        self.suspension = Suspension(app_settings)
+
         self.basic_review = BasicReview(app_settings)
         self.HOLD_TIME = app_settings.HOLD_TIME
-        self._throttle = Persist(app_settings.REDIS, app_settings.SUSPEND_HOSTING_LOCK_TIME)
 
         self.mapping = {
             'customer_warning': self.customer_warning,
@@ -63,7 +63,7 @@ class HostedHandler:
         if not report_type:  # If any of these were invalid, all values returned as None
             return False
 
-        if not self._throttle.can_suspend_hosting_product(guid):
+        if not self.hosting_service.can_suspend_hosting_product(guid):
             self._logger.info("Hosting {} already suspended".format(guid))
             return False
 
@@ -83,7 +83,7 @@ class HostedHandler:
         if not report_type:  # If any of these were invalid, all values returned as None
             return False
 
-        if not self._throttle.can_suspend_hosting_product(guid):
+        if not self.hosting_service.can_suspend_hosting_product(guid):
             self._logger.info("Hosting {} already suspended".format(guid))
             return False
 
@@ -97,7 +97,7 @@ class HostedHandler:
         guid = get_host_info_from_dict(data).get('mwpId') or guid
         product = get_host_info_from_dict(data).get('product')
 
-        if not self.suspension.suspend(product, guid, data):
+        if not self.hosting_service.suspend_hosting(product, guid, data):
             self.slack.failed_hosting_suspension(guid)
             return False
         return True

@@ -3,7 +3,7 @@ from redis import Redis
 from zeus.persist.timeout import timeout
 
 
-class Persist(object):
+class Throttle(object):
     # This class is used to create a Redis key, with a time to live, which is referred to
     # so that we don't spam shoppers for the same domain, when they have multiple registered
     # only abuse complaints submitted against a specific domain.  A shopper will only be

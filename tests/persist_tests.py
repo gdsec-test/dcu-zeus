@@ -1,13 +1,13 @@
 from nose.tools import assert_true, assert_false
 from mockredis import mock_redis_client
 
-from zeus.persist.persist import Persist
+from zeus.persist.notification_timeouts import Throttle
 
 
 class TestPersist:
     @classmethod
     def setup(cls):
-        cls._persist = Persist('0.0.0.0', 1)
+        cls._persist = Throttle('0.0.0.0', 1)
         cls._persist.redis = mock_redis_client(host='0.0.0.0', port=6379, db=0)
         cls._domain = 'google.com'
         cls._shopper_id = 'test-id'

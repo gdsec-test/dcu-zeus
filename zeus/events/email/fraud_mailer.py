@@ -5,7 +5,8 @@ from hermes.messenger import send_mail
 from settings import config_by_name
 from zeus.events.email.interface import Mailer
 from zeus.events.user_logging.events import generate_event
-from zeus.persist.persist import Persist
+from zeus.persist.notification_timeouts import Throttle
+from zeus.utils.functions import sanitize_url
 
 
 class FraudMailer(Mailer):
@@ -15,7 +16,7 @@ class FraudMailer(Mailer):
     def __init__(self, app_settings):
         super(FraudMailer, self).__init__(app_settings)
         self._logger = logging.getLogger(__name__)
-        self._throttle = Persist(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)
+        self._throttle = Throttle(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)
         self.testing_email_address = [
             {'email': config_by_name[self.env].NON_PROD_EMAIL_ADDRESS}] if self.env != 'prod' else []
 
@@ -47,7 +48,7 @@ class FraudMailer(Mailer):
                                        'DOMAIN': domain,
                                        'MALICIOUS_ACTIVITY': report_type,
                                        'BRAND_TARGETED': target or 'Unknown Brand',
-                                       'SANITIZED_URL': self.sanitize_url(source)}
+                                       'SANITIZED_URL': sanitize_url(source)}
 
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
                 resp = send_mail(template, substitution_values, **kwargs)
@@ -87,7 +88,7 @@ class FraudMailer(Mailer):
                                        'DOMAIN': domain,
                                        'MALICIOUS_ACTIVITY': report_type,
                                        'BRAND_TARGETED': target or 'Unknown Brand',
-                                       'SANITIZED_URL': self.sanitize_url(source)}
+                                       'SANITIZED_URL': sanitize_url(source)}
 
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
                 print kwargs
@@ -126,7 +127,7 @@ class FraudMailer(Mailer):
                                        'DOMAIN': domain,
                                        'MALICIOUS_ACTIVITY': report_type,
                                        'BRAND_TARGETED': target or 'Unknown Brand',
-                                       'SANITIZED_URL': self.sanitize_url(source)}
+                                       'SANITIZED_URL': sanitize_url(source)}
 
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
                 resp = send_mail(template, substitution_values, **kwargs)
@@ -167,7 +168,7 @@ class FraudMailer(Mailer):
                                        'DOMAIN': domain,
                                        'MALICIOUS_ACTIVITY': report_type,
                                        'BRAND_TARGETED': target or 'Unknown Brand',
-                                       'SANITIZED_URL': self.sanitize_url(source)}
+                                       'SANITIZED_URL': sanitize_url(source)}
 
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
                 resp = send_mail(template, substitution_values, **kwargs)
@@ -207,7 +208,7 @@ class FraudMailer(Mailer):
                                        'DOMAIN': guid,  # Template requires DOMAIN param
                                        'MALICIOUS_ACTIVITY': report_type,
                                        'BRAND_TARGETED': target or 'Unknown Brand',
-                                       'SANITIZED_URL': self.sanitize_url(source)}
+                                       'SANITIZED_URL': sanitize_url(source)}
 
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
                 resp = send_mail(template, substitution_values, **kwargs)

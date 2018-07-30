@@ -2,7 +2,7 @@ import json
 import requests
 import logging
 
-from zeus.persist.persist import Persist
+from zeus.persist.notification_timeouts import Throttle
 
 
 class SlackUtil(object):
@@ -28,8 +28,8 @@ class SlackUtil(object):
             # Check for HTTP response codes from SNOW for other than 200
             if response.status_code != 200:
                 self._logger.error("Status: {} Headers: {} Error: {}".format(response.status_code,
-                                                                               response.headers,
-                                                                               response.json()))
+                                                                             response.headers,
+                                                                             response.json()))
         except Exception as e:
             self._logger.error("Error posting message to slack {}".format(e.message))
 
@@ -38,7 +38,7 @@ class ThrottledSlack(object):
     def __init__(self, app_settings):
         self._logger = logging.getLogger(__name__)
         self._decorated = SlackUtil(app_settings.SLACK_URL, app_settings.SLACK_CHANNEL)
-        self._throttle = Persist(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)
+        self._throttle = Throttle(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)
 
     def send_message(self, key, message):
         if self._throttle.can_slack_message_be_sent(key):

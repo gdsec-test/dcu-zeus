@@ -1,3 +1,8 @@
+import re
+
+def sanitize_url(url):
+    return re.sub(r'^http', 'hxxp', url)
+
 def _get_domain_query(dict_to_search):
     return dict_to_search.get('data', {}).get('domainQuery', {})
 
