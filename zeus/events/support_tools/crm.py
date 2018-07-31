@@ -23,8 +23,11 @@ class ThrottledCRM:
 
 class CRM:
     NOTES = "SNOW ID: {ticket} {entered_by} - Engineers. {notes}. Customer questions to hostsec@"
+    SHOPPER_NOTE_SUCCESS = "Added CRM note to shopper {} for ticket {}"
+    SHOPPER_NOTE_FAILURE = "Unable to add CRM note to shopper {} for ticket: {} : {}"
 
     def __init__(self, app_settings):
+        self._logger = logging.getLogger(__name__)
         self.env = os.getenv('sysenv', 'dev')
         self.author = app_settings.ENTERED_BY
 
@@ -39,8 +42,12 @@ class CRM:
         if not isinstance(shopper_id_list, list):
             shopper_id_list = [shopper_id_list]
 
-        messages = Message.factory(Message.WSCMS, self.env, self.author)
-        notation = self.NOTES.format(ticket=ticket_id, entered_by=self.author, notes=notes)
+        try:
+            messages = Message.factory(Message.WSCMS, self.env, self.author)
+            notation = self.NOTES.format(ticket=ticket_id, entered_by=self.author, notes=notes)
 
-        for shopper_id in shopper_id_list:
-            messages.add_note(shopper_id, notation, self.author)
+            for shopper_id in shopper_id_list:
+                if messages.add_note(shopper_id, notation, self.author):
+                    self._logger.info(self.SHOPPER_NOTE_SUCCESS.format(shopper_id, ticket_id))
+        except Exception as e:
+            self._logger.error(self.SHOPPER_NOTE_FAILURE.format(shopper_id_list, ticket_id, e.message))

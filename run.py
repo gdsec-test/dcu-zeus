@@ -72,16 +72,16 @@ def fraud_new_shopper(ticket_id):
 @celery.task()
 def customer_warning(ticket_id):
     data = get_database_handle().get_incident(ticket_id)
-    return route_request(data.get('hosted_status'), 'customer_warning') if data else None
+    return route_request(data, 'customer_warning') if data else None
 
 
 @celery.task()
 def intentionally_malicious(ticket_id):
     data = get_database_handle().get_incident(ticket_id)
-    return route_request(data.get('hosted_status'), 'intentionally_malicious') if data else None
+    return route_request(data, 'intentionally_malicious') if data else None
 
 
 @celery.task()
 def suspend(ticket_id):
     data = get_database_handle().get_incident(ticket_id)
-    return route_request(data.get('hosted_status'), 'suspend') if data else None
+    return route_request(data, 'suspend') if data else None

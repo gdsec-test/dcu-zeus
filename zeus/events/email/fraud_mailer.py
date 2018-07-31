@@ -91,7 +91,6 @@ class FraudMailer(Mailer):
                                        'SANITIZED_URL': sanitize_url(source)}
 
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
-                print kwargs
                 resp = send_mail(template, substitution_values, **kwargs)
                 resp.update({'type': message_type, 'template': 3693})
                 generate_event(ticket_id, success_message, **resp)
@@ -101,8 +100,7 @@ class FraudMailer(Mailer):
             generate_event(ticket_id, exception_type, type=message_type)
         return False
 
-    def send_malicious_domain_notification(self, ticket_id, domain, shopper_id, report_type, source,
-                                           target):
+    def send_malicious_domain_notification(self, ticket_id, domain, shopper_id, report_type, source, target):
         """
         Sends a malicious notification to fraud
         :param ticket_id:
@@ -180,8 +178,7 @@ class FraudMailer(Mailer):
             generate_event(ticket_id, exception_type, type=message_type)
         return False
 
-    def send_malicious_hosting_notification(self, ticket_id, domain, shopper_id, guid, source, report_type,
-                                            target):
+    def send_malicious_hosting_notification(self, ticket_id, domain, shopper_id, guid, source, report_type, target):
         """
         Sends a malicious notification to fraud
         Using DMV Fraud template; DOMAIN = item reported to Fraud (guid here, for hosting)
