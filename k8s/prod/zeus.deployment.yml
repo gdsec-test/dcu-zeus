@@ -1,0 +1,121 @@
+---
+apiVersion: "extensions/v1beta1"
+kind: "Deployment"
+metadata:
+  name: "zeus"
+  namespace: "abuse-api-prod"
+  labels:
+    app: "zeus"
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  template:
+    metadata:
+      labels:
+        app: "zeus"
+    spec:
+      imagePullSecrets:
+        -
+          name: "dcu-artifactory-creds"
+      containers:
+        -
+          name: "zeus"
+          imagePullPolicy: "Always"
+          image: "docker-dcu-local.artifactory.secureserver.net/zeus:REPLACE_WITH_GIT_COMMIT"
+          livenessProbe:
+            exec:
+              command:
+                - '/app/health.sh'
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          env:
+          - name: BUILD_DATE
+            value: 'THIS_STRING_IS_REPLACED_DURING_BUILD'
+          - name: sysenv
+            value: prod
+          - name: KEYFILE
+            value: /keyfiles/key.txt
+          - name: BROKER_PASS
+            valueFrom:
+              secretKeyRef:
+                name: amqp-zeus
+                key: password
+          - name: DB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: db-zeus
+                key: password
+
+          - name: DIABLOUSER
+            valueFrom:
+              secretKeyRef:
+                name: auth-zeus-envs
+                key: diablouser
+          - name: DIABLOPASS
+            valueFrom:
+              secretKeyRef:
+                name: auth-zeus-envs
+                key: diablopass
+          - name: MWPONEUSER
+            valueFrom:
+              secretKeyRef:
+                name: auth-zeus-envs
+                key: mwponeuser
+          - name: MWPONEPASS
+            valueFrom:
+              secretKeyRef:
+                name: auth-zeus-envs
+                key: mwponepass
+
+          - name: NETVIO_SSL_CERT
+            value: /netvio_certs/tls.crt
+          - name: NETVIO_SSL_KEY
+            value: /netvio_certs/tls.key
+          - name: OCM_SSL_CERT
+            value: /ocm_certs/tls.crt
+          - name: OCM_SSL_KEY
+            value: /ocm_certs/tls.key
+          - name: ZEUS_SSL_CERT
+            value: /zeus_certs/tls.crt
+          - name: ZEUS_SSL_KEY
+            value: /zeus_certs/tls.key
+
+          volumeMounts:
+          - name: encryption-keys
+            mountPath: /keyfiles
+            readOnly: true
+          - name: tls-netvio-files
+            mountPath: /netvio_certs
+            readOnly: true
+          - name: tls-ocm-files
+            mountPath: /ocm_certs
+            readOnly: true
+          - name: tls-zeus-files
+            mountPath: /zeus_certs
+            readOnly: true
+
+        -
+          name: "redis"
+          imagePullPolicy: "Always"
+          image: "redis"
+          livenessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 15
+            timeoutSeconds: 5
+
+      volumes:
+        - name: encryption-keys
+          secret:
+            secretName: encryption-key-files
+        - name: tls-netvio-files
+          secret:
+            secretName: tls-netvio
+        - name: tls-ocm-files
+          secret:
+            secretName: tls-phishnet
+        - name: tls-zeus-files
+          secret:
+            secretName: tls-zeus
