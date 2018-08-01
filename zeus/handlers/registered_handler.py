@@ -63,8 +63,9 @@ class RegisteredHandler(Handler):
         self.registered_mailer.send_hosting_provider_notice(ticket_id, domain, source, hosted_brand, recipients, ip)
 
         if data.get('hosted_status') == self.REGISTERED:
-            note = note_mappings['registered']['customerWarning']['crm']
-            note.format(domain=domain, type=report_type, location=source)
+            note = note_mappings['registered']['customerWarning']['crm'].format(domain=domain,
+                                                                                type=report_type,
+                                                                                location=source)
             self.crm.notate_crm_account(shopper_id_list, ticket_id, note)
 
             if not self.registered_mailer.send_registrant_warning(ticket_id, domain, shopper_id_list, source):
@@ -88,8 +89,9 @@ class RegisteredHandler(Handler):
             self._logger.info("Domain {} already suspended".format(domain))
             return False
 
-        note = note_mappings['registered']['intentionallyMalicious']['crm']
-        note.format(domain=domain, type=report_type, location=source)
+        note = note_mappings['registered']['intentionallyMalicious']['crm'].format(domain=domain,
+                                                                                   type=report_type,
+                                                                                   location=source)
         self.crm.notate_crm_account([shopper_id], ticket_id, note)
 
         self.fraud_mailer.send_malicious_domain_notification(ticket_id, domain, shopper_id, report_type, source, target)
@@ -115,8 +117,9 @@ class RegisteredHandler(Handler):
             self._logger.info("Domain {} already suspended".format(domain))
             return False
 
-        note = note_mappings['registered']['suspension']['crm']
-        note.format(domain=domain, type=report_type, location=source)
+        note = note_mappings['registered']['suspension']['crm'].format(domain=domain,
+                                                                       type=report_type,
+                                                                       location=source)
         self.crm.notate_crm_account([shopper_id], ticket_id, note)
 
         if not self.registered_mailer.send_shopper_suspension(ticket_id, domain, shopper_id_list, source, report_type):
