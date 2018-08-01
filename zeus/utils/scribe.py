@@ -2,7 +2,7 @@ import logging
 
 from zeus.events.support_tools.constants import note_mappings
 from zeus.events.support_tools.crm import ThrottledCRM
-from zeus.events.support_tools.netvio import Netvio
+from zeus.events.support_tools.netvio import ThrottledNetvio
 from zeus.utils.slack import SlackFailures, ThrottledSlack
 
 
@@ -11,7 +11,7 @@ class HostedScribe:
         self._logger = logging.getLogger(__name__)
         self.crm = ThrottledCRM(app_settings)
         self.slack = SlackFailures(ThrottledSlack(app_settings))
-        self.netvio = Netvio()
+        self.netvio = ThrottledNetvio(app_settings)
 
     def customer_warning(self, ticket, guid, url, report_type, shopper_id):
         crm_note = note_mappings['hosted']['customerWarning']['crm'].format(guid=guid, type=report_type, location=url)

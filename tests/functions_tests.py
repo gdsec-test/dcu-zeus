@@ -5,7 +5,8 @@ from zeus.utils.functions import get_shopper_id_from_dict, \
     get_domain_create_date_from_dict, \
     get_shopper_create_date_from_dict, \
     get_host_abuse_email_from_dict, \
-    get_host_brand_from_dict
+    get_host_brand_from_dict, \
+    get_list_of_ids_to_notify
 
 
 class TestFunctions:
@@ -82,3 +83,21 @@ class TestFunctions:
         data = {'data': {'domainQuery': {'host': {'brand': 'GODADDY'}}}}
         actual = get_host_brand_from_dict(data)
         assert_equal(actual, 'GODADDY')
+
+    def test_get_list_of_ids_to_notify_none(self):
+        actual = get_list_of_ids_to_notify({})
+        assert_equal(actual, [])
+
+    def test_get_list_of_ids_to_notify(self):
+        data = {'data': {'domainQuery': {'apiReseller': {'parent': '1234', 'child': '4567'}}}}
+        actual = get_list_of_ids_to_notify(data)
+        assert_equal(actual, ['1234', '4567'])
+
+    def test_get_shopper_create_date_none(self):
+        actual = get_shopper_create_date_from_dict(None)
+        assert_is_none(actual)
+
+    def test_get_shopper_create_date(self):
+        data = {'data': {'domainQuery': {'shopperInfo': {'shopperCreateDate': '1 Jan, 1970'}}}}
+        actual = get_shopper_create_date_from_dict(data)
+        assert_equal(actual, '1 Jan, 1970')

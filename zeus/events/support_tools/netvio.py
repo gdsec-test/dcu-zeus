@@ -1,9 +1,28 @@
+import logging
 from time import localtime, strftime
 from xml.sax.saxutils import escape
 
 from suds.sax.text import Raw
 
 from zeus.events.support_tools.soap import SoapBase
+from zeus.persist.notification_timeouts import Throttle
+
+
+class ThrottledNetvio:
+    def __init__(self, app_settings):
+        self._logger = logging.getLogger(__name__)
+        self._decorated = Netvio()
+        self._throttle = Throttle(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)  # one day throttle
+
+    def create_ticket(self, shopper_id, guid, abuse_type, values):
+        if self._throttle.can_netvio_be_created(guid):
+            return self.create_ticket(shopper_id, guid, abuse_type, values)
+
+        self._logger.info("Netvio for {} already created".format(guid))
+        return False
+
+    def get_ticket(self, ticket_id):
+        return self._decorated.get_ticket(ticket_id)
 
 
 class Netvio(SoapBase):

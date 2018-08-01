@@ -1,7 +1,7 @@
 # Zeus
 
 Zeus is responsible for facilitating automated actions on GoDaddy Products. 
-These are mainly broken up into 1) Registered 2) Hosted) and 3) Fraud actions. Its major functionalities currently include
+These are mainly broken up into 1) Registered 2) Hosted) and 3) Fraud actions. Its major functionality currently include
  1. Product Suspensions (Domains, cPanel, MWP 1.0, etc.)
  2. Customer Warnings (Domains, Vertigo)
  
@@ -63,4 +63,6 @@ If you would like to run Happy locally you will need to specify the following en
  7. `NETVIO_SSL_KEY` (The path to the SSL Key white-listed for Netvio Soap API)
  8. `OCM_SSL_CERT` (The path to the SSL Cert white-listed for OCM API)
  9. `OCM_SSL_KEY` (The path to the SSL Key white-listed for OCM API)
- 10. `EMAIL_RECIPIENT` (The email address you want `non-shopper` emails sent to while testing, instead of emailing fraud. e.g. user@example.com)
+ 10. `ZEUS_SSL_CERT` (The path to the SSL Cert for communicating with DCU Journal)
+ 11. `ZEUS_SSL_KEY` (The path to the SSL Key for communicating with DCU Journal)
+ 12. `EMAIL_RECIPIENT` (The email address you want `non-shopper` emails sent to while testing, instead of emailing fraud. e.g. user@example.com)

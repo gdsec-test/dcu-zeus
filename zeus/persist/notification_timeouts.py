@@ -78,6 +78,13 @@ class Throttle(object):
             return True
         return False
 
+    def can_netvio_be_created(self, guid):
+        crm_key = '{}_hosted_24hr_hold'.format(guid)
+        if not self._get_anti_spam_key(crm_key):
+            self._set_anti_spam_key(crm_key)
+            return True
+        return False
+
     def can_slack_message_be_sent(self, key):
         if not self._get_anti_spam_key(key):
             self._set_anti_spam_key(key)
