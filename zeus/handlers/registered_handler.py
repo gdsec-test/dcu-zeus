@@ -69,6 +69,7 @@ class RegisteredHandler(Handler):
 
             if not self.registered_mailer.send_registrant_warning(ticket_id, domain, shopper_id_list, source):
                 self.slack.failed_sending_email(ticket_id)
+                return False
         return True
 
     def intentionally_malicious(self, data):
@@ -95,6 +96,7 @@ class RegisteredHandler(Handler):
         if not self.registered_mailer.send_shopper_intentional_suspension(ticket_id, domain, shopper_id_list,
                                                                           report_type):
             self.slack.failed_sending_email(ticket_id)
+            return False
 
         return self._suspend_domain(data, ticket_id, note)
 
@@ -119,6 +121,7 @@ class RegisteredHandler(Handler):
 
         if not self.registered_mailer.send_shopper_suspension(ticket_id, domain, shopper_id_list, source, report_type):
             self.slack.failed_sending_email(ticket_id)
+            return False
 
         return self._suspend_domain(data, ticket_id, note)
 

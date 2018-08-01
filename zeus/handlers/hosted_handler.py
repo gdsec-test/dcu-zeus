@@ -51,6 +51,7 @@ class HostedHandler:
         self.scribe.customer_warning(ticket_id, guid, source, report_type, shopper_id)
         if not self.hosted_mailer.send_hosted_warning(ticket_id, domain, shopper_id, source):
             self.slack.failed_sending_email(ticket_id)
+            return False
 
         return True
 
@@ -68,9 +69,9 @@ class HostedHandler:
             return False
 
         self.scribe.intentionally_malicious(ticket_id, guid, source, report_type, shopper_id)
-        if not self.hosted_mailer.send_shopper_hosted_intentional_suspension(ticket_id, domain, shopper_id,
-                                                                             report_type):
+        if not self.hosted_mailer.send_shopper_hosted_intentional_suspension(ticket_id, domain, shopper_id, report_type):
             self.slack.failed_sending_email(ticket_id)
+            return False
 
         return self.suspend_product(data, guid)
 
@@ -90,6 +91,7 @@ class HostedHandler:
         self.scribe.suspension(ticket_id, guid, source, report_type, shopper_id)
         if not self.hosted_mailer.send_shopper_hosted_suspension(ticket_id, domain, shopper_id, source):
             self.slack.failed_sending_email(ticket_id)
+            return False
 
         return self.suspend_product(data, guid)
 

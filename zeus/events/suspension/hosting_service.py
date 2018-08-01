@@ -23,8 +23,8 @@ class ThrottledHostingService:
 
 
 class HostingService(Product):
-    UNSUPPORTED_PRODUCT = "Unsupported Product {}"
-    UNSUPPORTED_OPERATION = "Unsupported Operation {}"
+    UNSUPPORTED_PRODUCT = "Unsupported Product: {}"
+    UNSUPPORTED_OPERATION = "Unsupported Operation: {}"
 
     def __init__(self, app_settings):
         self._products = {'diablo': Diablo(app_settings),

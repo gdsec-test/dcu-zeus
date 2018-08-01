@@ -1,6 +1,5 @@
 import abc
 import os
-import re
 
 
 class Mailer(object):
