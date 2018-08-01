@@ -52,7 +52,7 @@ dev: prep
 
 prod-deploy: prod
 	@echo "----- deploying $(REPONAME) prod -----"
-	docker push $(DOCKERREPO):prod
+	docker push $(DOCKERREPO):$(COMMIT)
 	kubectl --context prod apply -f $(BUILDROOT)/k8s/prod/zeus.deployment.yml --record
 
 ote-deploy: ote
