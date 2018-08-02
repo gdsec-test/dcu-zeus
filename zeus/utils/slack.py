@@ -92,8 +92,8 @@ class SlackFailures:
         self._logger.error(message)
         self._slack.send_message(key, message)
 
-    def failed_sending_email(self, ticket_id):
-        key = '{}_email_failed_to_send'.format(ticket_id)
-        message = 'Email failed to send for {}'.format(ticket_id)
+    def failed_sending_email(self, domain):
+        key = '{}_email_failed_to_send'.format(domain)
+        message = 'Email failed to send for {}'.format(domain)
         self._logger.error(message)
         self._slack.send_message(key, message)

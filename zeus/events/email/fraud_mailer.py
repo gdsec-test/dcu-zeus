@@ -54,11 +54,11 @@ class FraudMailer(Mailer):
                 resp = send_mail(template, substitution_values, **kwargs)
                 resp.update({'type': message_type, 'template': 3716})
                 generate_event(ticket_id, success_message, **resp)
-                return True
         except Exception as e:
             self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
-        return False
+            return False
+        return True
 
     def send_new_shopper_notification(self, ticket_id, domain, shopper_id, shopper_create_date, report_type, source,
                                       target):
@@ -94,11 +94,11 @@ class FraudMailer(Mailer):
                 resp = send_mail(template, substitution_values, **kwargs)
                 resp.update({'type': message_type, 'template': 3693})
                 generate_event(ticket_id, success_message, **resp)
-                return True
         except Exception as e:
             self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
-        return False
+            return False
+        return True
 
     def send_malicious_domain_notification(self, ticket_id, domain, shopper_id, report_type, source, target):
         """
@@ -131,11 +131,11 @@ class FraudMailer(Mailer):
                 resp = send_mail(template, substitution_values, **kwargs)
                 resp.update({'type': message_type, 'template': 3694})
                 generate_event(ticket_id, success_message, **resp)
-                return True
         except Exception as e:
             self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
-        return False
+            return False
+        return True
 
     def send_new_hosting_account_notification(self, ticket_id, domain, shopper_id, account_create_date, report_type,
                                               source, target):
@@ -172,11 +172,11 @@ class FraudMailer(Mailer):
                 resp = send_mail(template, substitution_values, **kwargs)
                 resp.update({'type': message_type, 'template': 3693})
                 generate_event(ticket_id, success_message, **resp)
-                return True
         except Exception as e:
             self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
-        return False
+            return False
+        return True
 
     def send_malicious_hosting_notification(self, ticket_id, domain, shopper_id, guid, source, report_type, target):
         """
@@ -211,8 +211,8 @@ class FraudMailer(Mailer):
                 resp = send_mail(template, substitution_values, **kwargs)
                 resp.update({'type': message_type, 'template': 3694})
                 generate_event(ticket_id, success_message, **resp)
-                return True
         except Exception as e:
             self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
-        return False
+            return False
+        return True

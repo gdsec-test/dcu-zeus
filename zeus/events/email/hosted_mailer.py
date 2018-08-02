@@ -40,13 +40,13 @@ class HostedMailer(Mailer):
                 resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
                 resp.update({'type': message_type, 'template': 3996})
                 generate_event(ticket_id, success_message, **resp)
-                return True
             else:
                 self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
         except Exception as e:
             self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
-        return False
+            return False
+        return True
 
     def send_content_removed(self, ticket_id, domain, shopper_id, content_removed):
         """
@@ -76,13 +76,13 @@ class HostedMailer(Mailer):
                 resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
                 resp.update({'type': message_type, 'template': 3994})
                 generate_event(ticket_id, success_message, **resp)
-                return True
             else:
                 self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
         except Exception as e:
             self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
-        return False
+            return False
+        return True
 
     def send_shopper_hosted_suspension(self, ticket_id, domain, shopper_id, source):
         """
@@ -110,13 +110,13 @@ class HostedMailer(Mailer):
                 resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
                 resp.update({'type': message_type, 'template': 3998})
                 generate_event(ticket_id, success_message, **resp)
-                return True
             else:
                 self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
         except Exception as e:
             self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
-        return False
+            return False
+        return True
 
     def send_shopper_hosted_intentional_suspension(self, ticket_id, domain, shopper_id, report_type):
         """
@@ -144,10 +144,10 @@ class HostedMailer(Mailer):
                 resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
                 resp.update({'type': message_type, 'template': 4046})
                 generate_event(ticket_id, success_message, **resp)
-                return True
             else:
                 self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
         except Exception as e:
             self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
-        return False
+            return False
+        return True

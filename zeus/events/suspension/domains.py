@@ -16,9 +16,7 @@ class ThrottledDomainService:
         return self._throttle.can_suspend_domain(domain)
 
     def suspend_domain(self, domain, entered_by, reason):
-        if self.can_suspend_domain(domain):
-            return self._decorated.suspend_domain(domain, entered_by, reason)
-        return False
+        return self._decorated.suspend_domain(domain, entered_by, reason)
 
 
 class DomainService:

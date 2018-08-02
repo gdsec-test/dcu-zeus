@@ -50,13 +50,13 @@ class RegisteredMailer(Mailer):
                     resp.update(
                         {'type': message_type, 'template': 3132})  # template provided for backwards compatibility
                     generate_event(ticket_id, success_message, **resp)
-                return True
             else:
                 self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
         except Exception as e:
             self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
-        return False
+            return False
+        return True
 
     def send_shopper_suspension(self, ticket_id, domain, shopper_ids, source, report_type):
         """
@@ -92,13 +92,13 @@ class RegisteredMailer(Mailer):
                     resp.update(
                         {'type': message_type, 'template': 3760})  # template provided for backwards compatibility
                     generate_event(ticket_id, success_message, **resp)
-                return True
             else:
                 self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
         except Exception as e:
             self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
-        return False
+            return False
+        return True
 
     def send_shopper_intentional_suspension(self, ticket_id, domain, shopper_ids, report_type):
         """
@@ -132,13 +132,13 @@ class RegisteredMailer(Mailer):
                     resp.update(
                         {'type': message_type, 'template': 4044})  # template provided for backwards compatibility
                     generate_event(ticket_id, success_message, **resp)
-                return True
             else:
                 self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
         except Exception as e:
             self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
-        return False
+            return False
+        return True
 
     def send_hosting_provider_notice(self, ticket_id, domain, source, hosting_brand, recipients,
                                      ip_address="Unable to ascertain IP Address"):
@@ -177,8 +177,8 @@ class RegisteredMailer(Mailer):
                     resp = send_mail(template, substitution_values, **kwargs)
                     resp.update({'type': message_type, 'template': 3103})
                     generate_event(ticket_id, success_message, **resp)
-            return True
         except Exception as e:
             self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
-        return False
+            return False
+        return True

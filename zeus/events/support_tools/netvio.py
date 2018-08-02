@@ -19,7 +19,7 @@ class ThrottledNetvio:
             return self.create_ticket(shopper_id, guid, abuse_type, values)
 
         self._logger.info("Netvio for {} already created".format(guid))
-        return False
+        return True
 
     def get_ticket(self, ticket_id):
         return self._decorated.get_ticket(ticket_id)

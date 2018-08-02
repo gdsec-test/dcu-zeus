@@ -17,9 +17,7 @@ class ThrottledHostingService:
         return self._throttle.can_suspend_hosting_product(identifier)
 
     def suspend_hosting(self, product, identifier, data):
-        if self.can_suspend_hosting_product(identifier):
-            return self._decorated.suspend(product, identifier, data)
-        return False
+        return self._decorated.suspend(product, identifier, data)
 
 
 class HostingService(Product):

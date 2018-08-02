@@ -69,7 +69,7 @@ class RegisteredHandler(Handler):
             self.crm.notate_crm_account(shopper_id_list, ticket_id, note)
 
             if not self.registered_mailer.send_registrant_warning(ticket_id, domain, shopper_id_list, source):
-                self.slack.failed_sending_email(ticket_id)
+                self.slack.failed_sending_email(domain)
                 return False
         return True
 
@@ -97,7 +97,7 @@ class RegisteredHandler(Handler):
         self.fraud_mailer.send_malicious_domain_notification(ticket_id, domain, shopper_id, report_type, source, target)
         if not self.registered_mailer.send_shopper_intentional_suspension(ticket_id, domain, shopper_id_list,
                                                                           report_type):
-            self.slack.failed_sending_email(ticket_id)
+            self.slack.failed_sending_email(domain)
             return False
 
         return self._suspend_domain(data, ticket_id, note)
@@ -123,7 +123,7 @@ class RegisteredHandler(Handler):
         self.crm.notate_crm_account([shopper_id], ticket_id, note)
 
         if not self.registered_mailer.send_shopper_suspension(ticket_id, domain, shopper_id_list, source, report_type):
-            self.slack.failed_sending_email(ticket_id)
+            self.slack.failed_sending_email(domain)
             return False
 
         return self._suspend_domain(data, ticket_id, note)
