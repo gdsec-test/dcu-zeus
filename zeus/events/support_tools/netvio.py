@@ -16,7 +16,7 @@ class ThrottledNetvio:
 
     def create_ticket(self, shopper_id, guid, abuse_type, values):
         if self._throttle.can_netvio_be_created(guid):
-            return self.create_ticket(shopper_id, guid, abuse_type, values)
+            return self._decorated.create_ticket(shopper_id, guid, abuse_type, values)
 
         self._logger.info("Netvio for {} already created".format(guid))
         return True

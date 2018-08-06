@@ -27,9 +27,7 @@ class HostingService(Product):
     def __init__(self, app_settings):
         self._products = {'diablo': Diablo(app_settings),
                           'wpaas': MWPOne(app_settings),
-                          'angelo': Angelo(app_settings),
-                          'vertigo': Vertigo(app_settings),
-                          'legacy': Legacy(app_settings)}
+                          'angelo': Angelo(app_settings)}
 
     def suspend(self, product, identifier, data):
         product = product.lower()

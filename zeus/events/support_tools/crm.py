@@ -13,6 +13,8 @@ class ThrottledCRM:
         self._throttle = Throttle(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)  # one day throttle
 
     def notate_crm_account(self, shopper_id_list, ticket_id, note):
+        if not isinstance(shopper_id_list, list):
+            shopper_id_list = [shopper_id_list]
         shopper_id_for_throttle = shopper_id_list[-1]
 
         if self._throttle.can_crm_be_notated(shopper_id_for_throttle):

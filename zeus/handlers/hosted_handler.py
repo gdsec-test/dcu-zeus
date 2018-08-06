@@ -99,9 +99,13 @@ class HostedHandler:
         guid = get_host_info_from_dict(data).get('mwpId') or guid
         product = get_host_info_from_dict(data).get('product')
 
-        if not self.hosting_service.suspend_hosting(product, guid, data):
+        suspension_result = self.hosting_service.suspend_hosting(product, guid, data)
+        if isinstance(suspension_result, str):
+            self.slack.failed_hosting_suspension(guid, info=suspension_result)
+        elif not suspension_result:
             self.slack.failed_hosting_suspension(guid)
             return False
+
         return True
 
     def _validate_required_args(self, data):
