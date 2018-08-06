@@ -8,6 +8,7 @@ from dcdatabase.phishstorymongo import PhishstoryMongo
 
 from celeryconfig import CeleryConfig
 from settings import config_by_name
+from zeus.handlers.foreign_handler import ForeignHandler
 from zeus.handlers.fraud_handler import FraudHandler
 from zeus.handlers.hosted_handler import HostedHandler
 from zeus.handlers.registered_handler import RegisteredHandler
@@ -34,6 +35,7 @@ _logger = get_task_logger(__name__)
 fraud = FraudHandler(config)
 hosted = HostedHandler(config)
 registered = RegisteredHandler(config)
+foreign = ForeignHandler(config)
 
 
 def route_request(data, request_type):
@@ -49,6 +51,9 @@ def route_request(data, request_type):
 
 def get_database_handle():
     return PhishstoryMongo(config)
+
+
+''' Fraud Tasks '''
 
 
 @celery.task()
@@ -67,6 +72,18 @@ def fraud_new_hosting_account(ticket_id):
 def fraud_new_shopper(ticket_id):
     data = get_database_handle().get_incident(ticket_id)
     return fraud.new_shopper(data) if data else None
+
+
+''' Foreign Tasks'''
+
+
+@celery.task()
+def foreign_notice(ticket_id):
+    data = get_database_handle().get_incident(ticket_id)
+    return foreign.foreign_notice(data) if data else None
+
+
+''' Multi-Handler Tasks '''
 
 
 @celery.task()

@@ -39,7 +39,7 @@ class TestRegisteredMailer:
     def test_send_registrant_warning_exception(self, send_mail):
         assert_false(self._mailer.send_registrant_warning(None, None, ['test-id'], None))
 
-    ''' Shoper Suspension Tests '''
+    ''' Shopper Suspension Tests '''
 
     @patch('zeus.events.email.registered_mailer.send_mail', return_value={})
     def test_send_shopper_suspension(self, send_mail):
@@ -65,19 +65,3 @@ class TestRegisteredMailer:
     @patch('hermes.messenger.send_mail', side_efect=OCMException())
     def test_send_shopper_intentional_suspension_exception(self, send_mail):
         assert_false(self._mailer.send_shopper_intentional_suspension(None, None, ['test-id'], None))
-
-    ''' 3rd Party Hosting Provider Tests '''
-
-    @patch('zeus.events.email.registered_mailer.send_mail', return_value={})
-    def test_send_hosting_provider_notice(self, send_mail):
-        assert_true(self._mailer.send_hosting_provider_notice(None, None, 'test-source', 'FOREIGN', ['noc@'], None))
-
-    def test_send_hosting_provider_notice_invalid_hosting_brand(self):
-        assert_false(self._mailer.send_hosting_provider_notice(None, None, None, 'GODADDY', [], None))
-
-    def test_send_hosting_provider_notice_no_shoppers(self):
-        assert_false(self._mailer.send_hosting_provider_notice(None, None, None, 'FOREIGN', [], None))
-
-    @patch('hermes.messenger.send_mail', side_effect=OCMException())
-    def test_send_hosting_provider_notice_exception(self, send_mail):
-        assert_false(self._mailer.send_hosting_provider_notice(None, None, None, 'FOREIGN', ['test-id'], None))

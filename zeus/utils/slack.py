@@ -86,6 +86,12 @@ class SlackFailures:
         self._logger.error(message)
         self._slack.send_message(key, message)
 
+    def failed_to_send_foreign_hosting_notice(self, domain):
+        key = '{}_failed_foreign_notice'.format(domain)
+        message = 'No foreign notice sent for {}'.format(domain)
+        self._logger.error(message)
+        self._slack.send_message(key, message)
+
     def failed_to_determine_guid(self, ticket_id):
         key = '{}_suspend_failed_no_guid'.format(ticket_id)
         message = 'No action taken for {} - no GUID could be found'.format(ticket_id)

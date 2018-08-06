@@ -4,6 +4,7 @@ from nose.tools import assert_false, assert_true
 from settings import TestingConfig
 from zeus.events.email.fraud_mailer import FraudMailer
 from zeus.events.email.registered_mailer import RegisteredMailer
+from zeus.events.email.foreign_mailer import ForeignMailer
 from zeus.events.support_tools.crm import ThrottledCRM
 from zeus.events.suspension.domains import ThrottledDomainService
 from zeus.handlers.registered_handler import RegisteredHandler
@@ -36,17 +37,10 @@ class TestRegisteredHandler:
     def test_customer_warning_no_shoppers(self, failed_to_determine_shoppers):
         assert_false(self._registered.customer_warning(self.ticket_no_shopper))
 
-    @patch.object(RegisteredMailer, 'send_hosting_provider_notice', return_value=None)
-    @patch.object(BasicReview, 'place_in_review', return_value=None)
-    def test_customer_warning_foreign(self, review, mailer):
-        data = self.ticket_valid.copy()
-        data['hosted_status'] = 'FOREIGN'
-        assert_true(self._registered.customer_warning(data))
-
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(RegisteredMailer, 'send_registrant_warning', return_value=False)
-    @patch.object(RegisteredMailer, 'send_hosting_provider_notice', return_value=None)
+    @patch.object(ForeignMailer, 'send_foreign_hosting_notice', return_value=None)
     @patch.object(BasicReview, 'place_in_review', return_value=None)
     def test_customer_warning_failed_registrant_warning(self, review, hosting, registrant, crm, slack):
         assert_false(self._registered.customer_warning(self.ticket_valid))

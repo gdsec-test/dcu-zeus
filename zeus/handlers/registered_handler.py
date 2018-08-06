@@ -1,6 +1,7 @@
 import logging.config
 from datetime import datetime, timedelta
 
+from zeus.events.email.foreign_mailer import ForeignMailer
 from zeus.events.email.fraud_mailer import FraudMailer
 from zeus.events.email.registered_mailer import RegisteredMailer
 from zeus.events.support_tools.constants import note_mappings
@@ -18,13 +19,13 @@ from zeus.utils.slack import ThrottledSlack, SlackFailures
 class RegisteredHandler(Handler):
     TYPES = ['PHISHING', 'MALWARE']
     REGISTERED = 'REGISTERED'
-    FOREIGN = 'FOREIGN'
 
     def __init__(self, app_settings):
         self._logger = logging.getLogger(__name__)
 
         self.registered_mailer = RegisteredMailer(app_settings)
         self.fraud_mailer = FraudMailer(app_settings)
+        self.foreign_mailer = ForeignMailer(app_settings)
 
         self.domain_service = ThrottledDomainService(app_settings)
         self.crm = ThrottledCRM(app_settings)
@@ -55,12 +56,12 @@ class RegisteredHandler(Handler):
         report_type = data.get('type')
         source = data.get('source')
 
-        if not self._validate_required_args(data, [self.REGISTERED, self.FOREIGN]):  # Registered or Foreign is OK
+        if not self._validate_required_args(data):
             return False
 
         self.basic_review.place_in_review(ticket_id, datetime.utcnow() + timedelta(seconds=self.HOLD_TIME),
                                           '24hr_notice_sent')
-        self.registered_mailer.send_hosting_provider_notice(ticket_id, domain, source, hosted_brand, recipients, ip)
+        self.foreign_mailer.send_foreign_hosting_notice(ticket_id, domain, source, hosted_brand, recipients, ip)
 
         if data.get('hosted_status') == self.REGISTERED:
             note = note_mappings['registered']['customerWarning']['crm'].format(domain=domain,
@@ -137,13 +138,10 @@ class RegisteredHandler(Handler):
             return False
         return True
 
-    def _validate_required_args(self, data, hosted_status=None):
+    def _validate_required_args(self, data):
         ticket_id = data.get('ticketId')
 
-        if not hosted_status:
-            hosted_status = [self.REGISTERED]
-
-        if data.get('hosted_status') not in hosted_status:
+        if data.get('hosted_status') != self.REGISTERED:
             self.slack.invalid_hosted_status(ticket_id)
         elif data.get('type') not in self.TYPES:
             self.slack.invalid_abuse_type(ticket_id)
