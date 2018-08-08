@@ -33,13 +33,25 @@ class HostingService(Product):
         product = product.lower()
         if product not in self._products:
             return self.UNSUPPORTED_PRODUCT.format(product)
-        return self._products[product].suspend(identifier, data)
+
+        if product == 'diablo':
+            return self._products[product].suspend(identifier)
+        elif product == 'wpaas':
+            return self._products[product].suspend(identifier)
+        elif product == 'angelo':
+            return self._products[product].suspend(identifier, data)
 
     def reinstate(self, product, identifier, data):
         product = product.lower()
         if product not in self._products:
             return self.UNSUPPORTED_PRODUCT.format(product)
-        return self._products[product].reinstate(identifier, data)
+
+        if product == 'diablo':
+            return self._products[product].reinstate(identifier)
+        elif product == 'wpaas':
+            return self._products[product].reinstate(identifier)
+        elif product == 'angelo':
+            return self._products[product].reinstate(identifier, data)
 
     def cancel(self, product, identifier):
         product = product.lower()
