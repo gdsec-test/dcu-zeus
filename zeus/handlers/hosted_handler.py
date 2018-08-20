@@ -41,12 +41,12 @@ class HostedHandler:
         source = data.get('source')
         ticket_id = data.get('ticketId')
 
+        self.basic_review.place_in_review(ticket_id, datetime.utcnow() + timedelta(seconds=self.HOLD_TIME),
+                                          '24hr_notice_sent')
+
         report_type, guid, shopper_id = self._validate_required_args(data)
         if not report_type:  # If any of these were invalid, all values returned as None
             return False
-
-        self.basic_review.place_in_review(ticket_id, datetime.utcnow() + timedelta(seconds=self.HOLD_TIME),
-                                          '24hr_notice_sent')
 
         self.scribe.customer_warning(ticket_id, guid, source, report_type, shopper_id)
         if not self.hosted_mailer.send_hosted_warning(ticket_id, domain, shopper_id, source):
