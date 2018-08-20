@@ -1,3 +1,4 @@
 git+ssh://git@github.secureserver.net/ITSecurity/dcdatabase.git
 git+ssh://git@github.secureserver.net/ITSecurity/crm_notate.git
 git+ssh://git@github.secureserver.net/ITSecurity/hermes.git
+git+ssh://git@github.secureserver.net/auth-contrib/PyAuth.git

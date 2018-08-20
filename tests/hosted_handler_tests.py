@@ -8,6 +8,7 @@ from zeus.handlers.hosted_handler import HostedHandler
 from zeus.reviews.reviews import BasicReview
 from zeus.utils.scribe import HostedScribe
 from zeus.utils.slack import SlackFailures
+from zeus.utils.journal import Journal
 
 
 class TestHostedHandler:
@@ -71,11 +72,12 @@ class TestHostedHandler:
     def test_intentionally_malicious_failed_shopper_email(self, can_suspend, scribe, slack, mailer):
         assert_false(self._hosted.intentionally_malicious(self.ticket_valid))
 
-    @patch.object(HostedHandler, 'suspend_product', return_value=True)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=True)
     @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
-    def test_intentionally_malicious_success(self, can_suspend, scribe, mailer, suspend):
+    def test_intentionally_malicious_success(self, can_suspend, scribe, mailer, suspend, journal):
         assert_true(self._hosted.intentionally_malicious(self.ticket_valid))
 
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
@@ -93,7 +95,7 @@ class TestHostedHandler:
     def test_suspend_failed_shopper_email(self, can_suspend, scribe, slack, mailer):
         assert_false(self._hosted.suspend(self.ticket_valid))
 
-    @patch.object(HostedHandler, 'suspend_product', return_value=True)
+    @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_shopper_hosted_suspension', return_value=True)
     @patch.object(HostedScribe, 'suspension', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
@@ -103,8 +105,8 @@ class TestHostedHandler:
     @patch.object(SlackFailures, 'failed_hosting_suspension', return_value=None)
     @patch.object(ThrottledHostingService, 'suspend_hosting', return_value=False)
     def test_suspend_product_failure(self, suspend, slack):
-        assert_false(self._hosted.suspend_product({}, ''))
+        assert_false(self._hosted._suspend_product({}, '', 'test-product'))
 
     @patch.object(ThrottledHostingService, 'suspend_hosting', return_value=True)
     def test_suspend_product_success(self, suspend):
-        assert_true(self._hosted.suspend_product({}, ''))
+        assert_true(self._hosted._suspend_product({}, '', 'test-product'))

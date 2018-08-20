@@ -6,7 +6,8 @@ DATE=$(shell date)
 # libraries we need to stage for pip to install inside Docker build
 PRIVATE_PIPS=git@github.secureserver.net:ITSecurity/dcdatabase.git \
 git@github.secureserver.net:ITSecurity/crm_notate.git \
-git@github.secureserver.net:ITSecurity/hermes.git
+git@github.secureserver.net:ITSecurity/hermes.git \
+git@github.secureserver.net:auth-contrib/PyAuth.git
 
 .PHONY: prep dev stage prod ote clean prod-deploy ote-deploy dev-deploy
 

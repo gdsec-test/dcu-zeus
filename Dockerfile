@@ -7,6 +7,8 @@ RUN apk update && \
     apk add --no-cache build-base \
     ca-certificates \
     python-dev \
+    openssl-dev \
+    libffi-dev \
     py-pip
 
 WORKDIR /tmp
@@ -15,7 +17,7 @@ WORKDIR /tmp
 ADD . /tmp
 
 # pip install private pips staged by Makefile
-RUN for entry in dcdatabase crm_notate hermes; \
+RUN for entry in dcdatabase crm_notate hermes PyAuth; \
     do \
     pip install --compile "/tmp/private_pips/$entry"; \
     done

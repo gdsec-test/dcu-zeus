@@ -13,12 +13,14 @@ from zeus.utils.functions import get_list_of_ids_to_notify, \
     get_shopper_id_from_dict, \
     get_host_brand_from_dict, \
     get_host_abuse_email_from_dict, get_host_info_from_dict
+from zeus.utils.journal import Journal, EventTypes
 from zeus.utils.slack import ThrottledSlack, SlackFailures
 
 
 class RegisteredHandler(Handler):
     TYPES = ['PHISHING', 'MALWARE']
     REGISTERED = 'REGISTERED'
+    DOMAIN = 'Domain'
 
     def __init__(self, app_settings):
         self._logger = logging.getLogger(__name__)
@@ -29,6 +31,7 @@ class RegisteredHandler(Handler):
 
         self.domain_service = ThrottledDomainService(app_settings)
         self.crm = ThrottledCRM(app_settings)
+        self.journal = Journal(app_settings)
         self.slack = SlackFailures(ThrottledSlack(app_settings))
 
         self.basic_review = BasicReview(app_settings)
@@ -63,15 +66,16 @@ class RegisteredHandler(Handler):
                                           '24hr_notice_sent')
         self.foreign_mailer.send_foreign_hosting_notice(ticket_id, domain, source, hosted_brand, recipients, ip)
 
-        if data.get('hosted_status') == self.REGISTERED:
-            note = note_mappings['registered']['customerWarning']['crm'].format(domain=domain,
-                                                                                type=report_type,
-                                                                                location=source)
-            self.crm.notate_crm_account(shopper_id_list, ticket_id, note)
+        note = note_mappings['registered']['customerWarning']['crm'].format(domain=domain,
+                                                                            type=report_type,
+                                                                            location=source)
+        self.crm.notate_crm_account(shopper_id_list, ticket_id, note)
+        self.journal.write(EventTypes.customer_warning, self.DOMAIN, domain, report_type,
+                           note_mappings['journal']['customerWarning'], [source])
 
-            if not self.registered_mailer.send_registrant_warning(ticket_id, domain, shopper_id_list, source):
-                self.slack.failed_sending_email(domain)
-                return False
+        if not self.registered_mailer.send_registrant_warning(ticket_id, domain, shopper_id_list, source):
+            self.slack.failed_sending_email(domain)
+            return False
         return True
 
     def intentionally_malicious(self, data):
@@ -94,6 +98,8 @@ class RegisteredHandler(Handler):
                                                                                    type=report_type,
                                                                                    location=source)
         self.crm.notate_crm_account([shopper_id], ticket_id, note)
+        self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
+                           note_mappings['journal']['intentionallyMalicious'], [source])
 
         self.fraud_mailer.send_malicious_domain_notification(ticket_id, domain, shopper_id, report_type, source, target)
         if not self.registered_mailer.send_shopper_intentional_suspension(ticket_id, domain, shopper_id_list,
@@ -101,7 +107,7 @@ class RegisteredHandler(Handler):
             self.slack.failed_sending_email(domain)
             return False
 
-        return self._suspend_domain(data, ticket_id, note)
+        return self._suspend_domain(domain, ticket_id, note)
 
     def suspend(self, data):
         shopper_id = get_shopper_id_from_dict(data)
@@ -122,17 +128,18 @@ class RegisteredHandler(Handler):
                                                                        type=report_type,
                                                                        location=source)
         self.crm.notate_crm_account([shopper_id], ticket_id, note)
+        self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
+                           note_mappings['journal']['suspension'], [source])
 
         if not self.registered_mailer.send_shopper_suspension(ticket_id, domain, shopper_id_list, source, report_type):
             self.slack.failed_sending_email(domain)
             return False
 
-        return self._suspend_domain(data, ticket_id, note)
+        return self._suspend_domain(domain, ticket_id, note)
 
-    def _suspend_domain(self, data, ticket_id, reason):
-        domain = data.get('sourceDomainOrIp')
-
+    def _suspend_domain(self, domain, ticket_id, reason):
         self._logger.info("Suspending domain {} for incident {}".format(domain, ticket_id))
+
         if not self.domain_service.suspend_domain(domain, self.ENTERED_BY, reason):
             self.slack.failed_domain_suspension(domain)
             return False

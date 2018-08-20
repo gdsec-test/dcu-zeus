@@ -14,11 +14,11 @@ note_mappings = {
     'hosted': {
         'customerWarning': {
             'netvio': CUSTOMER_WARNING,
-            'crm': "Warning sent to customer for {guid}. {type} content reported at {location}",
+            'crm': "Warning sent to customer for {guid}. {type} content reported at {location}"
         },
         'contentRemoved': {
             'netvio': CONTENT_REMOVED,
-            'crm': "{type} content removed from hosting {guid} at {location}",
+            'crm': "{type} content removed from hosting {guid} at {location}"
         },
         'suspension': {
             'netvio': SUSPENSION,
@@ -39,5 +39,10 @@ note_mappings = {
         'intentionallyMalicious': {
             'crm': "{domain} suspended for intentional {type} at {location}"
         }
+    },
+    'journal': {
+        'customerWarning': "Customer should remove abusive content associated with incident.",
+        'intentionallyMalicious': "Customer engaged in suspected intentionally malicious behavior.",
+        'suspension': "Customer failed to resolve incident within provided time period."
     }
 }
