@@ -34,7 +34,7 @@ class RequestsTransport(HttpAuthenticated):
                                 headers=request.headers,
                                 cert=self.cert,
                                 verify=False,
-                                timeout=300)
+                                timeout=10)
         return io.StringIO(response.content.decode('utf-8'))
 
     def send(self, request):
@@ -44,7 +44,7 @@ class RequestsTransport(HttpAuthenticated):
                                  headers=request.headers,
                                  cert=self.cert,
                                  verify=False,
-                                 timeout=300)
+                                 timeout=10)
         return Reply(response.status_code, response.headers, response.content)
 
 
