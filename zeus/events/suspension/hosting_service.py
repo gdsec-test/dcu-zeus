@@ -30,7 +30,7 @@ class HostingService(Product):
                           'angelo': Angelo(app_settings)}
 
     def suspend(self, product, identifier, data):
-        product = product.lower()
+        product = product.lower() if product else None
         if product not in self._products:
             return self.UNSUPPORTED_PRODUCT.format(product)
 
@@ -42,7 +42,7 @@ class HostingService(Product):
             return self._products[product].suspend(identifier, data)
 
     def reinstate(self, product, identifier, data):
-        product = product.lower()
+        product = product.lower() if product else None
         if product not in self._products:
             return self.UNSUPPORTED_PRODUCT.format(product)
 
@@ -54,25 +54,25 @@ class HostingService(Product):
             return self._products[product].reinstate(identifier, data)
 
     def cancel(self, product, identifier):
-        product = product.lower()
+        product = product.lower() if product else None
         if product not in self._products:
             return self.UNSUPPORTED_PRODUCT.format(product)
         return self.UNSUPPORTED_OPERATION.format('cancel')
 
     def block_content(self, product, identifier):
-        product = product.lower()
+        product = product.lower() if product else None
         if product not in self._products:
             return self.UNSUPPORTED_PRODUCT.format(product)
         return self.UNSUPPORTED_OPERATION.format('block_content')
 
     def unblock_content(self, product, identifier):
-        product = product.lower()
+        product = product.lower() if product else None
         if product not in self._products:
             return self.UNSUPPORTED_PRODUCT.format(product)
         return self.UNSUPPORTED_OPERATION.format('unblock_content')
 
     def delete_content(self, product, identifier):
-        product = product.lower()
+        product = product.lower() if product else None
         if product not in self._products:
             return self.UNSUPPORTED_PRODUCT.format(product)
         return self.UNSUPPORTED_OPERATION.format('delete_content')
