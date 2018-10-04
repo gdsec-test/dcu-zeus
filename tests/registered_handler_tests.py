@@ -2,9 +2,9 @@ from mock import patch
 from nose.tools import assert_false, assert_true
 
 from settings import TestingConfig
+from zeus.events.email.foreign_mailer import ForeignMailer
 from zeus.events.email.fraud_mailer import FraudMailer
 from zeus.events.email.registered_mailer import RegisteredMailer
-from zeus.events.email.foreign_mailer import ForeignMailer
 from zeus.events.support_tools.crm import ThrottledCRM
 from zeus.events.suspension.domains import ThrottledDomainService
 from zeus.handlers.registered_handler import RegisteredHandler

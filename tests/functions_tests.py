@@ -1,12 +1,12 @@
 from nose.tools import assert_equal, assert_is_none
 
-from zeus.utils.functions import get_shopper_id_from_dict, \
-    get_parent_child_shopper_ids_from_dict, \
-    get_domain_create_date_from_dict, \
-    get_shopper_create_date_from_dict, \
-    get_host_abuse_email_from_dict, \
-    get_host_brand_from_dict, \
-    get_list_of_ids_to_notify
+from zeus.utils.functions import (get_domain_create_date_from_dict,
+                                  get_host_abuse_email_from_dict,
+                                  get_host_brand_from_dict,
+                                  get_list_of_ids_to_notify,
+                                  get_parent_child_shopper_ids_from_dict,
+                                  get_shopper_create_date_from_dict,
+                                  get_shopper_id_from_dict)
 
 
 class TestFunctions:

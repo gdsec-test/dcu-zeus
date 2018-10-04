@@ -1,5 +1,5 @@
 import logging
-from logging import getLoggerClass, addLevelName, setLoggerClass, NOTSET
+from logging import NOTSET, addLevelName, getLoggerClass, setLoggerClass
 
 UEVENT = logging.CRITICAL + 5
 

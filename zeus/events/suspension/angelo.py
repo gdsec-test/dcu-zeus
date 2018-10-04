@@ -2,7 +2,8 @@ import json
 import logging
 
 import requests
-from requests.packages.urllib3.exceptions import InsecurePlatformWarning, InsecureRequestWarning
+from requests.packages.urllib3.exceptions import (InsecurePlatformWarning,
+                                                  InsecureRequestWarning)
 
 from zeus.events.suspension.interface import Product
 from zeus.utils.functions import get_host_shopper_id_from_dict

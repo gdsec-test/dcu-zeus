@@ -3,13 +3,14 @@ from datetime import datetime, timedelta
 
 from zeus.events.email.fraud_mailer import FraudMailer
 from zeus.events.email.hosted_mailer import HostedMailer
-from zeus.events.suspension.hosting_service import ThrottledHostingService
 from zeus.events.support_tools.constants import note_mappings
+from zeus.events.suspension.hosting_service import ThrottledHostingService
 from zeus.reviews.reviews import BasicReview
-from zeus.utils.functions import get_host_info_from_dict, get_host_shopper_id_from_dict
+from zeus.utils.functions import (get_host_info_from_dict,
+                                  get_host_shopper_id_from_dict)
+from zeus.utils.journal import EventTypes, Journal
 from zeus.utils.scribe import HostedScribe
-from zeus.utils.slack import ThrottledSlack, SlackFailures
-from zeus.utils.journal import Journal, EventTypes
+from zeus.utils.slack import SlackFailures, ThrottledSlack
 
 
 class HostedHandler:

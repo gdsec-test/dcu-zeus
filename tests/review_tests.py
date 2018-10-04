@@ -4,8 +4,8 @@ import mongomock
 from dcdatabase.phishstorymongo import PhishstoryMongo
 from nose.tools import assert_true
 
-from zeus.reviews.reviews import BasicReview, FraudReview
 from settings import TestingConfig
+from zeus.reviews.reviews import BasicReview, FraudReview
 
 
 class TestReview:

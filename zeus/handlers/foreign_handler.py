@@ -2,10 +2,10 @@ from datetime import datetime, timedelta
 
 from zeus.events.email.foreign_mailer import ForeignMailer
 from zeus.reviews.reviews import BasicReview
-from zeus.utils.functions import get_host_brand_from_dict, \
-    get_host_abuse_email_from_dict, \
-    get_host_info_from_dict
-from zeus.utils.slack import ThrottledSlack, SlackFailures
+from zeus.utils.functions import (get_host_abuse_email_from_dict,
+                                  get_host_brand_from_dict,
+                                  get_host_info_from_dict)
+from zeus.utils.slack import SlackFailures, ThrottledSlack
 
 
 class ForeignHandler:

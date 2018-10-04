@@ -1,7 +1,8 @@
 import logging
 
 import requests
-from requests.packages.urllib3.exceptions import InsecurePlatformWarning, InsecureRequestWarning
+from requests.packages.urllib3.exceptions import (InsecurePlatformWarning,
+                                                  InsecureRequestWarning)
 
 from zeus.events.suspension.interface import Product
 

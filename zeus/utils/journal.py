@@ -1,8 +1,8 @@
 import json
 import logging
+from enum import Enum
 
 import requests
-from enum import Enum
 
 
 class EventTypes(Enum):

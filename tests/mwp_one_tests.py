@@ -1,4 +1,4 @@
-from mock import patch, MagicMock
+from mock import MagicMock, patch
 from nose.tools import assert_false, assert_true
 from requests.exceptions import Timeout
 

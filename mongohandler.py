@@ -1,17 +1,18 @@
-from log4mongo.handlers import MongoHandler
+import logging
+import os
+
+import pymongo
+from log4mongo.handlers import MongoFormatter, MongoHandler
+from pymongo.collection import Collection
+from pymongo.errors import OperationFailure
+
+from settings import config_by_name
 
 try:
     from pymongo import MongoClient as Connection
 except ImportError:
     from pymongo import Connection
 
-from pymongo.collection import Collection
-from pymongo.errors import OperationFailure
-from log4mongo.handlers import MongoFormatter
-import pymongo
-import os
-import logging
-from settings import config_by_name
 
 if pymongo.version_tuple[0] >= 3:
     write_method = 'insert_one'

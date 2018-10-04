@@ -1,6 +1,7 @@
 import json
-import requests
 import logging
+
+import requests
 
 from zeus.persist.notification_timeouts import Throttle
 

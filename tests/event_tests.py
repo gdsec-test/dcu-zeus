@@ -2,10 +2,10 @@ import logging
 
 import mongomock
 from nose.tools import assert_true
-from zeus.events.user_logging.events import generate_event
 
 import mongohandler as handler
 from mongohandler import MongoLogFactory
+from zeus.events.user_logging.events import generate_event
 from zeus.events.user_logging.user_logger import UEVENT
 
 

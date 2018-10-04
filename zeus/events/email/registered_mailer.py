@@ -139,4 +139,3 @@ class RegisteredMailer(Mailer):
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
-

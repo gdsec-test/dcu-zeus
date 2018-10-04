@@ -1,14 +1,14 @@
 from mock import patch
-from nose.tools import assert_false, assert_equal, assert_true
+from nose.tools import assert_equal, assert_false, assert_true
 
 from settings import TestingConfig
 from zeus.events.email.hosted_mailer import HostedMailer
 from zeus.events.suspension.hosting_service import ThrottledHostingService
 from zeus.handlers.hosted_handler import HostedHandler
 from zeus.reviews.reviews import BasicReview
+from zeus.utils.journal import Journal
 from zeus.utils.scribe import HostedScribe
 from zeus.utils.slack import SlackFailures
-from zeus.utils.journal import Journal
 
 
 class TestHostedHandler:

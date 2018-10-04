@@ -1,5 +1,5 @@
-from nose.tools import assert_true, assert_false
 from mockredis import mock_redis_client
+from nose.tools import assert_false, assert_true
 
 from zeus.persist.notification_timeouts import Throttle
 

@@ -1,11 +1,11 @@
 import logging
 
 from zeus.events.email.fraud_mailer import FraudMailer
-from zeus.utils.functions import get_shopper_id_from_dict, \
-    get_shopper_create_date_from_dict, \
-    get_domain_create_date_from_dict, \
-    get_host_shopper_id_from_dict, \
-    get_hosting_created_date_from_dict
+from zeus.utils.functions import (get_domain_create_date_from_dict,
+                                  get_host_shopper_id_from_dict,
+                                  get_hosting_created_date_from_dict,
+                                  get_shopper_create_date_from_dict,
+                                  get_shopper_id_from_dict)
 
 
 class FraudHandler:

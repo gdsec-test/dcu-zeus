@@ -3,3 +3,5 @@ mock
 mongomock
 coverage
 mockredispy
+flake8
+isort

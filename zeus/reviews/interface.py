@@ -1,4 +1,5 @@
 import abc
+
 from dcdatabase.phishstorymongo import PhishstoryMongo
 
 

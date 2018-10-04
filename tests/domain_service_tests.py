@@ -1,6 +1,6 @@
 import json
 
-from mock import patch, MagicMock
+from mock import MagicMock, patch
 from nose.tools import assert_equal, assert_false
 
 from settings import TestingConfig

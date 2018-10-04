@@ -1,11 +1,11 @@
-import os
 import errno
+import os
 import signal
 from functools import wraps
 
-
 # Solution extracted from a StackOverflow selected answer
 # http://stackoverflow.com/questions/2281850/timeout-function-if-it-takes-too-long-to-finish
+
 
 class TimeoutError(Exception):
     pass
