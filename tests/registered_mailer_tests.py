@@ -30,38 +30,38 @@ class TestRegisteredMailer:
 
     @patch('zeus.events.email.registered_mailer.send_mail', return_value={})
     def test_send_registrant_warning(self, send_mail):
-        assert_true(self._mailer.send_registrant_warning('test-ticket', 'test-domain', ['test-id'], 'test-source'))
+        assert_true(self._mailer.send_registrant_warning('test-ticket', 'test-domain', 'test-domain-id', ['test-id'], 'test-source'))
 
     def test_send_registrant_warning_no_shoppers(self):
-        assert_false(self._mailer.send_registrant_warning(None, None, [], None))
+        assert_false(self._mailer.send_registrant_warning(None, None, None, [], None))
 
     @patch('hermes.messenger.send_mail', side_effect=OCMException())
     def test_send_registrant_warning_exception(self, send_mail):
-        assert_false(self._mailer.send_registrant_warning(None, None, ['test-id'], None))
+        assert_false(self._mailer.send_registrant_warning(None, None, None, ['test-id'], None))
 
     ''' Shopper Suspension Tests '''
 
     @patch('zeus.events.email.registered_mailer.send_mail', return_value={})
     def test_send_shopper_suspension(self, send_mail):
-        actual = self._mailer.send_shopper_suspension('test-id', 'test-domain', ['test-id'], 'test-source', 'PHISHING')
+        actual = self._mailer.send_shopper_suspension('test-id', 'test-domain', 'test-domain-id', ['test-id'], 'test-source', 'PHISHING')
         assert_true(actual)
 
     def test_send_shopper_suspension_no_shoppers(self):
-        assert_false(self._mailer.send_shopper_suspension(None, None, [], None, None))
+        assert_false(self._mailer.send_shopper_suspension(None, None, None, [], None, None))
 
     @patch('hermes.messenger.send_mail', side_effect=OCMException())
     def test_send_shopper_suspension_exception(self, send_mail):
-        assert_false(self._mailer.send_shopper_suspension(None, None, ['test-id'], None, None))
+        assert_false(self._mailer.send_shopper_suspension(None, None, None, ['test-id'], None, None))
 
     ''' Shopper Intentional Suspension Tests '''
 
     @patch('zeus.events.email.registered_mailer.send_mail', return_value={})
     def test_send_shopper_intentional_suspension(self, send_mail):
-        assert_true(self._mailer.send_shopper_intentional_suspension(None, None, ['test-id'], 'PHISHING'))
+        assert_true(self._mailer.send_shopper_intentional_suspension(None, None, None, ['test-id'], 'PHISHING'))
 
     def test_send_shopper_intentional_suspension_no_shoppers(self):
-        assert_false(self._mailer.send_shopper_intentional_suspension(None, None, [], None))
+        assert_false(self._mailer.send_shopper_intentional_suspension(None, None, None, [], None))
 
     @patch('hermes.messenger.send_mail', side_efect=OCMException())
     def test_send_shopper_intentional_suspension_exception(self, send_mail):
-        assert_false(self._mailer.send_shopper_intentional_suspension(None, None, ['test-id'], None))
+        assert_false(self._mailer.send_shopper_intentional_suspension(None, None, None, ['test-id'], None))

@@ -19,6 +19,14 @@ def get_shopper_id_from_dict(dict_to_search):
     return None
 
 
+def get_domain_id_from_dict(dict_to_search):
+    #  The domainId field is located in...
+    #    1: data->domainQuery->registrar->domainId
+    if isinstance(dict_to_search, dict):
+        return _get_domain_query(dict_to_search).get('registrar', {}).get('domainId')
+    return None
+
+
 def get_parent_child_shopper_ids_from_dict(dict_to_search):
     #  The parent/child API reseller fields currently appears in...
     #    1: data->domainQuery->apiReseller->parent

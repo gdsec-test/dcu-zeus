@@ -13,7 +13,8 @@ from zeus.utils.functions import (get_host_abuse_email_from_dict,
                                   get_host_brand_from_dict,
                                   get_host_info_from_dict,
                                   get_list_of_ids_to_notify,
-                                  get_shopper_id_from_dict)
+                                  get_shopper_id_from_dict,
+                                  get_domain_id_from_dict)
 from zeus.utils.journal import EventTypes, Journal
 from zeus.utils.slack import SlackFailures, ThrottledSlack
 
@@ -57,6 +58,7 @@ class RegisteredHandler(Handler):
         ip = get_host_info_from_dict(data).get('ip')
         ticket_id = data.get('ticketId')
         domain = data.get('sourceDomainOrIp')
+        domain_id = get_domain_id_from_dict(data)
         report_type = data.get('type')
         source = data.get('source')
 
@@ -74,7 +76,7 @@ class RegisteredHandler(Handler):
         self.journal.write(EventTypes.customer_warning, self.DOMAIN, domain, report_type,
                            note_mappings['journal']['customerWarning'], [source])
 
-        if not self.registered_mailer.send_registrant_warning(ticket_id, domain, shopper_id_list, source):
+        if not self.registered_mailer.send_registrant_warning(ticket_id, domain, domain_id, shopper_id_list, source):
             self.slack.failed_sending_email(domain)
             return False
         return True
@@ -84,6 +86,7 @@ class RegisteredHandler(Handler):
         shopper_id_list = get_list_of_ids_to_notify(data)
         ticket_id = data.get('ticketId')
         domain = data.get('sourceDomainOrIp')
+        domain_id = get_domain_id_from_dict(data)
         source = data.get('source')
         target = data.get('target')
         report_type = data.get('type')
@@ -103,7 +106,7 @@ class RegisteredHandler(Handler):
                            note_mappings['journal']['intentionallyMalicious'], [source])
 
         self.fraud_mailer.send_malicious_domain_notification(ticket_id, domain, shopper_id, report_type, source, target)
-        if not self.registered_mailer.send_shopper_intentional_suspension(ticket_id, domain, shopper_id_list,
+        if not self.registered_mailer.send_shopper_intentional_suspension(ticket_id, domain, domain_id, shopper_id_list,
                                                                           report_type):
             self.slack.failed_sending_email(domain)
             return False
@@ -115,6 +118,7 @@ class RegisteredHandler(Handler):
         shopper_id_list = get_list_of_ids_to_notify(data)
         ticket_id = data.get('ticketId')
         domain = data.get('sourceDomainOrIp')
+        domain_id = get_domain_id_from_dict(data)
         source = data.get('source')
         report_type = data.get('type')
 
@@ -132,7 +136,8 @@ class RegisteredHandler(Handler):
         self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
                            note_mappings['journal']['suspension'], [source])
 
-        if not self.registered_mailer.send_shopper_suspension(ticket_id, domain, shopper_id_list, source, report_type):
+        if not self.registered_mailer.send_shopper_suspension(ticket_id, domain, domain_id, shopper_id_list, source,
+                                                              report_type):
             self.slack.failed_sending_email(domain)
             return False
 

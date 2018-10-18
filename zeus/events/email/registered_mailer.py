@@ -18,11 +18,12 @@ class RegisteredMailer(Mailer):
         self.testing_email_address = [
             {'email': config_by_name[self.env].NON_PROD_EMAIL_ADDRESS}] if self.env != 'prod' else []
 
-    def send_registrant_warning(self, ticket_id, domain, shopper_ids, source):
+    def send_registrant_warning(self, ticket_id, domain, domain_id, shopper_ids, source):
         """
-        Sends a notification to the shopper account email address found for the domain
+        Sends a notification to the shopper account and administrative contact email address(es) found for the domain
         :param ticket_id:
         :param domain:
+        :param domain_id:
         :param shopper_ids:
         :param source:
         :return:
@@ -36,6 +37,8 @@ class RegisteredMailer(Mailer):
         exception_type = "reg-only_shopper_warning_email_exception"
         success_message = "reg-only_shopper_warning_email_sent"
 
+        kwargs = self.generate_kwargs_for_hermes()
+
         try:
             if self._throttle.can_shopper_email_be_sent(domain) or self._CAN_FLOOD:
 
@@ -46,7 +49,8 @@ class RegisteredMailer(Mailer):
                                            'DOMAIN': domain,
                                            'SANITIZED_URL': sanitize_url(source)}
 
-                    resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
+                    kwargs['domain_id'] = domain_id
+                    resp = send_mail(template, substitution_values, **kwargs)
                     resp.update(
                         {'type': message_type, 'template': 3132})  # template provided for backwards compatibility
                     generate_event(ticket_id, success_message, **resp)
@@ -58,11 +62,12 @@ class RegisteredMailer(Mailer):
             return False
         return True
 
-    def send_shopper_suspension(self, ticket_id, domain, shopper_ids, source, report_type):
+    def send_shopper_suspension(self, ticket_id, domain, domain_id, shopper_ids, source, report_type):
         """
-        Sends a suspension notification to the shopper account email address found for the domain
+        Sends a suspension notification to the shopper account and administrative contact email address(es) found for the domain
         :param ticket_id:
         :param domain:
+        :param domain_id:
         :param shopper_ids:
         :param source:
         :param report_type:
@@ -77,6 +82,8 @@ class RegisteredMailer(Mailer):
         exception_type = "reg-only_shopper_suspend_email_exception"
         success_message = "reg-only_shopper_suspend_email_sent"
 
+        kwargs = self.generate_kwargs_for_hermes()
+
         try:
             if self._throttle.can_shopper_email_be_sent(domain) or self._CAN_FLOOD:
 
@@ -88,7 +95,8 @@ class RegisteredMailer(Mailer):
                                            'SANITIZED_URL': sanitize_url(source),
                                            'MALICIOUS_ACTIVITY': report_type}
 
-                    resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
+                    kwargs['domain_id'] = domain_id
+                    resp = send_mail(template, substitution_values, **kwargs)
                     resp.update(
                         {'type': message_type, 'template': 3760})  # template provided for backwards compatibility
                     generate_event(ticket_id, success_message, **resp)
@@ -100,11 +108,12 @@ class RegisteredMailer(Mailer):
             return False
         return True
 
-    def send_shopper_intentional_suspension(self, ticket_id, domain, shopper_ids, report_type):
+    def send_shopper_intentional_suspension(self, ticket_id, domain, domain_id, shopper_ids, report_type):
         """
         Sends an intentional suspension notification to the shopper account email address found for the domain
         :param ticket_id:
         :param domain:
+        :param domain_id:
         :param shopper_ids:
         :param report_type:
         :return:
@@ -118,6 +127,8 @@ class RegisteredMailer(Mailer):
         exception_type = "reg-only_shopper_suspend_intentional_email_exception"
         success_message = "reg-only_shopper_suspend_intentional_email_sent"
 
+        kwargs = self.generate_kwargs_for_hermes()
+
         try:
             if self._throttle.can_shopper_email_be_sent(domain) or self._CAN_FLOOD:
 
@@ -128,7 +139,8 @@ class RegisteredMailer(Mailer):
                                            'DOMAIN': domain,
                                            'MALICIOUS_ACTIVITY': report_type}
 
-                    resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
+                    kwargs['domain_id'] = domain_id
+                    resp = send_mail(template, substitution_values, **kwargs)
                     resp.update(
                         {'type': message_type, 'template': 4044})  # template provided for backwards compatibility
                     generate_event(ticket_id, success_message, **resp)
