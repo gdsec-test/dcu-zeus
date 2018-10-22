@@ -9,12 +9,12 @@ from zeus.events.support_tools.crm import ThrottledCRM
 from zeus.events.suspension.domains import ThrottledDomainService
 from zeus.handlers.interface import Handler
 from zeus.reviews.reviews import BasicReview
-from zeus.utils.functions import (get_host_abuse_email_from_dict,
+from zeus.utils.functions import (get_domain_id_from_dict,
+                                  get_host_abuse_email_from_dict,
                                   get_host_brand_from_dict,
                                   get_host_info_from_dict,
                                   get_list_of_ids_to_notify,
-                                  get_shopper_id_from_dict,
-                                  get_domain_id_from_dict)
+                                  get_shopper_id_from_dict)
 from zeus.utils.journal import EventTypes, Journal
 from zeus.utils.slack import SlackFailures, ThrottledSlack
 
