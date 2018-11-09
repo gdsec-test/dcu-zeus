@@ -50,7 +50,7 @@ make tools   # Runs both Flake8 and isort
 ```
 
 ## Running Locally
-If you would like to run Happy locally you will need to specify the following environment variables
+If you would like to run Zeus locally you will need to specify the following environment variables
  1. `sysenv` (dev, ote, prod)
  2. `DB_PASS` (MongoDB password for Phishstory database)
  3. `BROKER_PASS` (The Broker Pass for the RabbitMQ server to connect to)
