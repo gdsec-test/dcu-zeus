@@ -40,7 +40,7 @@ note_mappings = {
             'crm': "{{domain}} suspended. {{type}} content still present at {{location}}. {}".format(requires_dcu)
         },
         'intentionallyMalicious': {
-            'crm': "{{domain} suspended for intentional {{type} at {{location}}. {}".format(requires_dcu)
+            'crm': "{{domain}} suspended for intentional {{type}} at {{location}}. {}".format(requires_dcu)
         }
     },
     'journal': {
