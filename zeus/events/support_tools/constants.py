@@ -1,10 +1,13 @@
+# requires_dcu defined here for instances Care cannot support directly
+requires_dcu = "Customer may direct any questions to hostsec@"
+
 # NETVIO defined here for readability
 CONTENT_REMOVED = "{ticket_id} - {guid} was found to have {type} content at {location}.\n" \
                   "The following files/directories have been removed:\n{content_removed}"
 SUSPENSION = "{ticket_id} - {guid} has been suspended by DCU-Eng; " \
              "{type} content at {location}"
-INTENTIONALLY_MALICIOUS = "{ticket_id}: hosting {guid} suspended for intentional " \
-                          "{type} at {location}"
+INTENTIONALLY_MALICIOUS = "{{ticket_id}}: hosting {{guid}} suspended for intentional " \
+                          "{{type}} at {{location}}. {}".format(requires_dcu)
 
 CUSTOMER_WARNING = "{ticket_id} - {guid} has {type} content at {location}, the customer has " \
                    "been given a 24hr warning to remove any and all malicious content or their services " \
@@ -26,7 +29,7 @@ note_mappings = {
         },
         'intentionallyMalicious': {
             'netvio': INTENTIONALLY_MALICIOUS,
-            'crm': "Hosting {guid} suspended for intentional {type} at {location}"
+            'crm': "Hosting {{guid}} suspended for intentional {{type}} at {{location}}. {}".format(requires_dcu)
         }
     },
     'registered': {
@@ -34,10 +37,10 @@ note_mappings = {
             'crm': "Warning sent to customer for {domain}. {type} content reported at {location}"
         },
         'suspension': {
-            'crm': "{domain} suspended. {type} content still present at {location}"
+            'crm': "{{domain}} suspended. {{type}} content still present at {{location}}. {}".format(requires_dcu)
         },
         'intentionallyMalicious': {
-            'crm': "{domain} suspended for intentional {type} at {location}"
+            'crm': "{{domain} suspended for intentional {{type} at {{location}}. {}".format(requires_dcu)
         }
     },
     'journal': {

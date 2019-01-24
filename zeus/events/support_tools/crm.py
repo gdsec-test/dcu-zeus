@@ -24,7 +24,7 @@ class ThrottledCRM:
 
 
 class CRM:
-    NOTES = "SNOW ID: {ticket} {entered_by} - Engineers. {notes}. Customer questions to hostsec@"
+    NOTES = "SNOW ID: {ticket} {entered_by} - Engineers. {notes}."
     SHOPPER_NOTE_SUCCESS = "Added CRM note to shopper {} for ticket {}"
     SHOPPER_NOTE_FAILURE = "Unable to add CRM note to shopper {} for ticket: {} : {}"
 
