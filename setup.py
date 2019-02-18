@@ -16,7 +16,7 @@ setup(
     author_email='dcueng@godaddy.com',
     description='Deals with automated action of abuse reports',
     long_description=long_description,
-    url='https://github.secureserver.net/nlemay/zeus',
+    url='https://github.secureserver.net/ITSecurity/zeus',
     packages=find_packages(exclude=['tests']),
     install_requires=install_reqs,
     tests_require=testing_reqs,
