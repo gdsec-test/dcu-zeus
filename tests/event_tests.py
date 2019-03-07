@@ -1,7 +1,7 @@
 import logging
 
 import mongomock
-from nose.tools import assert_true
+from nose.tools import assert_equal
 
 import mongohandler as handler
 from mongohandler import MongoLogFactory
@@ -21,6 +21,6 @@ class TestEvents:
     def test_login_event(self):
         generate_event('DCU000123', 'email_sent', more='extra_data')
         data = self._collection.find_one({})
-        assert_true(data['message'] is 'email_sent')
-        assert_true(data['ticket'] is 'DCU000123')
-        assert_true(data['more'] is 'extra_data')
+        assert_equal(data['message'], 'email_sent')
+        assert_equal(data['ticket'], 'DCU000123')
+        assert_equal(data['more'], 'extra_data')

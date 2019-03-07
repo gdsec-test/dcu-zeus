@@ -9,6 +9,7 @@ from zeus.reviews.reviews import BasicReview
 from zeus.utils.functions import (get_host_info_from_dict,
                                   get_host_shopper_id_from_dict)
 from zeus.utils.journal import EventTypes, Journal
+from zeus.utils.mimir import InfractionTypes, Mimir
 from zeus.utils.scribe import HostedScribe
 from zeus.utils.slack import SlackFailures, ThrottledSlack
 
@@ -24,6 +25,7 @@ class HostedHandler:
         self.hosting_service = ThrottledHostingService(app_settings)
         self.scribe = HostedScribe(app_settings)
         self.journal = Journal(app_settings)
+        self.mimir = Mimir(app_settings)
         self.slack = SlackFailures(ThrottledSlack(app_settings))
 
         self.basic_review = BasicReview(app_settings)
@@ -56,6 +58,8 @@ class HostedHandler:
         self.journal.write(EventTypes.customer_warning, product, domain, report_type,
                            note_mappings['journal']['customerWarning'], [source])
 
+        self.mimir.write(InfractionTypes.customer_warning, shopper_id, ticket_id, domain, guid)
+
         self.scribe.customer_warning(ticket_id, guid, source, report_type, shopper_id)
         if not self.hosted_mailer.send_hosted_warning(ticket_id, domain, shopper_id, source):
             self.slack.failed_sending_email(domain)
@@ -78,6 +82,8 @@ class HostedHandler:
 
         self.journal.write(EventTypes.product_suspension, product, domain, report_type,
                            note_mappings['journal']['intentionallyMalicious'], [source])
+
+        self.mimir.write(InfractionTypes.intentionally_malicious, shopper_id, ticket_id, domain, guid)
 
         self.scribe.intentionally_malicious(ticket_id, guid, source, report_type, shopper_id)
         if not self.hosted_mailer.send_shopper_hosted_intentional_suspension(ticket_id, domain, shopper_id, report_type):
@@ -102,6 +108,9 @@ class HostedHandler:
 
         self.journal.write(EventTypes.product_suspension, product, domain, report_type,
                            note_mappings['journal']['suspension'], [source])
+
+        self.mimir.write(InfractionTypes.suspended, shopper_id, ticket_id, domain, guid)
+
         self.scribe.suspension(ticket_id, guid, source, report_type, shopper_id)
         if not self.hosted_mailer.send_shopper_hosted_suspension(ticket_id, domain, shopper_id, source):
             self.slack.failed_sending_email(domain)

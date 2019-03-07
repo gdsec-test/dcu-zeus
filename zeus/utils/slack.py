@@ -104,3 +104,8 @@ class SlackFailures:
         message = 'Email failed to send for {}'.format(domain)
         self._logger.error(message)
         self._slack.send_message(key, message)
+
+    def failed_infraction_creation(self, guid, ticket_number, exception_message):
+        key = '{}/{}_create_infraction_failed'.format(guid, ticket_number)
+        message = 'Unable to create Mimir infraction for {}/{}: {}'.format(guid, ticket_number, exception_message)
+        self._slack.send_message(key, message)
