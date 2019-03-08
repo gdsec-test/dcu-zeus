@@ -63,3 +63,20 @@ If you would like to run Zeus locally you will need to specify the following env
  10. `ZEUS_SSL_CERT` (The path to the SSL Cert for communicating with DCU Journal)
  11. `ZEUS_SSL_KEY` (The path to the SSL Key for communicating with DCU Journal)
  12. `EMAIL_RECIPIENT` (The email address you want `non-shopper` emails sent to while testing, instead of emailing fraud. e.g. user@example.com)
+ 
+## Handling failures to create Mimir Infractions in Production.
+1. Create dictionary of required infraction fields. Data will come from mongo record for the ticket. Majority of data in `data>domainQuery>host`
+```
+    {"shopperId" : "<shopper number>",
+    "ticketId" : "<DCU ticket number>",
+    "sourceDomainOrIp" : "<domain or ip>",
+    "hostingGuid" : "<hosting guid>",
+    "infractionType" : "<One of CUSTOMER_WARNING, INTENTIONALLY_MALICIOUS, or SUSPENDED">}
+```
+
+2. Obtain Prod JWT from Zeus Cert. Visit [this page](https://confluence.godaddy.com/pages/viewpage.action?pageId=127801950) for instructions
+3. Send curl request to Mimir. Example below.
+    ```
+    curl -XPOST -H 'Content-Type: application/json' -H 'Authorization: sso-jwt <Zeus Cert2JWT>' https://mimir.int.godaddy.com/v1/infractions -d '{"shopperId" : "123456789", "ticketId" : "DCU123456789", "sourceDomainOrIp" : "example.com", "hostingGuid" : "abc-123-def-456-ghi789", "infractionType" : "CUSTOMER_WARNING"}'
+    ```
+4. Be sure you get an infraction ID back. You do not need to do anything with it, just confirming it was submitted.
