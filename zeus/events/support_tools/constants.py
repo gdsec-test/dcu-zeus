@@ -1,23 +1,23 @@
-# requires_dcu defined here for instances Care cannot support directly
-requires_dcu = "Customer may direct any questions to hostsec@"
+# support document created to provide additional resources to Care Agents
+support_doc = "See http://x.co/dcuwhat2do for more info."
 
 # NETVIO defined here for readability
-CONTENT_REMOVED = "{ticket_id} - {guid} was found to have {type} content at {location}.\n" \
+CONTENT_REMOVED = "{ticket_id} - {guid} was found to have {type} content at {location}\n" \
                   "The following files/directories have been removed:\n{content_removed}"
-SUSPENSION = "{ticket_id} - {guid} has been suspended by DCU-Eng; " \
-             "{type} content at {location}"
+SUSPENSION = "{{ticket_id}} - {{guid}} has been suspended by DCU-Eng; " \
+             "{{type}} content at {{location}}\n{}".format(support_doc)
 INTENTIONALLY_MALICIOUS = "{{ticket_id}}: hosting {{guid}} suspended for intentional " \
-                          "{{type}} at {{location}}. {}".format(requires_dcu)
-
-CUSTOMER_WARNING = "{ticket_id} - {guid} has {type} content at {location}, the customer has " \
+                          "{{type}} at {{location}}\n{}".format(support_doc)
+CUSTOMER_WARNING = "{{ticket_id}} - {{guid}} has {{type}} content at {{location}}, the customer has " \
                    "been given a 24hr warning to remove any and all malicious content or their services " \
-                   "will be suspended."
+                   "will be suspended.\n{}".format(support_doc)
 
 note_mappings = {
     'hosted': {
         'customerWarning': {
             'netvio': CUSTOMER_WARNING,
-            'crm': "Warning sent to customer for {guid}. {type} content reported at {location}"
+            'crm': "Warning sent to customer for {{guid}}. {{type}} content reported at {{location}} {}".format
+            (support_doc)
         },
         'contentRemoved': {
             'netvio': CONTENT_REMOVED,
@@ -25,22 +25,23 @@ note_mappings = {
         },
         'suspension': {
             'netvio': SUSPENSION,
-            'crm': "Hosting {guid} suspended. {type} content still present at {location}"
+            'crm': "Hosting {{guid}} suspended. {{type}} content still present at {{location}} {}".format(support_doc)
         },
         'intentionallyMalicious': {
             'netvio': INTENTIONALLY_MALICIOUS,
-            'crm': "Hosting {{guid}} suspended for intentional {{type}} at {{location}}. {}".format(requires_dcu)
+            'crm': "Hosting {{guid}} suspended for intentional {{type}} at {{location}} {}".format(support_doc)
         }
     },
     'registered': {
         'customerWarning': {
-            'crm': "Warning sent to customer for {domain}. {type} content reported at {location}"
+            'crm': "Warning sent to customer for {{domain}}. {{type}} content reported at {{location}} {}".format
+            (support_doc)
         },
         'suspension': {
-            'crm': "{{domain}} suspended. {{type}} content still present at {{location}}. {}".format(requires_dcu)
+            'crm': "{{domain}} suspended. {{type}} content still present at {{location}} {}".format(support_doc)
         },
         'intentionallyMalicious': {
-            'crm': "{{domain}} suspended for intentional {{type}} at {{location}}. {}".format(requires_dcu)
+            'crm': "{{domain}} suspended for intentional {{type}} at {{location}} {}".format(support_doc)
         }
     },
     'journal': {
