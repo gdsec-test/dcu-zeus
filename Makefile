@@ -2,6 +2,7 @@ REPONAME=infosec-dcu/zeus
 BUILDROOT=$(HOME)/dockerbuild/$(REPONAME)
 DOCKERREPO=docker-dcu-local.artifactory.secureserver.net/zeus
 DATE=$(shell date)
+SHELL=/bin/bash
 
 # libraries we need to stage for pip to install inside Docker build
 PRIVATE_PIPS=git@github.secureserver.net:ITSecurity/dcdatabase.git \
