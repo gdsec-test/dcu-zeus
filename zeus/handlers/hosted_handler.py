@@ -52,18 +52,24 @@ class HostedHandler:
                                           '24hr_notice_sent')
 
         report_type, guid, shopper_id = self._validate_required_args(data)
-        if not report_type:  # If any of these were invalid, all values returned as None
+
+        if not shopper_id:
+            return False
+
+        # Since we have a shopper_id, try to send the warning email, even if guid or report_type was not found
+        if not self.hosted_mailer.send_hosted_warning(ticket_id, domain, shopper_id, source):
+            self.slack.failed_sending_email(domain)
+            return False
+
+        if not guid or not report_type:
             return False
 
         self.journal.write(EventTypes.customer_warning, product, domain, report_type,
                            note_mappings['journal']['customerWarning'], [source])
 
         self.mimir.write(InfractionTypes.customer_warning, shopper_id, ticket_id, domain, guid)
-
         self.scribe.customer_warning(ticket_id, guid, source, report_type, shopper_id)
-        if not self.hosted_mailer.send_hosted_warning(ticket_id, domain, shopper_id, source):
-            self.slack.failed_sending_email(domain)
-            return False
+
         return True
 
     def intentionally_malicious(self, data):
@@ -73,7 +79,7 @@ class HostedHandler:
         product = get_host_info_from_dict(data).get('product')
 
         report_type, guid, shopper_id = self._validate_required_args(data)
-        if not report_type:  # If any of these were invalid, all values returned as None
+        if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
             return False
 
         if not self.hosting_service.can_suspend_hosting_product(guid):
@@ -99,7 +105,7 @@ class HostedHandler:
         product = get_host_info_from_dict(data).get('product')
 
         report_type, guid, shopper_id = self._validate_required_args(data)
-        if not report_type:  # If any of these were invalid, all values returned as None
+        if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
             return False
 
         if not self.hosting_service.can_suspend_hosting_product(guid):
@@ -142,6 +148,4 @@ class HostedHandler:
             self.slack.failed_to_determine_guid(ticket_id)
         elif not shopper_id:
             self.slack.failed_to_determine_shoppers(ticket_id)
-        else:
-            return report_type, guid, shopper_id
-        return None, None, None
+        return report_type, guid, shopper_id

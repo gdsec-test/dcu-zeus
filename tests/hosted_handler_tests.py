@@ -12,10 +12,13 @@ from zeus.utils.slack import SlackFailures
 
 
 class TestHostedHandler:
-    ticket_no_guid = {'type': 'PHISHING'}
-    ticket_no_shopper = {'type': 'PHISHING', 'data': {'domainQuery': {'host': {'guid': 'test-guid'}}}}
-    ticket_valid = {'type': 'PHISHING',
-                    'data': {'domainQuery': {'host': {'guid': 'test-guid', 'shopperId': 'test-id'}}}}
+    phishing = 'PHISHING'
+    guid = 'test-guid'
+    sid = 'test-id'
+    ticket_no_guid = {'type': phishing}
+    ticket_no_shopper = {'type': phishing, 'data': {'domainQuery': {'host': {'guid': guid}}}}
+    ticket_valid = {'type': phishing,
+                    'data': {'domainQuery': {'host': {'guid': guid, 'shopperId': sid}}}}
 
     @classmethod
     def setup(cls):
@@ -30,14 +33,14 @@ class TestHostedHandler:
 
     @patch.object(SlackFailures, 'failed_to_determine_guid', return_value=None)
     def test_validate_required_args_no_guid(self, failed_to_determine_guid):
-        assert_equal((None, None, None), self._hosted._validate_required_args(self.ticket_no_guid))
+        assert_equal((self.phishing, None, None), self._hosted._validate_required_args(self.ticket_no_guid))
 
     @patch.object(SlackFailures, 'failed_to_determine_shoppers', return_value=None)
     def test_validate_required_args_no_shopper(self, failed_to_determine_shoppers):
-        assert_equal((None, None, None), self._hosted._validate_required_args(self.ticket_no_shopper))
+        assert_equal((self.phishing, self.guid, None), self._hosted._validate_required_args(self.ticket_no_shopper))
 
     def test_validate_required(self):
-        assert_equal(('PHISHING', 'test-guid', 'test-id'), self._hosted._validate_required_args(self.ticket_valid))
+        assert_equal((self.phishing, self.guid, self.sid), self._hosted._validate_required_args(self.ticket_valid))
 
     @patch.object(BasicReview, 'place_in_review', return_value=None)
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
