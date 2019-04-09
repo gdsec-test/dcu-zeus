@@ -7,6 +7,7 @@ from zeus.events.suspension.hosting_service import ThrottledHostingService
 from zeus.handlers.hosted_handler import HostedHandler
 from zeus.reviews.reviews import BasicReview
 from zeus.utils.journal import Journal
+from zeus.utils.mimir import Mimir
 from zeus.utils.scribe import HostedScribe
 from zeus.utils.slack import SlackFailures
 
@@ -54,10 +55,12 @@ class TestHostedHandler:
     def test_customer_warning_failed_registrant_warning(self, review, scribe, slack, mailer):
         assert_false(self._hosted.customer_warning(self.ticket_valid))
 
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedMailer, 'send_hosted_warning', return_value=True)
     @patch.object(HostedScribe, 'customer_warning', return_value=None)
     @patch.object(BasicReview, 'place_in_review', return_value=None)
-    def test_customer_warning_success(self, review, slack, mailer):
+    def test_customer_warning_success(self, review, scribe, mailer, journal, mimir):
         assert_true(self._hosted.customer_warning(self.ticket_valid))
 
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
@@ -68,19 +71,22 @@ class TestHostedHandler:
     def test_intentionally_malicious_already_suspended(self, can_suspend):
         assert_false(self._hosted.intentionally_malicious(self.ticket_valid))
 
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=False)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
-    def test_intentionally_malicious_failed_shopper_email(self, can_suspend, scribe, slack, mailer):
+    def test_intentionally_malicious_failed_shopper_email(self, can_suspend, scribe, slack, mailer, journal, mimir):
         assert_false(self._hosted.intentionally_malicious(self.ticket_valid))
 
+    @patch.object(Mimir, 'write', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=True)
     @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
-    def test_intentionally_malicious_success(self, can_suspend, scribe, mailer, suspend, journal):
+    def test_intentionally_malicious_success(self, can_suspend, scribe, mailer, suspend, journal, mimir):
         assert_true(self._hosted.intentionally_malicious(self.ticket_valid))
 
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
@@ -91,18 +97,22 @@ class TestHostedHandler:
     def test_suspend_already_suspended(self, can_suspend):
         assert_false(self._hosted.suspend(self.ticket_valid))
 
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedMailer, 'send_shopper_hosted_suspension', return_value=False)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(HostedScribe, 'suspension', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
-    def test_suspend_failed_shopper_email(self, can_suspend, scribe, slack, mailer):
+    def test_suspend_failed_shopper_email(self, can_suspend, scribe, slack, mailer, journal, mimir):
         assert_false(self._hosted.suspend(self.ticket_valid))
 
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_shopper_hosted_suspension', return_value=True)
     @patch.object(HostedScribe, 'suspension', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
-    def test_suspend_success(self, can_suspend, scribe, mailer, handler):
+    def test_suspend_success(self, can_suspend, scribe, mailer, handler, journal, mimir):
         assert_true(self._hosted.suspend(self.ticket_valid))
 
     @patch.object(SlackFailures, 'failed_hosting_suspension', return_value=None)
