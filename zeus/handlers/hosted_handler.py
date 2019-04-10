@@ -92,6 +92,7 @@ class HostedHandler:
         self.mimir.write(InfractionTypes.intentionally_malicious, shopper_id, ticket_id, domain, guid)
 
         self.scribe.intentionally_malicious(ticket_id, guid, source, report_type, shopper_id)
+
         if not self.hosted_mailer.send_shopper_hosted_intentional_suspension(ticket_id, domain, shopper_id, report_type):
             self.slack.failed_sending_email(domain)
             return False

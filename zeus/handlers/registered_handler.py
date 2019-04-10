@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from zeus.events.email.foreign_mailer import ForeignMailer
 from zeus.events.email.fraud_mailer import FraudMailer
 from zeus.events.email.registered_mailer import RegisteredMailer
+from zeus.events.email.ssl_mailer import SSLMailer
 from zeus.events.support_tools.constants import note_mappings
 from zeus.events.support_tools.crm import ThrottledCRM
 from zeus.events.suspension.domains import ThrottledDomainService
@@ -14,7 +15,8 @@ from zeus.utils.functions import (get_domain_id_from_dict,
                                   get_host_brand_from_dict,
                                   get_host_info_from_dict,
                                   get_list_of_ids_to_notify,
-                                  get_shopper_id_from_dict)
+                                  get_shopper_id_from_dict,
+                                  get_ssl_subscriptions_from_dict)
 from zeus.utils.journal import EventTypes, Journal
 from zeus.utils.slack import SlackFailures, ThrottledSlack
 
@@ -30,6 +32,7 @@ class RegisteredHandler(Handler):
         self.registered_mailer = RegisteredMailer(app_settings)
         self.fraud_mailer = FraudMailer(app_settings)
         self.foreign_mailer = ForeignMailer(app_settings)
+        self.ssl_mailer = SSLMailer(app_settings)
 
         self.domain_service = ThrottledDomainService(app_settings)
         self.crm = ThrottledCRM(app_settings)
@@ -106,6 +109,9 @@ class RegisteredHandler(Handler):
                            note_mappings['journal']['intentionallyMalicious'], [source])
 
         self.fraud_mailer.send_malicious_domain_notification(ticket_id, domain, shopper_id, report_type, source, target)
+
+        self.ssl_mailer.send_revocation_email(ticket_id, domain, shopper_id, get_ssl_subscriptions_from_dict(data))
+
         if not self.registered_mailer.send_shopper_intentional_suspension(ticket_id, domain, domain_id, shopper_id_list,
                                                                           report_type):
             self.slack.failed_sending_email(domain)

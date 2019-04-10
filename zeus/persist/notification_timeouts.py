@@ -90,3 +90,10 @@ class Throttle(object):
             self._set_anti_spam_key(key)
             return True
         return False
+
+    def can_ssl_revocation_email_be_sent(self, domain):
+        ssl_cert_key = 'ssl_revocation_{}'.format(domain)
+        if not self._get_anti_spam_key(ssl_cert_key):
+            self._set_anti_spam_key(ssl_cert_key)
+            return True
+        return False

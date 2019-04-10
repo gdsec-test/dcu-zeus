@@ -120,3 +120,8 @@ def get_list_of_ids_to_notify(data):
     else:
         account_number_list = parent_child_list
     return account_number_list
+
+
+def get_ssl_subscriptions_from_dict(data):
+    # Return the ssl subscription information associated with the account
+    return _get_domain_query(data).get('sslSubscriptions', [])
