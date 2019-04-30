@@ -79,6 +79,10 @@ spec:
             value: /zeus_certs/tls.crt
           - name: ZEUS_SSL_KEY
             value: /zeus_certs/tls.key
+          - name: ORION_SSL_CERT
+            value: /ecomm_certs/tls.crt
+          - name: ORION_SSL_KEY
+            value: /ecomm_certs/tls.key
 
           volumeMounts:
           - name: encryption-keys
@@ -92,6 +96,9 @@ spec:
             readOnly: true
           - name: tls-zeus-files
             mountPath: /zeus_certs
+            readOnly: true
+          - name: tls-ecomm-files
+            mountPath: /ecomm_certs
             readOnly: true
 
         -
@@ -119,3 +126,6 @@ spec:
         - name: tls-zeus-files
           secret:
             secretName: tls-zeus
+        - name: tls-ecomm-files
+          secret:
+            secretName: tls-ecomm
