@@ -2,8 +2,8 @@
 support_doc = "See http://x.co/dcuwhat2do for more info."
 
 # NETVIO defined here for readability
-CONTENT_REMOVED = "{ticket_id} - {guid} was found to have {type} content at {location}\n" \
-                  "The following files/directories have been removed:\n{content_removed}"
+CONTENT_REMOVED = "{{ticket_id}} - {{guid}} was found to have {{type}} content at:\n{{location}}\n" \
+                  "The files/directories provided have been removed and/or disabled.\n{}".format(support_doc)
 SUSPENSION = "{{ticket_id}} - {{guid}} has been suspended by DCU-Eng; " \
              "{{type}} content at {{location}}\n{}".format(support_doc)
 INTENTIONALLY_MALICIOUS = "{{ticket_id}}: hosting {{guid}} suspended for intentional " \
@@ -21,7 +21,7 @@ note_mappings = {
         },
         'contentRemoved': {
             'netvio': CONTENT_REMOVED,
-            'crm': "{type} content removed from hosting {guid} at {location}"
+            'crm': "{{type}} content removed and/or disabled from hosting {{guid}} at {{location}} {}".format(support_doc)
         },
         'suspension': {
             'netvio': SUSPENSION,
