@@ -26,7 +26,7 @@ class SSLMailer(Mailer):
         :param ssl_subscriptions
         :return:
         """
-        template = 'smtp.ssl_revocation'
+        template = 'ssl.revocation'
         cert_template = 'Common Name: {certCommonName}, Created Date: {createdAt}, Expiration Date: {expiresAt}\n'
 
         message_type = 'cert_authority_ssl_revocation'

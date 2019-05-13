@@ -1,7 +1,7 @@
 import logging
 
 import mongomock
-from hermes.exceptions import OCMException
+from hermes.exceptions import SMTPException
 from mock import patch
 from mockredis import mock_redis_client
 from nose.tools import assert_false, assert_true
@@ -28,50 +28,50 @@ class TestFraudMailer:
 
     ''' New Domain Tests '''
 
-    @patch('zeus.events.email.fraud_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.fraud_mailer.send_mail', return_value='SUCCESS')
     def test_send_fraud_new_domain_notification(self, send_mail):
         assert_true(self._mailer.send_new_domain_notification(None, None, None, None, None, 'test-source', None))
 
-    @patch('hermes.messenger.send_mail', side_effect=OCMException())
+    @patch('zeus.events.email.fraud_mailer.send_mail', side_effect=SMTPException())
     def test_send_fraud_new_domain_notification_exception(self, send_mail):
         assert_false(self._mailer.send_new_domain_notification(None, None, None, None, None, 'test-source', None))
 
     ''' New Shopper Tests '''
 
-    @patch('zeus.events.email.fraud_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.fraud_mailer.send_mail', return_value='SUCCESS')
     def test_send_fraud_new_shopper_notification(self, send_mail):
         assert_true(self._mailer.send_new_shopper_notification(None, None, None, None, None, 'test-source', None))
 
-    @patch('hermes.messenger.send_mail', side_effect=OCMException())
+    @patch('zeus.events.email.fraud_mailer.send_mail', side_effect=SMTPException())
     def test_send_fraud_new_shopper_notification_exception(self, send_mail):
         assert_false(self._mailer.send_new_shopper_notification(None, None, None, None, None, 'test-source', None))
 
     ''' Malicious Notification Tests '''
 
-    @patch('zeus.events.email.fraud_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.fraud_mailer.send_mail', return_value='SUCCESS')
     def test_send_malicious_notification(self, send_mail):
         assert_true(self._mailer.send_malicious_domain_notification(None, None, None, None, 'test-source', None))
 
-    @patch('hermes.messenger.send_mail', side_effect=OCMException())
+    @patch('zeus.events.email.fraud_mailer.send_mail', side_effect=SMTPException())
     def test_send_malicious_notification_exception(self, send_mail):
         assert_false(self._mailer.send_malicious_domain_notification(None, None, None, None, 'test-source', None))
 
     ''' New Hosting Account Tests '''
 
-    @patch('zeus.events.email.fraud_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.fraud_mailer.send_mail', return_value='SUCCESS')
     def test_send_new_hosting_account_notification(self, send_mail):
         assert_true(self._mailer.send_new_hosting_account_notification(None, None, None, None, None, 'test-source', None))
 
-    @patch('hermes.messenger.send_mail', side_effect=OCMException())
+    @patch('zeus.events.email.fraud_mailer.send_mail', side_effect=SMTPException())
     def test_send_new_hosting_account_notification_exception(self, send_mail):
         assert_false(self._mailer.send_new_hosting_account_notification(None, None, None, None, None, 'test-source', None))
 
     ''' Malicious Hosting Notification '''
 
-    @patch('zeus.events.email.fraud_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.fraud_mailer.send_mail', return_value='SUCCESS')
     def test_send_malicious_hosting_notification(self, send_mail):
         assert_true(self._mailer.send_malicious_hosting_notification(None, None, None, None, 'test-source', None, None))
 
-    @patch('hermes.messenger.send_mail', side_effect=OCMException())
+    @patch('zeus.events.email.fraud_mailer.send_mail', side_effect=SMTPException())
     def test_send_malicious_hosting_notification_exception(self, send_mail):
         assert_false(self._mailer.send_malicious_hosting_notification(None, None, None, None, 'test-source', None, None))

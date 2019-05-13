@@ -2,7 +2,6 @@ import logging
 
 import mongomock
 from hermes.exceptions import InvalidEmailRecipientException
-from hermes.mailers.interface import SMTP
 from mock import patch
 from mockredis import mock_redis_client
 from nose.tools import assert_false, assert_true
@@ -28,7 +27,7 @@ class TestSSLMailer:
         logging.basicConfig()
         logging.getLogger().addHandler(MongoLogFactory(level=UEVENT, basic_config=True))
 
-    @patch('hermes.mailers.interface.SMTP.send_mail', return_value='SUCCESS')
+    @patch('zeus.events.email.ssl_mailer.send_mail', return_value='SUCCESS')
     def test_send_ssl_revocation_success(self, send_mail):
         assert_true(self._mailer.send_revocation_email('DCU123', 'abc.com', '1234',
                                                        [{'certCommonName': '*.abc.com',
@@ -41,7 +40,7 @@ class TestSSLMailer:
                                                          'expiresAt': '2019-10-28'}
                                                         ]))
 
-    @patch.object(SMTP, 'send_mail', side_effect=InvalidEmailRecipientException())
+    @patch('zeus.events.email.ssl_mailer.send_mail', side_effect=InvalidEmailRecipientException())
     def test_send_ssl_revocation_invalid_recipient_exception(self, send_mail):
         assert_false(self._mailer.send_revocation_email('DCU123', 'abc.com',
                                                         '1234', [{'certCommonName': '*.abc.com',

@@ -6,19 +6,17 @@ from settings import config_by_name
 from zeus.events.email.interface import Mailer
 from zeus.events.user_logging.events import generate_event
 from zeus.persist.notification_timeouts import Throttle
-from zeus.utils.functions import sanitize_url
 
 
 class FraudMailer(Mailer):
-    fraud_email = [{'email': 'ccinquiries@godaddy.com'}]  # Updated from verifypayment@ (requested by Sarah Neiswonger)
+    fraud_email = ['ccinquiries@godaddy.com']  # Updated from verifypayment@ (requested by Sarah Neiswonger)
     RECIPIENTS = 'recipients'
 
     def __init__(self, app_settings):
         super(FraudMailer, self).__init__(app_settings)
         self._logger = logging.getLogger(__name__)
         self._throttle = Throttle(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)
-        self.testing_email_address = [
-            {'email': config_by_name[self.env].NON_PROD_EMAIL_ADDRESS}] if self.env != 'prod' else []
+        self.testing_email_address = [config_by_name[self.env].NON_PROD_EMAIL_ADDRESS] if self.env != 'prod' else []
 
     def send_new_domain_notification(self, ticket_id, domain, shopper_id, domain_create_date, report_type, source,
                                      target):
@@ -48,12 +46,11 @@ class FraudMailer(Mailer):
                                        'DOMAIN': domain,
                                        'MALICIOUS_ACTIVITY': report_type,
                                        'BRAND_TARGETED': target or 'Unknown Brand',
-                                       'SANITIZED_URL': sanitize_url(source)}
+                                       'URL': source}
 
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
-                resp = send_mail(template, substitution_values, **kwargs)
-                resp.update({'type': message_type, 'template': 3716})
-                generate_event(ticket_id, success_message, **resp)
+                send_mail(template, substitution_values, **kwargs)
+                generate_event(ticket_id, success_message)
         except Exception as e:
             self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
@@ -88,12 +85,11 @@ class FraudMailer(Mailer):
                                        'DOMAIN': domain,
                                        'MALICIOUS_ACTIVITY': report_type,
                                        'BRAND_TARGETED': target or 'Unknown Brand',
-                                       'SANITIZED_URL': sanitize_url(source)}
+                                       'URL': source}
 
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
-                resp = send_mail(template, substitution_values, **kwargs)
-                resp.update({'type': message_type, 'template': 3693})
-                generate_event(ticket_id, success_message, **resp)
+                send_mail(template, substitution_values, **kwargs)
+                generate_event(ticket_id, success_message)
         except Exception as e:
             self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
@@ -125,12 +121,11 @@ class FraudMailer(Mailer):
                                        'DOMAIN': domain,
                                        'MALICIOUS_ACTIVITY': report_type,
                                        'BRAND_TARGETED': target or 'Unknown Brand',
-                                       'SANITIZED_URL': sanitize_url(source)}
+                                       'URL': source}
 
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
-                resp = send_mail(template, substitution_values, **kwargs)
-                resp.update({'type': message_type, 'template': 3694})
-                generate_event(ticket_id, success_message, **resp)
+                send_mail(template, substitution_values, **kwargs)
+                generate_event(ticket_id, success_message)
         except Exception as e:
             self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
@@ -166,12 +161,11 @@ class FraudMailer(Mailer):
                                        'DOMAIN': domain,
                                        'MALICIOUS_ACTIVITY': report_type,
                                        'BRAND_TARGETED': target or 'Unknown Brand',
-                                       'SANITIZED_URL': sanitize_url(source)}
+                                       'URL': source}
 
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
-                resp = send_mail(template, substitution_values, **kwargs)
-                resp.update({'type': message_type, 'template': 3693})
-                generate_event(ticket_id, success_message, **resp)
+                send_mail(template, substitution_values, **kwargs)
+                generate_event(ticket_id, success_message)
         except Exception as e:
             self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
@@ -205,12 +199,11 @@ class FraudMailer(Mailer):
                                        'DOMAIN': guid,  # Template requires DOMAIN param
                                        'MALICIOUS_ACTIVITY': report_type,
                                        'BRAND_TARGETED': target or 'Unknown Brand',
-                                       'SANITIZED_URL': sanitize_url(source)}
+                                       'URL': source}
 
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
-                resp = send_mail(template, substitution_values, **kwargs)
-                resp.update({'type': message_type, 'template': 3694})
-                generate_event(ticket_id, success_message, **resp)
+                send_mail(template, substitution_values, **kwargs)
+                generate_event(ticket_id, success_message)
         except Exception as e:
             self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
