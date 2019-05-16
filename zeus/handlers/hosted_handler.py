@@ -11,6 +11,7 @@ from zeus.utils.functions import (get_host_info_from_dict,
 from zeus.utils.journal import EventTypes, Journal
 from zeus.utils.mimir import InfractionTypes, Mimir
 from zeus.utils.scribe import HostedScribe
+from zeus.utils.shoplocked import Shoplocked
 from zeus.utils.slack import SlackFailures, ThrottledSlack
 
 
@@ -27,6 +28,7 @@ class HostedHandler:
         self.journal = Journal(app_settings)
         self.mimir = Mimir(app_settings)
         self.slack = SlackFailures(ThrottledSlack(app_settings))
+        self.shoplocked = Shoplocked(app_settings)
 
         self.basic_review = BasicReview(app_settings)
         self.HOLD_TIME = app_settings.HOLD_TIME
@@ -96,6 +98,8 @@ class HostedHandler:
         if not self.hosted_mailer.send_shopper_hosted_intentional_suspension(ticket_id, domain, shopper_id, report_type):
             self.slack.failed_sending_email(domain)
             return False
+
+        self.shoplocked.adminlock(shopper_id, note_mappings['hosted']['intentionallyMalicious']['shoplocked'])
 
         return self._suspend_product(data, guid, product)
 

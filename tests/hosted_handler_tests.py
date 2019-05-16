@@ -9,6 +9,7 @@ from zeus.reviews.reviews import BasicReview
 from zeus.utils.journal import Journal
 from zeus.utils.mimir import Mimir
 from zeus.utils.scribe import HostedScribe
+from zeus.utils.shoplocked import Shoplocked
 from zeus.utils.slack import SlackFailures
 
 
@@ -71,22 +72,24 @@ class TestHostedHandler:
     def test_intentionally_malicious_already_suspended(self, can_suspend):
         assert_false(self._hosted.intentionally_malicious(self.ticket_valid))
 
+    @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=False)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
-    def test_intentionally_malicious_failed_shopper_email(self, can_suspend, scribe, slack, mailer, journal, mimir):
+    def test_intentionally_malicious_failed_shopper_email(self, can_suspend, scribe, slack, mailer, journal, mimir, shoplocked):
         assert_false(self._hosted.intentionally_malicious(self.ticket_valid))
 
+    @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=True)
     @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
-    def test_intentionally_malicious_success(self, can_suspend, scribe, mailer, suspend, journal, mimir):
+    def test_intentionally_malicious_success(self, can_suspend, scribe, mailer, suspend, journal, mimir, shoplocked):
         assert_true(self._hosted.intentionally_malicious(self.ticket_valid))
 
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)

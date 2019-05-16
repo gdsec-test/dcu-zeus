@@ -12,6 +12,10 @@ CUSTOMER_WARNING = "{{ticket_id}} - {{guid}} has {{type}} content at {{location}
                    "been given a 24hr warning to remove any and all malicious content or their services " \
                    "will be suspended.\n{}".format(support_doc)
 
+# SHOPLOCKED CRM notes for Admin Locked accounts
+INTENTIONALLY_MALICIOUS_ADMINLOCK = "Account locked for abuse. Do not unlock the account. The customer can email the " \
+                                    "Digital Crimes Unit at hostsec@, if they have questions."
+
 note_mappings = {
     'hosted': {
         'customerWarning': {
@@ -29,7 +33,8 @@ note_mappings = {
         },
         'intentionallyMalicious': {
             'netvio': INTENTIONALLY_MALICIOUS,
-            'crm': "Hosting {{guid}} suspended for intentional {{type}} at {{location}} {}".format(support_doc)
+            'crm': "Hosting {{guid}} suspended for intentional {{type}} at {{location}} {}".format(support_doc),
+            'shoplocked': INTENTIONALLY_MALICIOUS_ADMINLOCK
         }
     },
     'registered': {
@@ -41,7 +46,8 @@ note_mappings = {
             'crm': "{{domain}} suspended. {{type}} content still present at {{location}} {}".format(support_doc)
         },
         'intentionallyMalicious': {
-            'crm': "{{domain}} suspended for intentional {{type}} at {{location}} {}".format(support_doc)
+            'crm': "{{domain}} suspended for intentional {{type}} at {{location}} {}".format(support_doc),
+            'shoplocked': INTENTIONALLY_MALICIOUS_ADMINLOCK
         }
     },
     'journal': {

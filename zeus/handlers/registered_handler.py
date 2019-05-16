@@ -18,6 +18,7 @@ from zeus.utils.functions import (get_domain_id_from_dict,
                                   get_shopper_id_from_dict,
                                   get_ssl_subscriptions_from_dict)
 from zeus.utils.journal import EventTypes, Journal
+from zeus.utils.shoplocked import Shoplocked
 from zeus.utils.slack import SlackFailures, ThrottledSlack
 
 
@@ -38,6 +39,7 @@ class RegisteredHandler(Handler):
         self.crm = ThrottledCRM(app_settings)
         self.journal = Journal(app_settings)
         self.slack = SlackFailures(ThrottledSlack(app_settings))
+        self.shoplocked = Shoplocked(app_settings)
 
         self.basic_review = BasicReview(app_settings)
         self.HOLD_TIME = app_settings.HOLD_TIME
@@ -116,6 +118,8 @@ class RegisteredHandler(Handler):
                                                                           report_type):
             self.slack.failed_sending_email(domain)
             return False
+
+        self.shoplocked.adminlock(shopper_id, note_mappings['registered']['intentionallyMalicious']['shoplocked'])
 
         return self._suspend_domain(domain, ticket_id, note)
 
