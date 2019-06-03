@@ -35,6 +35,7 @@ class HostedHandler:
 
         self.mapping = {
             'customer_warning': self.customer_warning,
+            'content_removed': self.content_removed,
             'intentionally_malicious': self.intentionally_malicious,
             'suspend': self.suspend
         }
@@ -71,6 +72,29 @@ class HostedHandler:
 
         self.mimir.write(InfractionTypes.customer_warning, shopper_id, ticket_id, domain, guid)
         self.scribe.customer_warning(ticket_id, guid, source, report_type, shopper_id)
+
+        return True
+
+    def content_removed(self, data):
+        domain = data.get('sourceDomainOrIp')
+        source = data.get('source')
+        ticket_id = data.get('ticketId')
+
+        report_type, guid, shopper_id = self._validate_required_args(data)
+
+        if not shopper_id:
+            return False
+
+        # Since we have a shopper_id, try to send the notification email, even if guid or report_type was not found
+        if not self.hosted_mailer.send_content_removed(ticket_id, domain, shopper_id, source):
+            self.slack.failed_sending_email(domain)
+            return False
+
+        if not guid or not report_type:
+            return False
+
+        self.mimir.write(InfractionTypes.content_removed, shopper_id, ticket_id, domain, guid)
+        self.scribe.content_removed(ticket_id, guid, source, report_type, shopper_id)
 
         return True
 

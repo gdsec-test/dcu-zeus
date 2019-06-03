@@ -9,6 +9,7 @@ from zeus.utils.slack import SlackFailures, ThrottledSlack
 
 class InfractionTypes(Enum):
     customer_warning = 'CUSTOMER_WARNING'
+    content_removed = 'CONTENT_REMOVED'
     intentionally_malicious = 'INTENTIONALLY_MALICIOUS'
     suspended = 'SUSPENDED'
 

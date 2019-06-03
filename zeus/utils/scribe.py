@@ -48,14 +48,13 @@ class HostedScribe:
             return False
         return True
 
-    def content_removed(self, ticket, guid, url, report_type, shopper_id, content_removed):
+    def content_removed(self, ticket, guid, url, report_type, shopper_id):
         crm_note = note_mappings['hosted']['contentRemoved']['crm'].format(guid=guid, type=report_type, location=url)
         self.crm.notate_crm_account(shopper_id, ticket, crm_note)
 
         netvio_note = note_mappings['hosted']['contentRemoved']['netvio'].format(ticket_id=ticket, guid=guid,
                                                                                  type=report_type,
-                                                                                 location=url,
-                                                                                 content_removed=content_removed)
+                                                                                 location=url)
         if not self.netvio.create_ticket(shopper_id, guid, report_type, netvio_note):
             self.slack.failed_netvio_creation(guid)
             return False

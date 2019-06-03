@@ -56,11 +56,11 @@ class TestHostedScribe:
     @patch.object(ThrottledNetvio, 'create_ticket', return_value=False)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     def test_content_removed_fail(self, notate_crm_account, create_ticket, failed_netvio_creation):
-        actual = self._scribe.content_removed('test-ticket', 'test-guid', 'url', 'report-type', 'shopper-id', 'removed')
+        actual = self._scribe.content_removed('test-ticket', 'test-guid', 'url', 'report-type', 'shopper-id')
         assert_false(actual)
 
     @patch.object(ThrottledNetvio, 'create_ticket', return_value=True)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     def test_content_removed_success(self, notate_crm_account, create_ticket):
-        actual = self._scribe.content_removed('test-ticket', 'test-guid', 'url', 'report-type', 'shopper-id', 'removed')
+        actual = self._scribe.content_removed('test-ticket', 'test-guid', 'url', 'report-type', 'shopper-id')
         assert_true(actual)

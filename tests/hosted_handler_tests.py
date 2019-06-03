@@ -65,6 +65,23 @@ class TestHostedHandler:
         assert_true(self._hosted.customer_warning(self.ticket_valid))
 
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
+    def test_content_removed_none(self, invalid_abuse_type):
+        assert_false(self._hosted.content_removed({}))
+
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(HostedMailer, 'send_content_removed', return_value=False)
+    @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
+    @patch.object(HostedScribe, 'content_removed', return_value=None)
+    def test_content_removed_failed_shopper_email(self, scribe, slack, mailer, mimir):
+        assert_false(self._hosted.content_removed(self.ticket_valid))
+
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(HostedMailer, 'send_content_removed', return_value=True)
+    @patch.object(HostedScribe, 'content_removed', return_value=None)
+    def test_content_removed_success(self, scribe, mailer, mimir):
+        assert_true(self._hosted.content_removed(self.ticket_valid))
+
+    @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
     def test_intentionally_malicious_none(self, invalid_abuse_type):
         assert_false(self._hosted.intentionally_malicious({}))
 
