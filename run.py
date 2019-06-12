@@ -108,3 +108,9 @@ def suspend(ticket_id):
 def content_removed(ticket_id):
     data = get_database_handle().get_incident(ticket_id)
     return route_request(data, 'content_removed') if data else None
+
+
+@celery.task()
+def extensive_compromise(ticket_id):
+    data = get_database_handle().get_incident(ticket_id)
+    return route_request(data, 'extensive_compromise') if data else None

@@ -59,3 +59,8 @@ class HostedScribe:
             self.slack.failed_netvio_creation(guid)
             return False
         return True
+
+    def extensive_compromise(self, ticket, guid, url, report_type, shopper_id):
+        crm_note = note_mappings['hosted']['extensiveCompromise']['crm'].format(guid=guid, type=report_type, location=url)
+        self.crm.notate_crm_account(shopper_id, ticket, crm_note)
+        return True

@@ -37,7 +37,8 @@ class HostedHandler:
             'customer_warning': self.customer_warning,
             'content_removed': self.content_removed,
             'intentionally_malicious': self.intentionally_malicious,
-            'suspend': self.suspend
+            'suspend': self.suspend,
+            'extensive_compromise': self.extensive_compromise
         }
 
     def process(self, data, request_type):
@@ -148,6 +149,32 @@ class HostedHandler:
 
         self.scribe.suspension(ticket_id, guid, source, report_type, shopper_id)
         if not self.hosted_mailer.send_shopper_hosted_suspension(ticket_id, domain, shopper_id, source):
+            self.slack.failed_sending_email(domain)
+            return False
+
+        return self._suspend_product(data, guid, product)
+
+    def extensive_compromise(self, data):
+        domain = data.get('sourceDomainOrIp')
+        source = data.get('source')
+        ticket_id = data.get('ticketId')
+        product = get_host_info_from_dict(data).get('product')
+
+        report_type, guid, shopper_id = self._validate_required_args(data)
+        if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
+            return False
+
+        if not self.hosting_service.can_suspend_hosting_product(guid):
+            self._logger.info("Hosting {} already suspended".format(guid))
+            return False
+
+        self.journal.write(EventTypes.product_suspension, product, domain, report_type,
+                           note_mappings['journal']['extensiveCompromise'], [source])
+
+        self.mimir.write(InfractionTypes.extensive_compromise, shopper_id, ticket_id, domain, guid)
+
+        self.scribe.extensive_compromise(ticket_id, guid, source, report_type, shopper_id)
+        if not self.hosted_mailer.send_extensive_compromise(ticket_id, domain, shopper_id):
             self.slack.failed_sending_email(domain)
             return False
 

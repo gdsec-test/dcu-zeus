@@ -143,3 +143,29 @@ class TestHostedHandler:
     @patch.object(ThrottledHostingService, 'suspend_hosting', return_value=True)
     def test_suspend_product_success(self, suspend):
         assert_true(self._hosted._suspend_product({}, '', 'test-product'))
+
+    @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
+    def test_extensive_compromise_none(self, invalid_abuse_type):
+        assert_false(self._hosted.extensive_compromise({}))
+
+    @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=False)
+    def test_extensive_compromise_already_suspended(self, can_suspend):
+        assert_false(self._hosted.extensive_compromise(self.ticket_valid))
+
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(HostedMailer, 'send_extensive_compromise', return_value=False)
+    @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
+    @patch.object(HostedScribe, 'extensive_compromise', return_value=None)
+    @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
+    def test_extensive_compromise_failed_shopper_email(self, can_suspend, scribe, slack, mailer, journal, mimir):
+        assert_false(self._hosted.extensive_compromise(self.ticket_valid))
+
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(HostedHandler, '_suspend_product', return_value=True)
+    @patch.object(HostedMailer, 'send_extensive_compromise', return_value=True)
+    @patch.object(HostedScribe, 'extensive_compromise', return_value=None)
+    @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
+    def test_extensive_compromise_success(self, can_suspend, scribe, mailer, suspend, journal, mimir):
+        assert_true(self._hosted.extensive_compromise(self.ticket_valid))

@@ -64,3 +64,7 @@ class TestHostedScribe:
     def test_content_removed_success(self, notate_crm_account, create_ticket):
         actual = self._scribe.content_removed('test-ticket', 'test-guid', 'url', 'report-type', 'shopper-id')
         assert_true(actual)
+
+    @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
+    def test_extensive_compromise_success(self, notate_crm_account):
+        assert_true(self._scribe.extensive_compromise('test-ticket', 'test-guid', 'url', 'report-type', 'shopper-id'))

@@ -151,3 +151,36 @@ class HostedMailer(Mailer):
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
+
+    def send_extensive_compromise(self, ticket_id, domain, shopper_id):
+        """
+        Sends a notification to the shopper account email address found for the hosting account regarding
+        action taken due to extensive compromise
+        :param ticket_id:
+        :param domain:
+        :param shopper_id:
+        :return:
+        """
+        template = "hosted.extensive_compromise"
+
+        message_type = "hosted_extensive_compromise"
+        exception_type = "hosted_extensive_compromise_email_exception"
+        success_message = "hosted_extensive_compromise_email_sent"
+
+        redis_key = "{}_extensive_compromise".format(domain)
+
+        try:
+            if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
+                substitution_values = {'ACCOUNT_NUMBER': shopper_id,
+                                       'DOMAIN': domain}
+
+                resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
+                resp.update({'type': message_type, 'template': 4809})
+                generate_event(ticket_id, success_message, **resp)
+            else:
+                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+        except Exception as e:
+            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            generate_event(ticket_id, exception_type, type=message_type)
+            return False
+        return True

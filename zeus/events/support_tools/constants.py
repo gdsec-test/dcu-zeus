@@ -35,6 +35,9 @@ note_mappings = {
             'netvio': INTENTIONALLY_MALICIOUS,
             'crm': "Hosting {{guid}} suspended for intentional {{type}} at {{location}} {}".format(support_doc),
             'shoplocked': INTENTIONALLY_MALICIOUS_ADMINLOCK
+        },
+        'extensiveCompromise': {
+            'crm': "Hosting {{guid}} suspended due to extensive compromise. {{type}} content reported at {{location}} {}".format(support_doc)
         }
     },
     'registered': {
@@ -53,6 +56,7 @@ note_mappings = {
     'journal': {
         'customerWarning': "Customer should remove abusive content associated with incident.",
         'intentionallyMalicious': "Customer engaged in suspected intentionally malicious behavior.",
-        'suspension': "Customer failed to resolve incident within provided time period."
+        'suspension': "Customer failed to resolve incident within provided time period.",
+        'extensiveCompromise': "Customer's hosting is permanently suspended due to extensive compromise."
     }
 }

@@ -12,6 +12,7 @@ class InfractionTypes(Enum):
     content_removed = 'CONTENT_REMOVED'
     intentionally_malicious = 'INTENTIONALLY_MALICIOUS'
     suspended = 'SUSPENDED'
+    extensive_compromise = 'EXTENSIVE_COMPROMISE'
 
 
 class Mimir:
@@ -32,7 +33,7 @@ class Mimir:
         """
         Create an infraction entry in DCU Mimir
 
-        :param infraction_type: One of CUSTOMER_WARNING, INTENTIONALLY_MALICIOUS, or SUSPENDED
+        :param infraction_type: One of CUSTOMER_WARNING, INTENTIONALLY_MALICIOUS, EXTENSIVE_COMPROMISE, or SUSPENDED
         :param shopper_number: Shopper account number
         :param ticket_number: DCU SNOW ticket number
         :param domain: Domain name

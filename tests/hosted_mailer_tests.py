@@ -65,3 +65,11 @@ class TestRegisteredMailer:
     @patch('hermes.messenger.send_mail', side_effect=OCMException())
     def test_send_shopper_hosted_intentional_suspension_exception(self, send_mail):
         assert_false(self._mailer.send_shopper_hosted_intentional_suspension(None, None, 'test-id', None))
+
+    @patch('zeus.events.email.hosted_mailer.send_mail', return_value={})
+    def test_send_extensive_compromise_suspension(self, send_mail):
+        assert_true(self._mailer.send_extensive_compromise(None, None, 'test-id'))
+
+    @patch('zeus.events.email.hosted_mailer.send_mail', side_effect=OCMException())
+    def test_send_extensive_compromise_suspension_exception(self, send_mail):
+        assert_false(self._mailer.send_extensive_compromise(None, None, 'test-id'))
