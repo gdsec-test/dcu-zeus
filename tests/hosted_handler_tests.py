@@ -160,7 +160,7 @@ class TestHostedHandler:
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
     def test_repeat_offender_failed_shopper_email(self, can_suspend, scribe, slack, mailer, journal, mimir):
         assert_false(self._hosted.repeat_offender(self.ticket_valid))
-        
+
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
@@ -169,7 +169,7 @@ class TestHostedHandler:
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
     def test_repeat_offender_success(self, can_suspend, scribe, mailer, suspend, journal, mimir):
         assert_true(self._hosted.repeat_offender(self.ticket_valid))
-        
+
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
     def test_extensive_compromise_none(self, invalid_abuse_type):
         assert_false(self._hosted.extensive_compromise({}))
