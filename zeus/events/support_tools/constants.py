@@ -27,6 +27,9 @@ note_mappings = {
             'netvio': CONTENT_REMOVED,
             'crm': "{{type}} content removed and/or disabled from hosting {{guid}} at {{location}} {}".format(support_doc)
         },
+        'repeatOffender': {
+            'crm': "Hosting {{guid}} suspended for excessive repeat occurences. {{type}} content reported at {{location}} {}".format(support_doc)
+        },
         'suspension': {
             'netvio': SUSPENSION,
             'crm': "Hosting {{guid}} suspended. {{type}} content still present at {{location}} {}".format(support_doc)
@@ -57,6 +60,7 @@ note_mappings = {
         'customerWarning': "Customer should remove abusive content associated with incident.",
         'intentionallyMalicious': "Customer engaged in suspected intentionally malicious behavior.",
         'suspension': "Customer failed to resolve incident within provided time period.",
+        'repeatOffender': "Customer has received excessive repeat occurences of malicious content reports.",
         'extensiveCompromise': "Customer's hosting is permanently suspended due to extensive compromise."
     }
 }

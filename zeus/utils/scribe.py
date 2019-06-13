@@ -60,6 +60,11 @@ class HostedScribe:
             return False
         return True
 
+    def repeat_offender(self, ticket, guid, url, report_type, shopper_id):
+        crm_note = note_mappings['hosted']['repeatOffender']['crm'].format(guid=guid, type=report_type, location=url)
+        self.crm.notate_crm_account(shopper_id, ticket, crm_note)
+        return True
+
     def extensive_compromise(self, ticket, guid, url, report_type, shopper_id):
         crm_note = note_mappings['hosted']['extensiveCompromise']['crm'].format(guid=guid, type=report_type, location=url)
         self.crm.notate_crm_account(shopper_id, ticket, crm_note)

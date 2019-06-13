@@ -80,7 +80,7 @@ If you would like to run Zeus locally you will need to specify the following env
     "ticketId" : "<DCU ticket number>",
     "sourceDomainOrIp" : "<domain or ip>",
     "hostingGuid" : "<hosting guid>",
-    "infractionType" : "<One of CUSTOMER_WARNING, INTENTIONALLY_MALICIOUS, CONTENT_REMOVED, EXTENSIVE_COMPROMISE, or SUSPENDED">}
+    "infractionType" : "<One of CONTENT_REMOVED, CUSTOMER_WARNING, EXTENSIVE_COMPROMISE, INTENTIONALLY_MALICIOUS, REPEAT_OFFENDER, or SUSPENDED">}
 ```
 
 2. Obtain Prod JWT from Zeus Cert. Visit [this page](https://confluence.godaddy.com/pages/viewpage.action?pageId=127801950) for instructions

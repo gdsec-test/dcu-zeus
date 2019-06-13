@@ -11,6 +11,7 @@ class InfractionTypes(Enum):
     customer_warning = 'CUSTOMER_WARNING'
     content_removed = 'CONTENT_REMOVED'
     intentionally_malicious = 'INTENTIONALLY_MALICIOUS'
+    repeat_offender = 'REPEAT_OFFENDER'
     suspended = 'SUSPENDED'
     extensive_compromise = 'EXTENSIVE_COMPROMISE'
 
@@ -32,8 +33,7 @@ class Mimir:
     def write(self, infraction_type, shopper_number, ticket_number, domain, guid):
         """
         Create an infraction entry in DCU Mimir
-
-        :param infraction_type: One of CUSTOMER_WARNING, INTENTIONALLY_MALICIOUS, EXTENSIVE_COMPROMISE, or SUSPENDED
+        :param infraction_type: One of CONTENT_REMOVED, CUSTOMER_WARNING, EXTENSIVE_COMPROMISE, INTENTIONALLY_MALICIOUS, REPEAT_OFFENDER, or SUSPENDED
         :param shopper_number: Shopper account number
         :param ticket_number: DCU SNOW ticket number
         :param domain: Domain name

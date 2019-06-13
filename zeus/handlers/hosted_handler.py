@@ -37,6 +37,7 @@ class HostedHandler:
             'customer_warning': self.customer_warning,
             'content_removed': self.content_removed,
             'intentionally_malicious': self.intentionally_malicious,
+            'repeat_offender': self.repeat_offender,
             'suspend': self.suspend,
             'extensive_compromise': self.extensive_compromise
         }
@@ -125,6 +126,32 @@ class HostedHandler:
             return False
 
         self.shoplocked.adminlock(shopper_id, note_mappings['hosted']['intentionallyMalicious']['shoplocked'])
+
+        return self._suspend_product(data, guid, product)
+
+    def repeat_offender(self, data):
+        domain = data.get('sourceDomainOrIp')
+        source = data.get('source')
+        ticket_id = data.get('ticketId')
+        product = get_host_info_from_dict(data).get('product')
+
+        report_type, guid, shopper_id = self._validate_required_args(data)
+        if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
+            return False
+
+        if not self.hosting_service.can_suspend_hosting_product(guid):
+            self._logger.info("Hosting {} already suspended".format(guid))
+            return False
+
+        self.journal.write(EventTypes.product_suspension, product, domain, report_type,
+                           note_mappings['journal']['repeatOffender'], [source])
+
+        self.mimir.write(InfractionTypes.repeat_offender, shopper_id, ticket_id, domain, guid)
+
+        self.scribe.repeat_offender(ticket_id, guid, source, report_type, shopper_id)
+        if not self.hosted_mailer.send_repeat_offender(ticket_id, domain, shopper_id, source):
+            self.slack.failed_sending_email(domain)
+            return False
 
         return self._suspend_product(data, guid, product)
 

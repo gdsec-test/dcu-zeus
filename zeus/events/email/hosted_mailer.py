@@ -5,6 +5,7 @@ from hermes.messenger import send_mail
 from zeus.events.email.interface import Mailer
 from zeus.events.user_logging.events import generate_event
 from zeus.persist.notification_timeouts import Throttle
+from zeus.utils.functions import sanitize_url
 
 
 class HostedMailer(Mailer):
@@ -71,10 +72,45 @@ class HostedMailer(Mailer):
                 content_removed = content_removed.replace('\n', '<br />\n')
                 substitution_values = {'ACCOUNT_NUMBER': shopper_id,
                                        'DOMAIN': domain,
-                                       'MALICIOUS_CONTENT_REMOVED': content_removed}
+                                       'MALICIOUS_CONTENT_REMOVED': sanitize_url(content_removed)}
 
                 resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
                 resp.update({'type': message_type, 'template': 3994})
+                generate_event(ticket_id, success_message, **resp)
+            else:
+                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+        except Exception as e:
+            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            generate_event(ticket_id, exception_type, type=message_type)
+            return False
+        return True
+
+    def send_repeat_offender(self, ticket_id, domain, shopper_id, source):
+        """
+        Sends a notification to the shopper account email address found for the hosted domain regarding
+        action taken due to repeat hosting offenses
+        :param ticket_id:
+        :param domain:
+        :param shopper_id:
+        :param source:
+        :return:
+        """
+        template = "hosted.repeat_offender"
+
+        message_type = "hosted_repeat_offender"
+        exception_type = "hosted_repeat_offender_email_exception"
+        success_message = "hosted_repeat_offender_email_sent"
+
+        redis_key = "{}_repeat_offender".format(domain)
+
+        try:
+            if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
+                substitution_values = {'ACCOUNT_NUMBER': shopper_id,
+                                       'DOMAIN': domain,
+                                       'SANITIZED_URL': sanitize_url(source)}
+
+                resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
+                resp.update({'type': message_type, 'template': 4807})
                 generate_event(ticket_id, success_message, **resp)
             else:
                 self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
