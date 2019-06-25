@@ -88,7 +88,7 @@ class HostedHandler:
             return False
 
         # Since we have a shopper_id, try to send the notification email, even if guid or report_type was not found
-        if not self.hosted_mailer.send_content_removed(ticket_id, domain, shopper_id, source):
+        if not self.hosted_mailer.send_content_removed(ticket_id, domain, shopper_id):
             self.slack.failed_sending_email(domain)
             return False
 

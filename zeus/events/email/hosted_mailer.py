@@ -49,14 +49,13 @@ class HostedMailer(Mailer):
             return False
         return True
 
-    def send_content_removed(self, ticket_id, domain, shopper_id, content_removed):
+    def send_content_removed(self, ticket_id, domain, shopper_id):
         """
         Sends a notification to the shopper account email address found for the hosted domain regarding
         content that was removed
         :param ticket_id:
         :param domain:
         :param shopper_id:
-        :param content_removed:
         :return:
         """
         template = "hosted.content_removed"
@@ -69,10 +68,8 @@ class HostedMailer(Mailer):
 
         try:
             if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
-                content_removed = content_removed.replace('\n', '<br />\n')
                 substitution_values = {'ACCOUNT_NUMBER': shopper_id,
-                                       'DOMAIN': domain,
-                                       'MALICIOUS_CONTENT_REMOVED': sanitize_url(content_removed)}
+                                       'DOMAIN': domain}
 
                 resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
                 resp.update({'type': message_type, 'template': 3994})

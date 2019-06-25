@@ -40,11 +40,11 @@ class TestRegisteredMailer:
 
     @patch('zeus.events.email.hosted_mailer.send_mail', return_value={})
     def test_send_content_removed(self, send_mail):
-        assert_true(self._mailer.send_content_removed('test-ticket', 'test-domain', 'test-id', 'removed-content'))
+        assert_true(self._mailer.send_content_removed('test-ticket', 'test-domain', 'test-id'))
 
     @patch('hermes.messenger.send_mail', side_effect=OCMException())
     def test_send_content_removed_exception(self, send_mail):
-        assert_false(self._mailer.send_content_removed('test-ticket', 'test-domain', 'test-id', 'removed-content'))
+        assert_false(self._mailer.send_content_removed('test-ticket', 'test-domain', 'test-id'))
 
     ''' Hosted Suspension Tests '''
 
