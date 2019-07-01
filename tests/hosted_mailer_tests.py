@@ -30,7 +30,7 @@ class TestRegisteredMailer:
 
     @patch('zeus.events.email.hosted_mailer.send_mail', return_value={})
     def test_send_hosted_warning(self, send_mail):
-        assert_true(self._mailer.send_hosted_warning(None, None, 'test-id', None))
+        assert_true(self._mailer.send_hosted_warning(None, None, 'test-id', 'source'))
 
     @patch('hermes.messenger.send_mail', side_effect=OCMException())
     def test_send_hosted_warning_exception(self, send_mail):
@@ -50,7 +50,7 @@ class TestRegisteredMailer:
 
     @patch('zeus.events.email.hosted_mailer.send_mail', return_value={})
     def test_send_shopper_hosted_suspension(self, send_mail):
-        assert_true(self._mailer.send_shopper_hosted_suspension(None, None, 'test-id', None))
+        assert_true(self._mailer.send_shopper_hosted_suspension(None, None, 'test-id', 'source'))
 
     @patch('hermes.messenger.send_mail', side_effect=OCMException())
     def test_send_shopper_hosted_suspension_exception(self, send_mail):
