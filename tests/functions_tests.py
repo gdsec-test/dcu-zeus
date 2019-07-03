@@ -19,6 +19,11 @@ class TestFunctions:
         actual = get_shopper_id_from_dict(data)
         assert_equal(actual, '1234')
 
+    def test_get_shopper_id_from_dict_child(self):
+        data = {'data': {'domainQuery': {'apiReseller': {'parent': '1234', 'child': '5678'}}}}
+        actual = get_shopper_id_from_dict(data)
+        assert_equal(actual, '5678')
+
     def test_get_parent_child_shopper_ids_from_dict_none(self):
         actual = get_parent_child_shopper_ids_from_dict(None)
         assert_is_none(actual)

@@ -14,8 +14,13 @@ def get_shopper_id_from_dict(dict_to_search):
     #    1: data->domainQuery->host->shopperId
     #    2: data->domainQuery->shopperInfo->shopperId
     #  BUT SINCE THIS IS DMV, WE ONLY CARE ABOUT THE 2ND LOCATION
+    #  If there are an API reseller parent and child account, we want the child account
     if isinstance(dict_to_search, dict):
-        return _get_domain_query(dict_to_search).get('shopperInfo', {}).get('shopperId')
+        parent_child_list = get_parent_child_shopper_ids_from_dict(dict_to_search)
+        if not parent_child_list:
+            return _get_domain_query(dict_to_search).get('shopperInfo', {}).get('shopperId')
+        else:
+            return parent_child_list[1]
     return None
 
 
