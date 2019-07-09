@@ -44,7 +44,7 @@ class Journal:
         :param product_family: The product family e.g. Domain, GoCentral, Diablo, etc.
         :param domain: The domain this report is for
         :param reason: The type of report this is e.g. PHISHING, MALWARE, etc.
-        :param notes: Human readable notes associated with this report, similar to CRM/Netvio notes.
+        :param notes: Human readable notes associated with this report, similar to CRM notes.
         :param assets: Any associated assets such as URLs
         :return:
         """

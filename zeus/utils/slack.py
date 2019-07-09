@@ -51,12 +51,6 @@ class SlackFailures:
         self._logger = logging.getLogger(__name__)
         self._slack = slack
 
-    def failed_netvio_creation(self, guid):
-        key = '{}_create_netvio_failed'.format(guid)
-        message = 'Unable to create NetVio ticket for {}'.format(guid)
-        self._logger.error(message)
-        self._slack.send_message(key, message)
-
     def failed_hosting_suspension(self, guid, info=None):
         key = '{}_suspend_failed'.format(guid)
         message = 'Suspension Failed for Hosting: {}. {}'.format(guid, info)

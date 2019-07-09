@@ -33,8 +33,6 @@ spec:
             value: 'THIS_STRING_IS_REPLACED_DURING_BUILD'
           - name: sysenv
             value: dev
-          - name: KEYFILE
-            value: /keyfiles/key.txt
           - name: BROKER_PASS
             valueFrom:
               secretKeyRef:
@@ -67,10 +65,6 @@ spec:
                 name: auth-zeus-envs
                 key: mwponepass
 
-          - name: NETVIO_SSL_CERT
-            value: /netvio_certs/tls.crt
-          - name: NETVIO_SSL_KEY
-            value: /netvio_certs/tls.key
           - name: OCM_SSL_CERT
             value: /ocm_certs/tls.crt
           - name: OCM_SSL_KEY
@@ -85,12 +79,6 @@ spec:
             value: /ecomm_certs/tls.key
 
           volumeMounts:
-          - name: encryption-keys
-            mountPath: /keyfiles
-            readOnly: true
-          - name: tls-netvio-files
-            mountPath: /netvio_certs
-            readOnly: true
           - name: tls-ocm-files
             mountPath: /ocm_certs
             readOnly: true
@@ -114,12 +102,6 @@ spec:
             timeoutSeconds: 5
 
       volumes:
-        - name: encryption-keys
-          secret:
-            secretName: encryption-key-files
-        - name: tls-netvio-files
-          secret:
-            secretName: tls-netvio
         - name: tls-ocm-files
           secret:
             secretName: tls-phishnet
