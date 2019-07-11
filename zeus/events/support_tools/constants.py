@@ -2,8 +2,7 @@
 support_doc = "See http://x.co/dcuwhat2do for more info."
 
 # SHOPLOCKED CRM notes for Admin Locked accounts
-INTENTIONALLY_MALICIOUS_ADMINLOCK = "Account locked for abuse. Do not unlock the account. The customer can email the " \
-                                    "Digital Crimes Unit at hostsec@, if they have questions."
+INTENTIONALLY_MALICIOUS_ADMINLOCK = "Account locked for abuse. Do not unlock the account. {}".format(support_doc)
 
 note_mappings = {
     'hosted': {
