@@ -23,32 +23,22 @@ class HostingService(Product):
 
     def __init__(self, app_settings):
         self._products = {'diablo': Diablo(app_settings),
-                          'wpaas': MWPOne(app_settings),
-                          'angelo': Angelo(app_settings)}
+                          'mwp 1.0': MWPOne(app_settings),
+                          'plesk': Angelo(app_settings)}
 
     def suspend(self, product, identifier, data):
         product = product.lower() if product else None
         if product not in self._products:
             return self.UNSUPPORTED_PRODUCT.format(product)
 
-        if product == 'diablo':
-            return self._products[product].suspend(identifier)
-        elif product == 'wpaas':
-            return self._products[product].suspend(identifier)
-        elif product == 'angelo':
-            return self._products[product].suspend(identifier, data)
+        return self._products.get(product).suspend(guid=identifier, data=data)
 
     def reinstate(self, product, identifier, data):
         product = product.lower() if product else None
         if product not in self._products:
             return self.UNSUPPORTED_PRODUCT.format(product)
 
-        if product == 'diablo':
-            return self._products[product].reinstate(identifier)
-        elif product == 'wpaas':
-            return self._products[product].reinstate(identifier)
-        elif product == 'angelo':
-            return self._products[product].reinstate(identifier, data)
+        return self._products.get(product).reinstate(guid=identifier, data=data)
 
     def cancel(self, product, identifier):
         product = product.lower() if product else None

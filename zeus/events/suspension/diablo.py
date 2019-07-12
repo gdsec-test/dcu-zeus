@@ -18,7 +18,7 @@ class Diablo(Product):
         self.url = app_settings.DIABLO_URL
         self.auth = (app_settings.DIABLOUSER, app_settings.DIABLOPASS)
 
-    def suspend(self, guid):
+    def suspend(self, guid, **kwargs):
         url = self.url + guid + '?suspend'
 
         try:
@@ -33,7 +33,7 @@ class Diablo(Product):
             logging.error("Failed to suspend GUID: {}. {}".format(guid, e.message))
         return False
 
-    def reinstate(self, guid):
+    def reinstate(self, guid, **kwargs):
         """
         Waiting on user perm update by Diablo Dev for this to work
         :return:

@@ -19,7 +19,7 @@ class Angelo(Product):
         self.auth = (app_settings.PLESKUSER, app_settings.PLESKPASS)
         self.url = app_settings.PLESK_URL
 
-    def suspend(self, guid, data):
+    def suspend(self, guid, data, **kwargs):
         """
         :param guid: plesk guid
         :param data:
@@ -27,7 +27,7 @@ class Angelo(Product):
         """
         return self._suspend_or_reinstate(guid, data, '?suspend')
 
-    def reinstate(self, guid, data):
+    def reinstate(self, guid, data, **kwargs):
         """
         :param guid: plesk guid
         :param data:
