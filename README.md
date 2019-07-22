@@ -11,7 +11,7 @@ to consume. This will aid in the decentralization of abuse management at GoDaddy
 ## Cloning
 To clone the repository via SSH perform the following
 ```
-git clone git@github.secureserver.net:ITSecurity/zeus.git
+git clone git@github.secureserver.net:digital-crimes/zeus.git
 ```
 
 It is recommended that you clone this project into a pyvirtualenv or equivalent virtual environment.

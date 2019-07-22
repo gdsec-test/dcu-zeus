@@ -1,4 +1,4 @@
-REPONAME=infosec-dcu/zeus
+REPONAME=digital-crimes/zeus
 BUILDROOT=$(HOME)/dockerbuild/$(REPONAME)
 DOCKERREPO=docker-dcu-local.artifactory.secureserver.net/zeus
 DATE=$(shell date)
