@@ -14,7 +14,7 @@ from zeus.handlers.hosted_handler import HostedHandler
 from zeus.handlers.registered_handler import RegisteredHandler
 
 # setup logging
-path = 'logging.yml'
+path = 'logging.yaml'
 value = os.getenv('LOG_CFG', None)
 if value:
     path = value

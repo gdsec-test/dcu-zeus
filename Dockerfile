@@ -28,7 +28,7 @@ RUN pip install --compile -r requirements.txt
 RUN pip install --compile .
 
 RUN mkdir -p /app
-COPY *.py logging.yml *.sh /app/
+COPY *.py logging.yaml *.sh /app/
 RUN /bin/sh -c "cat certs/* >> `python -c 'import certifi; print(certifi.where())'`"
 RUN chown -R dcu:dcu /app && update-ca-certificates
 
