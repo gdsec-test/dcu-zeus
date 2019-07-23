@@ -17,7 +17,7 @@ class Shoplocked:
 
     def adminlock(self, shopper_id, note):
         """
-         Place an admin lock on the given shopper_id. API deets: https://github.secureserver.net/ITSecurity/shoplocked
+         Place an admin lock on the given shopper_id. API deets: https://github.secureserver.net/digital-crimes/shoplocked
 
          :param shopper_id: Shopper account ID
          :param note: CRM note about why the account was locked or what further actions to be taken etc
