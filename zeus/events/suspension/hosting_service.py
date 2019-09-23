@@ -1,5 +1,6 @@
 from zeus.events.suspension.angelo import Angelo
 from zeus.events.suspension.diablo import Diablo
+from zeus.events.suspension.vertigo import Vertigo
 from zeus.events.suspension.interface import Product
 from zeus.events.suspension.mwp_one import MWPOne
 from zeus.persist.notification_timeouts import Throttle
@@ -24,7 +25,8 @@ class HostingService(Product):
     def __init__(self, app_settings):
         self._products = {'diablo': Diablo(app_settings),
                           'mwp 1.0': MWPOne(app_settings),
-                          'plesk': Angelo(app_settings)}
+                          'plesk': Angelo(app_settings),
+                          'vertigo': Vertigo(app_settings)}
 
     def suspend(self, product, identifier, data):
         product = product.lower() if product else None

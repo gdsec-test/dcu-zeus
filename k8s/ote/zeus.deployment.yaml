@@ -64,6 +64,16 @@ spec:
               secretKeyRef:
                 name: auth-zeus-envs
                 key: mwponepass
+          - name: VERTIGOUSER
+            valueFrom:
+              secretKeyRef:
+                name: auth-vertigo-api
+                key: vertigouser
+          - name: VERTIGOPASS
+            valueFrom:
+              secretKeyRef:
+                name: auth-vertigo-api
+                key: vertigopass
 
           - name: OCM_SSL_CERT
             value: /ocm_certs/tls.crt

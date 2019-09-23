@@ -62,13 +62,14 @@ If you would like to run Zeus locally you will need to specify the following env
  3. `BROKER_PASS` (The Broker Pass for the RabbitMQ server to connect to)
  4. `MWPONEUSER` & `MWPONEPASS` (Account credentials to access the managed wordpress API)
  5. `DIABLOUSER` & `DIABLOPASS` (Account credentials to access the diablo API)
- 6. `OCM_SSL_CERT` (The path to the SSL Cert white-listed for OCM API)
- 7. `OCM_SSL_KEY` (The path to the SSL Key white-listed for OCM API)
- 8. `ORION_SSL_CERT` (The path to the SSL Cert white-listed for Orion Web Service)
- 9. `ORION_SSL_KEY` (The path to the SSL Key white-listed for Orion Web Service)
- 10. `ZEUS_SSL_CERT` (The path to the SSL Cert for communicating with DCU Journal)
- 11. `ZEUS_SSL_KEY` (The path to the SSL Key for communicating with DCU Journal)
- 12. `EMAIL_RECIPIENT` (The email address you want `non-shopper` emails sent to while testing, instead of emailing fraud. e.g. user@example.com)
+ 6. `VERTIGOUSER` & `VERTIGOPASS` (Account credentials to access the diablo API)
+ 7. `OCM_SSL_CERT` (The path to the SSL Cert white-listed for OCM API)
+ 8. `OCM_SSL_KEY` (The path to the SSL Key white-listed for OCM API)
+ 9. `ORION_SSL_CERT` (The path to the SSL Cert white-listed for Orion Web Service)
+ 10. `ORION_SSL_KEY` (The path to the SSL Key white-listed for Orion Web Service)
+ 11. `ZEUS_SSL_CERT` (The path to the SSL Cert for communicating with DCU Journal)
+ 12. `ZEUS_SSL_KEY` (The path to the SSL Key for communicating with DCU Journal)
+ 13. `EMAIL_RECIPIENT` (The email address you want `non-shopper` emails sent to while testing, instead of emailing fraud. e.g. user@example.com)
  
 ## Handling failures to create Mimir Infractions in Production.
 1. Create dictionary of required infraction fields. Data will come from mongo record for the ticket. Majority of data in `data>domainQuery>host`
