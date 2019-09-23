@@ -1,8 +1,8 @@
 from zeus.events.suspension.angelo import Angelo
 from zeus.events.suspension.diablo import Diablo
-from zeus.events.suspension.vertigo import Vertigo
 from zeus.events.suspension.interface import Product
 from zeus.events.suspension.mwp_one import MWPOne
+from zeus.events.suspension.vertigo import Vertigo
 from zeus.persist.notification_timeouts import Throttle
 
 
