@@ -74,6 +74,16 @@ spec:
               secretKeyRef:
                 name: auth-vertigo-api
                 key: vertigopass
+          - name: VPS4USER
+            valueFrom:
+              secretKeyRef:
+                name: auth-vps4-api
+                key: vps4user
+          - name: VPS4PASS
+            valueFrom:
+              secretKeyRef:
+                name: auth-vps4-api
+                key: vps4pass
 
           - name: OCM_SSL_CERT
             value: /ocm_certs/tls.crt

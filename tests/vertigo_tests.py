@@ -1,7 +1,7 @@
-from requests.exceptions import Timeout
-
 from mock import MagicMock, patch
 from nose.tools import assert_false, assert_true
+from requests.exceptions import Timeout
+
 from settings import TestingConfig
 from zeus.events.suspension.vertigo import Vertigo
 

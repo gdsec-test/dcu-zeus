@@ -1,12 +1,16 @@
+from mock import patch
 from nose.tools import assert_equal
 
 from settings import TestingConfig
 from zeus.events.suspension.hosting_service import HostingService
+from zeus.events.suspension.vps4 import VPS4
 
 
 class TestHostingService:
+
     @classmethod
-    def setup(cls):
+    @patch.object(VPS4, '_get_jwt', return_value='fake-jwt')
+    def setup(cls, mock_vps):
         cls._hosting_service = HostingService(TestingConfig)
 
     def test_suspend(self):
