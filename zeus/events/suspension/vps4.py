@@ -50,9 +50,12 @@ class VPS4(Product):
         if not guid:
             return False
 
+        self._logger.info("VPS4 suspend called for {}".format(guid))
+
         for url in self._vps4_urls:
             credits_data = self._retrieve_credits(url, guid)
             if credits_data:
+                self._logger.info("Credits retrieved for {} and url {}".format(guid, url))
                 vm_id = credits_data.get('productId')
                 abuse_url = url + '/api/vms/{}/abuseSuspend'.format(vm_id)
 
@@ -64,14 +67,16 @@ class VPS4(Product):
 
                     while max_retries > 0 and response.status_code == 200:
                         credits_data = self._retrieve_credits(url, guid)
+                        self._logger.info("Credits retrieved after suspension for {} and url {}".format(guid, url))
                         if credits_data.get('abuseSuspendedFlagSet'):
                             self._logger.info("Successfully suspended VPS4 guid {} on server {}".format(guid, url))
                             return True
                         max_retries -= 1
 
                 except Exception as e:
-                    logging.error("Unable to suspend guid : {} using url : {}. Details: {}".format(guid, url, e.message))
+                    self._logger.error("Unable to suspend guid : {} using url : {}. Details: {}".format(guid, url, e.message))
 
+        self._logger.error("Unable to suspend guid : {} using all 3 VPS4 urls".format(guid))
         return False
 
     def reinstate(self, **kwargs):
