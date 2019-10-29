@@ -5,6 +5,7 @@ from settings import TestingConfig
 from zeus.events.email.hosted_mailer import HostedMailer
 from zeus.events.suspension.hosting_service import ThrottledHostingService
 from zeus.handlers.hosted_handler import HostedHandler
+from zeus.events.email.ssl_mailer import SSLMailer
 from zeus.reviews.reviews import BasicReview
 from zeus.utils.journal import Journal
 from zeus.utils.mimir import Mimir
@@ -96,7 +97,8 @@ class TestHostedHandler:
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
-    def test_intentionally_malicious_failed_shopper_email(self, can_suspend, scribe, slack, mailer, journal, mimir, shoplocked):
+    @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
+    def test_intentionally_malicious_failed_shopper_email(self, ssl_mailer, can_suspend, scribe, slack, mailer, journal, mimir, shoplocked):
         assert_false(self._hosted.intentionally_malicious(self.ticket_valid))
 
     @patch.object(Shoplocked, 'adminlock', return_value=None)
@@ -106,7 +108,8 @@ class TestHostedHandler:
     @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=True)
     @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
-    def test_intentionally_malicious_success(self, can_suspend, scribe, mailer, suspend, journal, mimir, shoplocked):
+    @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
+    def test_intentionally_malicious_success(self, ssl_mailer, can_suspend, scribe, mailer, suspend, journal, mimir, shoplocked):
         assert_true(self._hosted.intentionally_malicious(self.ticket_valid))
 
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)

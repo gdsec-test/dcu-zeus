@@ -7,9 +7,11 @@ from zeus.events.support_tools.constants import note_mappings
 from zeus.events.suspension.hosting_service import ThrottledHostingService
 from zeus.reviews.reviews import BasicReview
 from zeus.utils.functions import (get_host_info_from_dict,
-                                  get_host_shopper_id_from_dict)
+                                  get_host_shopper_id_from_dict,
+                                  get_ssl_subscriptions_from_dict)
 from zeus.utils.journal import EventTypes, Journal
 from zeus.utils.mimir import InfractionTypes, Mimir
+from zeus.events.email.ssl_mailer import SSLMailer
 from zeus.utils.scribe import HostedScribe
 from zeus.utils.shoplocked import Shoplocked
 from zeus.utils.slack import SlackFailures, ThrottledSlack
@@ -27,6 +29,7 @@ class HostedHandler:
         self.scribe = HostedScribe(app_settings)
         self.journal = Journal(app_settings)
         self.mimir = Mimir(app_settings)
+        self.ssl_mailer = SSLMailer(app_settings)
         self.slack = SlackFailures(ThrottledSlack(app_settings))
         self.shoplocked = Shoplocked(app_settings)
 
@@ -120,6 +123,8 @@ class HostedHandler:
         self.mimir.write(InfractionTypes.intentionally_malicious, shopper_id, ticket_id, domain, guid)
 
         self.scribe.intentionally_malicious(ticket_id, guid, source, report_type, shopper_id)
+
+        self.ssl_mailer.send_revocation_email(ticket_id, domain, shopper_id, get_ssl_subscriptions_from_dict(data))
 
         if not self.hosted_mailer.send_shopper_hosted_intentional_suspension(ticket_id, domain, shopper_id, report_type):
             self.slack.failed_sending_email(domain)
