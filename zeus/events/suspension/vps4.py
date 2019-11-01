@@ -39,6 +39,10 @@ class VPS4(Product):
             if self._require_jwt_refresh(response):
                 response = requests.get(credits_url, headers=self._headers)
 
+            self._logger.info("Response from credits endpoint".format(response))
+            if response.json():
+                self._logger.info("Response object from credits endpoint".format(response.json()))
+                
             return response.json() if response.status_code == 200 else None
         except Exception as e:
             self._logger.error("Failed to retrieve credits data from server : {} for guid : {}. Details: {}"
