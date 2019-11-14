@@ -4,6 +4,7 @@ import logging
 import requests
 
 from zeus.events.suspension.interface import Product
+from zeus.utils.functions import get_host_info_from_dict
 
 
 class VPS4(Product):
@@ -32,6 +33,7 @@ class VPS4(Product):
 
     def _retrieve_credits(self, vps4_url, guid):
         credits_url = vps4_url + '/api/credits/' + guid
+        credits_data = None
 
         try:
             response = requests.get(credits_url, headers=self._headers)
@@ -39,48 +41,62 @@ class VPS4(Product):
             if self._require_jwt_refresh(response):
                 response = requests.get(credits_url, headers=self._headers)
 
-            self._logger.info("Response from credits endpoint".format(response))
-            if response.json():
-                self._logger.info("Response object from credits endpoint".format(response.json()))
+            credits_data = response.json() if response.status_code == 200 else None
 
-            return response.json() if response.status_code == 200 else None
         except Exception as e:
             self._logger.error("Failed to retrieve credits data from server : {} for guid : {}. Details: {}"
                                .format(vps4_url, guid, e.message))
+        return credits_data
 
-    def suspend(self, guid, **kwargs):
-        max_retries = 10
+    def suspend(self, guid, data, **kwargs):
+        self._logger.info("VPS4 suspend called for {}".format(guid))
 
         if not guid:
             return False
 
-        self._logger.info("VPS4 suspend called for {}".format(guid))
+        dc = get_host_info_from_dict(data).get('dataCenter')
+        if dc in self._vps4_urls:
+            if self._suspend(self._vps4_urls.get(dc), guid):
+                return True
 
-        for url in self._vps4_urls:
-            credits_data = self._retrieve_credits(url, guid)
-            if credits_data:
-                self._logger.info("Credits retrieved for {} and url {}".format(guid, url))
-                vm_id = credits_data.get('productId')
-                abuse_url = url + '/api/vms/{}/abuseSuspend'.format(vm_id)
-
-                try:
-                    response = requests.post(abuse_url, headers=self._headers)
-
-                    if self._require_jwt_refresh(response):
-                        response = requests.post(abuse_url, headers=self._headers)
-
-                    while max_retries > 0 and response.status_code == 200:
-                        credits_data = self._retrieve_credits(url, guid)
-                        self._logger.info("Credits retrieved after suspension for {} and url {}".format(guid, url))
-                        if credits_data.get('abuseSuspendedFlagSet'):
-                            self._logger.info("Successfully suspended VPS4 guid {} on server {}".format(guid, url))
-                            return True
-                        max_retries -= 1
-
-                except Exception as e:
-                    self._logger.error("Unable to suspend guid : {} using url : {}. Details: {}".format(guid, url, e.message))
+        # Fall back and try all data center urls.
+        for dc_key, dc_url in self._vps4_urls.items():
+            if dc_key != dc and self._suspend(dc_url, guid):
+                return True
 
         self._logger.error("Unable to suspend guid : {} using all 3 VPS4 urls".format(guid))
+        return False
+
+    def _suspend(self, url, guid):
+        max_retries = 10
+        credits_data = self._retrieve_credits(url, guid)
+
+        if credits_data:
+            self._logger.info("Credits retrieved for {} and url {}".format(guid, url))
+
+            vm_id = credits_data.get('productId')
+            abuse_url = url + '/api/vms/{}/abuseSuspend'.format(vm_id)
+
+            try:
+                response = requests.post(abuse_url, headers=self._headers)
+
+                if self._require_jwt_refresh(response):
+                    response = requests.post(abuse_url, headers=self._headers)
+
+                while max_retries > 0 and response.status_code == 200:
+                    credits_data = self._retrieve_credits(url, guid)
+                    self._logger.info("Credits retrieved after suspension for {} and url {}".format(guid, url))
+
+                    if credits_data.get('abuseSuspendedFlagSet'):
+                        self._logger.info("Successfully suspended VPS4 guid {} on server {}".format(guid, url))
+                        return True
+
+                    max_retries -= 1
+
+            except Exception as e:
+                self._logger.error(
+                    "Unable to suspend guid : {} using url : {}. Details: {}".format(guid, url, e.message))
+
         return False
 
     def reinstate(self, **kwargs):
