@@ -16,7 +16,7 @@ class Vertigo(Product):
         self._cert = (app_settings.CMAP_PROXY_CERT, app_settings.CMAP_PROXY_KEY)
 
     def suspend(self, guid, data, **kwargs):
-        cid = data.get('data', {}).get('domainQuery', {}).get('host', {}).get('containerID', '')
+        cid = data.get('data', {}).get('domainQuery', {}).get('host', {}).get('containerId', '')
         url = self.url + cid + '/?suspend'
 
         try:
