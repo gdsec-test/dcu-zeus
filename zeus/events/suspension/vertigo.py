@@ -12,7 +12,8 @@ class Vertigo(Product):
     def __init__(self, app_settings):
         self._logger = logging.getLogger(__name__)
         self.url = app_settings.VERT_URL
-        self.auth = (app_settings.VERTIGOUSER, app_settings.VERTIGOPASS)
+        self._auth = (app_settings.CMAP_PROXY_USER, app_settings.CMAP_PROXY_PASS)
+        self._cert = (app_settings.CMAP_PROXY_CERT, app_settings.CMAP_PROXY_KEY)
 
     def suspend(self, guid, data, **kwargs):
         cid = data.get('data', {}).get('domainQuery', {}).get('host', {}).get('containerID', '')
@@ -21,7 +22,7 @@ class Vertigo(Product):
         try:
             body = json.dumps({'reason': 'DCU Suspension'}, ensure_ascii=False)
 
-            response = requests.post(url, auth=self.auth, headers=self.headers, data=body, verify=False)
+            response = requests.post(url, cert=self._cert, auth=self._auth, headers=self.headers, data=body, verify=False)
             response.raise_for_status()
 
             return response.status_code == 202

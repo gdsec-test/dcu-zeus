@@ -57,19 +57,22 @@ The following certs are required to run this project, must include proper ENV do
  
 ## Running Locally
 If you would like to run Zeus locally you will need to specify the following environment variables
- 1. `sysenv` (dev, ote, prod)
- 2. `DB_PASS` (MongoDB password for Phishstory database)
- 3. `BROKER_PASS` (The Broker Pass for the RabbitMQ server to connect to)
- 4. `MWPONEUSER` & `MWPONEPASS` (Account credentials to access the managed wordpress API)
- 5. `DIABLOUSER` & `DIABLOPASS` (Account credentials to access the diablo API)
- 6. `VERTIGOUSER` & `VERTIGOPASS` (Account credentials to access the diablo API)
- 7. `OCM_SSL_CERT` (The path to the SSL Cert white-listed for OCM API)
- 8. `OCM_SSL_KEY` (The path to the SSL Key white-listed for OCM API)
- 9. `ORION_SSL_CERT` (The path to the SSL Cert white-listed for Orion Web Service)
- 10. `ORION_SSL_KEY` (The path to the SSL Key white-listed for Orion Web Service)
- 11. `ZEUS_SSL_CERT` (The path to the SSL Cert for communicating with DCU Journal)
- 12. `ZEUS_SSL_KEY` (The path to the SSL Key for communicating with DCU Journal)
- 13. `EMAIL_RECIPIENT` (The email address you want `non-shopper` emails sent to while testing, instead of emailing fraud. e.g. user@example.com)
+* `sysenv` (dev, ote, prod)
+* `DB_PASS` (MongoDB password for Phishstory database)
+* `BROKER_PASS` (The Broker Pass for the RabbitMQ server to connect to)
+* `MWPONEUSER` & `MWPONEPASS` (Account credentials to access the managed wordpress API)
+* `DIABLOUSER` & `DIABLOPASS` (Account credentials to access the diablo API)
+* `CMAP_PROXY_CERT` Path to proxyuser.cmap.int.godaddy.com certificate file (for connecting to CMAP Proxy, prod only)
+* `CMAP_PROXY_KEY` Path to proxyuser.cmap.int.godaddy.com key file(for connecting to CMAP Proxy, prod only)
+* `CMAP_PROXY_USER` (User for CMAP Proxy)
+* `CMAP_PROXY_PASS` (Password for CMAP Proxy)
+* `OCM_SSL_CERT` (The path to the SSL Cert white-listed for OCM API)
+* `OCM_SSL_KEY` (The path to the SSL Key white-listed for OCM API)
+* `ORION_SSL_CERT` (The path to the SSL Cert white-listed for Orion Web Service)
+* `ORION_SSL_KEY` (The path to the SSL Key white-listed for Orion Web Service)
+* `ZEUS_SSL_CERT` (The path to the SSL Cert for communicating with DCU Journal)
+* `ZEUS_SSL_KEY` (The path to the SSL Key for communicating with DCU Journal)
+* `EMAIL_RECIPIENT` (The email address you want `non-shopper` emails sent to while testing, instead of emailing fraud. e.g. user@example.com)
  
 ## Handling failures to create Mimir Infractions in Production.
 1. Create dictionary of required infraction fields. Data will come from mongo record for the ticket. Majority of data in `data>domainQuery>host`
