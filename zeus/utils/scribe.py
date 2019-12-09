@@ -27,6 +27,11 @@ class HostedScribe:
         self.crm.notate_crm_account(shopper_id, ticket, crm_note)
         return True
 
+    def shopper_compromise(self, ticket, guid, url, report_type, shopper_id):
+        crm_note = note_mappings['hosted']['shopperCompromise']['crm'].format(guid=guid, type=report_type, location=url)
+        self.crm.notate_crm_account(shopper_id, ticket, crm_note)
+        return True
+
     def content_removed(self, ticket, guid, url, report_type, shopper_id):
         crm_note = note_mappings['hosted']['contentRemoved']['crm'].format(guid=guid, type=report_type, location=url)
         self.crm.notate_crm_account(shopper_id, ticket, crm_note)
@@ -38,6 +43,7 @@ class HostedScribe:
         return True
 
     def extensive_compromise(self, ticket, guid, url, report_type, shopper_id):
-        crm_note = note_mappings['hosted']['extensiveCompromise']['crm'].format(guid=guid, type=report_type, location=url)
+        crm_note = note_mappings['hosted']['extensiveCompromise']['crm'].format(guid=guid, type=report_type,
+                                                                                location=url)
         self.crm.notate_crm_account(shopper_id, ticket, crm_note)
         return True

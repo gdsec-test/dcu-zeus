@@ -3,6 +3,7 @@ support_doc = "See http://x.co/dcuwhat2do for more info."
 
 # SHOPLOCKED CRM notes for Admin Locked accounts
 INTENTIONALLY_MALICIOUS_ADMINLOCK = "Account locked for abuse. Do not unlock the account. {}".format(support_doc)
+SHOPPER_COMPROMISE_ADMINLOCK = "Shopper Account Possibly Compromised. Assist customer with changing password(s) and unlocking account. {}".format(support_doc)
 
 note_mappings = {
     'hosted': {
@@ -24,6 +25,10 @@ note_mappings = {
             'crm': "Hosting {{guid}} suspended for intentional {{type}} at {{location}} {}".format(support_doc),
             'shoplocked': INTENTIONALLY_MALICIOUS_ADMINLOCK
         },
+        'shopperCompromise': {
+            'crm': "Hosting {{guid}} suspended for {{type}} at {{location}} as a result of possible shopper account compromise {}".format(support_doc),
+            'shoplocked': SHOPPER_COMPROMISE_ADMINLOCK
+        },
         'extensiveCompromise': {
             'crm': "Hosting {{guid}} suspended due to extensive compromise. {{type}} content reported at {{location}} {}".format(support_doc)
         }
@@ -39,13 +44,18 @@ note_mappings = {
         'intentionallyMalicious': {
             'crm': "{{domain}} suspended for intentional {{type}} at {{location}} {}".format(support_doc),
             'shoplocked': INTENTIONALLY_MALICIOUS_ADMINLOCK
+        },
+        'shopperCompromise': {
+            'crm': "{{domain}} suspended for {{type}} at {{location}} as a result of possible shopper account compromise {}".format(support_doc),
+            'shoplocked': SHOPPER_COMPROMISE_ADMINLOCK
         }
     },
     'journal': {
         'customerWarning': "Customer should remove abusive content associated with incident.",
         'intentionallyMalicious': "Customer engaged in suspected intentionally malicious behavior.",
+        'shopperCompromise': "Customer account has possibly been compromised.",
         'suspension': "Customer failed to resolve incident within provided time period.",
-        'repeatOffender': "Customer has received excessive repeat occurences of malicious content reports.",
+        'repeatOffender': "Customer has received excessive repeat occurrences of malicious content reports.",
         'extensiveCompromise': "Customer's hosting is permanently suspended due to extensive compromise."
     }
 }

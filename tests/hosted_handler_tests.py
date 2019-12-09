@@ -113,6 +113,41 @@ class TestHostedHandler:
         assert_true(self._hosted.intentionally_malicious(self.ticket_valid))
 
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
+    def test_shopper_compromise_none(self, invalid_abuse_type):
+        assert_false(self._hosted.shopper_compromise({}))
+
+    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(HostedScribe, 'shopper_compromise', return_value=None)
+    @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=False)
+    @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
+    def test_shopper_compromise_already_suspended(self, ssl_mailer, can_suspend, scribe, journal, mimir, shoplocked):
+        assert_false(self._hosted.shopper_compromise(self.ticket_valid))
+
+    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(HostedMailer, 'send_shopper_compromise_hosted_suspension', return_value=False)
+    @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
+    @patch.object(HostedScribe, 'shopper_compromise', return_value=None)
+    @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
+    @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
+    def test_shopper_compromise_failed_shopper_email(self, ssl_mailer, can_suspend, scribe, slack, mailer, journal, mimir, shoplocked):
+        assert_false(self._hosted.shopper_compromise(self.ticket_valid))
+
+    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(HostedHandler, '_suspend_product', return_value=True)
+    @patch.object(HostedMailer, 'send_shopper_compromise_hosted_suspension', return_value=True)
+    @patch.object(HostedScribe, 'shopper_compromise', return_value=None)
+    @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
+    @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
+    def test_shopper_compromise_success(self, ssl_mailer, can_suspend, scribe, mailer, suspend, journal, mimir, shoplocked):
+        assert_true(self._hosted.shopper_compromise(self.ticket_valid))
+
+    @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
     def test_suspend_none(self, invalid_abuse_type):
         assert_false(self._hosted.suspend({}))
 

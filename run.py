@@ -120,3 +120,9 @@ def repeat_offender(ticket_id):
 def extensive_compromise(ticket_id):
     data = get_database_handle().get_incident(ticket_id)
     return route_request(data, 'extensive_compromise') if data else None
+
+
+@celery.task()
+def shopper_compromise(ticket_id):
+    data = get_database_handle().get_incident(ticket_id)
+    return route_request(data, 'shopper_compromise') if data else None

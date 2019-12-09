@@ -48,6 +48,7 @@ class RegisteredHandler(Handler):
         self.mapping = {
             'customer_warning': self.customer_warning,
             'intentionally_malicious': self.intentionally_malicious,
+            'shopper_compromise': self.shopper_compromise,
             'suspend': self.suspend
         }
 
@@ -120,6 +121,41 @@ class RegisteredHandler(Handler):
             return False
 
         self.shoplocked.adminlock(shopper_id, note_mappings['registered']['intentionallyMalicious']['shoplocked'])
+
+        return self._suspend_domain(domain, ticket_id, note)
+
+    def shopper_compromise(self, data):
+        shopper_id = get_shopper_id_from_dict(data)
+        shopper_id_list = get_list_of_ids_to_notify(data)
+        ticket_id = data.get('ticketId')
+        domain = data.get('sourceDomainOrIp')
+        domain_id = get_domain_id_from_dict(data)
+        source = data.get('source')
+        target = data.get('target')
+        report_type = data.get('type')
+
+        if not self._validate_required_args(data):
+            return False
+
+        note = note_mappings['registered']['shopperCompromise']['crm'].format(domain=domain, type=report_type,
+                                                                              location=source)
+        self.crm.notate_crm_account([shopper_id], ticket_id, note)
+        self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
+                           note_mappings['journal']['shopperCompromise'], [source])
+
+        self.fraud_mailer.send_malicious_domain_notification(ticket_id, domain, shopper_id, report_type, source, target)
+
+        self.ssl_mailer.send_revocation_email(ticket_id, domain, shopper_id, get_ssl_subscriptions_from_dict(data))
+
+        self.shoplocked.adminlock(shopper_id, note_mappings['registered']['shopperCompromise']['shoplocked'])
+
+        if not self.domain_service.can_suspend_domain(domain):
+            self._logger.info("Domain {} already suspended".format(domain))
+            return False
+
+        if not self.registered_mailer.send_shopper_compromise_suspension(ticket_id, domain, domain_id, shopper_id_list):
+            self.slack.failed_sending_email(domain)
+            return False
 
         return self._suspend_domain(domain, ticket_id, note)
 

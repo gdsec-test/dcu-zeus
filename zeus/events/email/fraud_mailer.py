@@ -132,6 +132,42 @@ class FraudMailer(Mailer):
             return False
         return True
 
+    def send_compromise_domain_notification(self, ticket_id, domain, shopper_id, report_type, source, target):
+        """
+        Sends a shopper compromise domain notification to fraud
+        :param ticket_id:
+        :param domain:
+        :param shopper_id:
+        :param report_type:
+        :param source:
+        :param target:
+        :return:
+        """
+        template = "fraud.compromised_shopper_account"
+
+        message_type = "fraud_compromised_shopper_account"
+        exception_type = "fraud_compromised_shopper_account_email_exception"
+        success_message = "fraud_compromised_shopper_account_email_sent"
+
+        kwargs = self.generate_kwargs_for_hermes()
+
+        try:
+            if self._throttle.can_fraud_email_be_sent(domain):
+                substitution_values = {'ACCOUNT_NUMBER': shopper_id,
+                                       'DOMAIN': domain,
+                                       'MALICIOUS_ACTIVITY': report_type,
+                                       'BRAND_TARGETED': target or 'Unknown Brand',
+                                       'URL': source}
+
+                kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
+                send_mail(template, substitution_values, **kwargs)
+                generate_event(ticket_id, success_message)
+        except Exception as e:
+            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            generate_event(ticket_id, exception_type, type=message_type)
+            return False
+        return True
+
     def send_new_hosting_account_notification(self, ticket_id, domain, shopper_id, account_create_date, report_type,
                                               source, target):
         """
@@ -190,6 +226,44 @@ class FraudMailer(Mailer):
         message_type = "fraud_intentionally_malicious_domain"
         exception_type = "fraud_intentionally_malicious_domain_email_exception"
         success_message = "fraud_intentionally_malicious_domain_email_sent"
+
+        kwargs = self.generate_kwargs_for_hermes()
+
+        try:
+            if self._throttle.can_fraud_email_be_sent(domain):
+                substitution_values = {'ACCOUNT_NUMBER': shopper_id,
+                                       'DOMAIN': guid,  # Template requires DOMAIN param
+                                       'MALICIOUS_ACTIVITY': report_type,
+                                       'BRAND_TARGETED': target or 'Unknown Brand',
+                                       'URL': source}
+
+                kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
+                send_mail(template, substitution_values, **kwargs)
+                generate_event(ticket_id, success_message)
+        except Exception as e:
+            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            generate_event(ticket_id, exception_type, type=message_type)
+            return False
+        return True
+
+    def send_compromise_hosting_notification(self, ticket_id, domain, shopper_id, guid, source, report_type, target):
+        """
+        Sends a shopper compromise hosting notification to fraud
+        Using DMV Fraud template; DOMAIN = item reported to Fraud (guid here, for hosting)
+        :param ticket_id:
+        :param domain:
+        :param shopper_id:
+        :param guid:
+        :param source:
+        :param report_type:
+        :param target:
+        :return:
+        """
+        template = "fraud.compromised_shopper_account"
+
+        message_type = "fraud_compromised_shopper_account"
+        exception_type = "fraud_compromised_shopper_account_email_exception"
+        success_message = "fraud_compromised_shopper_account_email_sent"
 
         kwargs = self.generate_kwargs_for_hermes()
 

@@ -12,6 +12,7 @@ class InfractionTypes(Enum):
     content_removed = 'CONTENT_REMOVED'
     intentionally_malicious = 'INTENTIONALLY_MALICIOUS'
     repeat_offender = 'REPEAT_OFFENDER'
+    shopper_compromise = 'SHOPPER_COMPROMISE'
     suspended = 'SUSPENDED'
     extensive_compromise = 'EXTENSIVE_COMPROMISE'
 
@@ -33,7 +34,8 @@ class Mimir:
     def write(self, infraction_type, shopper_number, ticket_number, domain, guid):
         """
         Create an infraction entry in DCU Mimir
-        :param infraction_type: One of CONTENT_REMOVED, CUSTOMER_WARNING, EXTENSIVE_COMPROMISE, INTENTIONALLY_MALICIOUS, REPEAT_OFFENDER, or SUSPENDED
+        :param infraction_type: One of CONTENT_REMOVED, CUSTOMER_WARNING, EXTENSIVE_COMPROMISE, INTENTIONALLY_MALICIOUS,
+            REPEAT_OFFENDER, SHOPPER_COMPROMISE or SUSPENDED
         :param shopper_number: Shopper account number
         :param ticket_number: DCU SNOW ticket number
         :param domain: Domain name
@@ -50,7 +52,8 @@ class Mimir:
             self.slack.failed_infraction_creation(guid, ticket_number, message)
             return
 
-        body = {'infractionType': infraction_type, 'shopperId': shopper_number, 'ticketId': ticket_number, 'sourceDomainOrIp': domain, 'hostingGuid': guid}
+        body = {'infractionType': infraction_type, 'shopperId': shopper_number, 'ticketId': ticket_number,
+                'sourceDomainOrIp': domain, 'hostingGuid': guid}
 
         try:
             response = requests.post(self._mimir_endpoint, json=body, headers=self._headers)

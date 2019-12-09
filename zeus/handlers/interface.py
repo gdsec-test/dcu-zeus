@@ -13,5 +13,9 @@ class Handler(object):
         pass
 
     @abc.abstractmethod
+    def shopper_compromise(self, data):
+        pass
+
+    @abc.abstractmethod
     def suspend(self, data):
         pass

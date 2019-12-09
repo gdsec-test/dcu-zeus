@@ -185,6 +185,37 @@ class HostedMailer(Mailer):
             return False
         return True
 
+    def send_shopper_compromise_hosted_suspension(self, ticket_id, domain, shopper_id):
+        """
+        Sends a notification to the shopper account email address found for the hosting account
+        :param ticket_id:
+        :param domain:
+        :param shopper_id:
+        :return:
+        """
+        template = "hosted.suspend_shopper_compromise"
+
+        message_type = "hosted_shopper_compromise_suspend_notice"
+        exception_type = "hosted_shopper_compromise_suspend_email_exception"
+        success_message = "hosted_shopper_compromise_suspend_notice_email_sent"
+
+        redis_key = "{}_compromise_suspended_email".format(domain)
+
+        try:
+            if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
+                substitution_values = {'ACCOUNT_NUMBER': shopper_id}
+
+                resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
+                resp.update({'type': message_type, 'template': 5282})
+                generate_event(ticket_id, success_message, **resp)
+            else:
+                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+        except Exception as e:
+            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            generate_event(ticket_id, exception_type, type=message_type)
+            return False
+        return True
+
     def send_extensive_compromise(self, ticket_id, domain, shopper_id):
         """
         Sends a notification to the shopper account email address found for the hosting account regarding

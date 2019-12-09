@@ -64,7 +64,8 @@ class RegisteredMailer(Mailer):
 
     def send_shopper_suspension(self, ticket_id, domain, domain_id, shopper_ids, source, report_type):
         """
-        Sends a suspension notification to the shopper account and administrative contact email address(es) found for the domain
+        Sends a suspension notification to the shopper account and administrative contact email address(es)
+        found for the domain
         :param ticket_id:
         :param domain:
         :param domain_id:
@@ -143,6 +144,47 @@ class RegisteredMailer(Mailer):
                     resp = send_mail(template, substitution_values, **kwargs)
                     resp.update(
                         {'type': message_type, 'template': 4044})  # template provided for backwards compatibility
+                    generate_event(ticket_id, success_message, **resp)
+            else:
+                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+        except Exception as e:
+            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            generate_event(ticket_id, exception_type, type=message_type)
+            return False
+        return True
+
+    def send_shopper_compromise_suspension(self, ticket_id, domain, domain_id, shopper_ids):
+        """
+        Sends an intentional suspension notification to the shopper account email address found for the domain
+        :param ticket_id:
+        :param domain:
+        :param domain_id:
+        :param shopper_ids:
+        :return:
+        """
+        if not shopper_ids:
+            return False
+
+        template = "registered.suspend_shopper_compromise"
+
+        message_type = "reg-only_domain_suspension_compromise"
+        exception_type = "reg-only_shopper_compromise_suspend_email_exception"
+        success_message = "reg-only_shopper_compromise_suspend_email_sent"
+
+        kwargs = self.generate_kwargs_for_hermes()
+
+        try:
+            if self._throttle.can_shopper_email_be_sent(domain) or self._CAN_FLOOD:
+
+                # If the domain is associated with a parent/child API reseller
+                #  account, then email both the parent and child account
+                for shopper_id in shopper_ids:
+                    substitution_values = {'ACCOUNT_NUMBER': shopper_id}
+
+                    kwargs['domain_id'] = domain_id
+                    resp = send_mail(template, substitution_values, **kwargs)
+                    resp.update(
+                        {'type': message_type, 'template': 5282})  # template provided for backwards compatibility
                     generate_event(ticket_id, success_message, **resp)
             else:
                 self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))

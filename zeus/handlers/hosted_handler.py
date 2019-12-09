@@ -41,6 +41,7 @@ class HostedHandler:
             'content_removed': self.content_removed,
             'intentionally_malicious': self.intentionally_malicious,
             'repeat_offender': self.repeat_offender,
+            'shopper_compromise': self.shopper_compromise,
             'suspend': self.suspend,
             'extensive_compromise': self.extensive_compromise
         }
@@ -131,6 +132,37 @@ class HostedHandler:
             return False
 
         self.shoplocked.adminlock(shopper_id, note_mappings['hosted']['intentionallyMalicious']['shoplocked'])
+
+        return self._suspend_product(data, guid, product)
+
+    def shopper_compromise(self, data):
+        domain = data.get('sourceDomainOrIp')
+        source = data.get('source')
+        ticket_id = data.get('ticketId')
+        product = get_host_info_from_dict(data).get('product')
+
+        report_type, guid, shopper_id = self._validate_required_args(data)
+        if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
+            return False
+
+        self.journal.write(EventTypes.product_suspension, product, domain, report_type,
+                           note_mappings['journal']['shopperCompromise'], [source])
+
+        self.mimir.write(InfractionTypes.shopper_compromise, shopper_id, ticket_id, domain, guid)
+
+        self.scribe.shopper_compromise(ticket_id, guid, source, report_type, shopper_id)
+
+        self.ssl_mailer.send_revocation_email(ticket_id, domain, shopper_id, get_ssl_subscriptions_from_dict(data))
+
+        self.shoplocked.adminlock(shopper_id, note_mappings['hosted']['shopperCompromise']['shoplocked'])
+
+        if not self.hosting_service.can_suspend_hosting_product(guid):
+            self._logger.info("Hosting {} already suspended".format(guid))
+            return False
+
+        if not self.hosted_mailer.send_shopper_compromise_hosted_suspension(ticket_id, domain, shopper_id):
+            self.slack.failed_sending_email(domain)
+            return False
 
         return self._suspend_product(data, guid, product)
 

@@ -56,6 +56,16 @@ class TestFraudMailer:
     def test_send_malicious_notification_exception(self, send_mail):
         assert_false(self._mailer.send_malicious_domain_notification(None, None, None, None, 'test-source', None))
 
+    ''' Shopper Compromise Domain Notification Tests '''
+
+    @patch('zeus.events.email.fraud_mailer.send_mail', return_value='SUCCESS')
+    def test_send_compromise_notification(self, send_mail):
+        assert_true(self._mailer.send_compromise_domain_notification(None, None, None, None, 'test-source', None))
+
+    @patch('zeus.events.email.fraud_mailer.send_mail', side_effect=SMTPException())
+    def test_send_compromise_notification_exception(self, send_mail):
+        assert_false(self._mailer.send_compromise_domain_notification(None, None, None, None, 'test-source', None))
+
     ''' New Hosting Account Tests '''
 
     @patch('zeus.events.email.fraud_mailer.send_mail', return_value='SUCCESS')
@@ -75,3 +85,13 @@ class TestFraudMailer:
     @patch('zeus.events.email.fraud_mailer.send_mail', side_effect=SMTPException())
     def test_send_malicious_hosting_notification_exception(self, send_mail):
         assert_false(self._mailer.send_malicious_hosting_notification(None, None, None, None, 'test-source', None, None))
+
+    ''' Shopper Compromise Hosting Notification '''
+
+    @patch('zeus.events.email.fraud_mailer.send_mail', return_value='SUCCESS')
+    def test_send_compromise_hosting_notification(self, send_mail):
+        assert_true(self._mailer.send_compromise_hosting_notification(None, None, None, None, 'test-source', None, None))
+
+    @patch('zeus.events.email.fraud_mailer.send_mail', side_effect=SMTPException())
+    def test_send_compromise_hosting_notification_exception(self, send_mail):
+        assert_false(self._mailer.send_compromise_hosting_notification(None, None, None, None, 'test-source', None, None))
