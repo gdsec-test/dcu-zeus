@@ -59,13 +59,3 @@ note_mappings = {
         'extensiveCompromise': "Customer's hosting is permanently suspended due to extensive compromise."
     }
 }
-
-alert_mappings = {
-    'hosted': {
-        'contentRemoved': "{type} content removed and/or disabled from hosting {domain}. See CRM notes and x.co/dcuwhat2do for more info.",
-        'suspend': "Hosting {domain} suspended for {type} content. See CRM notes and x.co/dcuwhat2do for more info."
-    },
-    'registered': {
-        'suspend': "{domain} suspended for {type} content. See CRM notes and x.co/dcuwhat2do for more info."
-    }
-}
