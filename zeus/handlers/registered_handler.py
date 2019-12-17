@@ -145,8 +145,6 @@ class RegisteredHandler(Handler):
 
         self.fraud_mailer.send_malicious_domain_notification(ticket_id, domain, shopper_id, report_type, source, target)
 
-        self.ssl_mailer.send_revocation_email(ticket_id, domain, shopper_id, get_ssl_subscriptions_from_dict(data))
-
         self.shoplocked.adminlock(shopper_id, note_mappings['registered']['shopperCompromise']['shoplocked'])
 
         if not self.domain_service.can_suspend_domain(domain):

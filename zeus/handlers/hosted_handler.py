@@ -152,8 +152,6 @@ class HostedHandler:
 
         self.scribe.shopper_compromise(ticket_id, guid, source, report_type, shopper_id)
 
-        self.ssl_mailer.send_revocation_email(ticket_id, domain, shopper_id, get_ssl_subscriptions_from_dict(data))
-
         self.shoplocked.adminlock(shopper_id, note_mappings['hosted']['shopperCompromise']['shoplocked'])
 
         if not self.hosting_service.can_suspend_hosting_product(guid):
