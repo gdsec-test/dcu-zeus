@@ -51,7 +51,7 @@ class SlackFailures:
         self._logger = logging.getLogger(__name__)
         self._slack = slack
 
-    def failed_hosting_suspension(self, guid, info=None):
+    def failed_hosting_suspension(self, guid, info=''):
         key = '{}_suspend_failed'.format(guid)
         message = 'Suspension Failed for Hosting: {}. {}'.format(guid, info)
         self._logger.error(message)

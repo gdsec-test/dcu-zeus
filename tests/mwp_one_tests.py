@@ -15,7 +15,7 @@ class TestMWPOne:
     def test_suspend_fails(self, post):
         assert_false(self._mwp_one.suspend('test-accountid'))
 
-    @patch('requests.post', return_value=MagicMock(text='true'))
+    @patch('requests.post', return_value=MagicMock(text='true', status_code=200))
     def test_suspend_success(self, post):
         assert_true(self._mwp_one.suspend('test-accountid'))
 
@@ -23,6 +23,6 @@ class TestMWPOne:
     def test_reinstate_fails(self, post):
         assert_false(self._mwp_one.reinstate('test-accountid'))
 
-    @patch('requests.post', return_value=MagicMock(text='true'))
+    @patch('requests.post', return_value=MagicMock(text='true', status_code=200))
     def test_reinstate_success(self, post):
         assert_true(self._mwp_one.reinstate('test-accountid'))

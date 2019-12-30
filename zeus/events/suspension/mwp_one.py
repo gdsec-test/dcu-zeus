@@ -22,10 +22,12 @@ class MWPOne(Product):
 
         try:
             response = requests.post(url, auth=self.mwponeauth, headers=self.headers, verify=False)
-
-            if response.text == 'true':
-                logging.info('Managed Wordpress 1.0 account {} has been suspended'.format(guid))
-                return True
+            if response.status_code == 200:
+                if response.text == 'true':
+                    logging.info('Managed Wordpress 1.0 account {} has been suspended'.format(guid))
+                    return True
+            else:
+                print 'Failed to suspend account {}: {}'.format(guid, response.reason)
 
         except Exception as e:
             logging.error("Failed to suspend account {}. {}".format(guid, e.message))
@@ -36,9 +38,12 @@ class MWPOne(Product):
 
         try:
             response = requests.post(url, auth=self.mwponeauth, headers=self.headers, verify=False)
-            if response.text == 'true':
-                logging.info('Managed Wordpress 1.0 account {} has been reinstated'.format(guid))
-                return True
+            if response.status_code == 200:
+                if response.text == 'true':
+                    logging.info('Managed Wordpress 1.0 account {} has been reinstated'.format(guid))
+                    return True
+            else:
+                print 'Failed to reinstate account {}: {}'.format(guid, response.reason)
 
         except Exception as e:
             logging.error("Failed to reinstate account {}. {}".format(guid, e.message))
