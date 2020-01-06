@@ -15,6 +15,7 @@ class Diablo(Product):
     headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
 
     def __init__(self, app_settings):
+        self._logger = logging.getLogger(__name__)
         self.url = app_settings.DIABLO_URL
         self.auth = (app_settings.DIABLOUSER, app_settings.DIABLOPASS)
 
@@ -30,7 +31,7 @@ class Diablo(Product):
             return response.status_code == 200
 
         except Exception as e:
-            logging.error("Failed to suspend GUID: {}. {}".format(guid, e.message))
+            self._logger.error("Failed to suspend GUID: {}. {}".format(guid, e.message))
         return False
 
     def reinstate(self, guid, **kwargs):
@@ -49,7 +50,7 @@ class Diablo(Product):
             return response.status_code == 200
 
         except Exception as e:
-            logging.error("Failed to reinstate GUID: {}. {}".format(guid, e.message))
+            self._logger.error("Failed to reinstate GUID: {}. {}".format(guid, e.message))
         return False
 
     def cancel(self):
