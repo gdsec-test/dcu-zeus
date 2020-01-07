@@ -103,3 +103,8 @@ class SlackFailures:
         key = '{}/{}_create_infraction_failed'.format(guid, ticket_number)
         message = 'Unable to create Mimir infraction for {}/{}: {}'.format(guid, ticket_number, exception_message)
         self._slack.send_message(key, message)
+
+    def failed_to_create_alert(self, domain, shopper_id):
+        key = '{}_failed_to_create_alert'.format(domain)
+        message = 'Failed to create alert for domain: {} shopperId: {}'.format(domain, shopper_id)
+        self._slack.send_message(key, message)

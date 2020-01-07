@@ -4,9 +4,10 @@ from datetime import datetime, timedelta
 from zeus.events.email.fraud_mailer import FraudMailer
 from zeus.events.email.hosted_mailer import HostedMailer
 from zeus.events.email.ssl_mailer import SSLMailer
-from zeus.events.support_tools.constants import note_mappings
+from zeus.events.support_tools.constants import alert_mappings, note_mappings
 from zeus.events.suspension.hosting_service import ThrottledHostingService
 from zeus.reviews.reviews import BasicReview
+from zeus.utils.crmalert import CRMAlert
 from zeus.utils.functions import (get_host_info_from_dict,
                                   get_host_shopper_id_from_dict,
                                   get_ssl_subscriptions_from_dict)
@@ -32,6 +33,7 @@ class HostedHandler:
         self.ssl_mailer = SSLMailer(app_settings)
         self.slack = SlackFailures(ThrottledSlack(app_settings))
         self.shoplocked = Shoplocked(app_settings)
+        self.crmalert = CRMAlert(app_settings)
 
         self.basic_review = BasicReview(app_settings)
         self.HOLD_TIME = app_settings.HOLD_TIME
@@ -102,6 +104,9 @@ class HostedHandler:
         self.mimir.write(InfractionTypes.content_removed, shopper_id, ticket_id, domain, guid)
         self.scribe.content_removed(ticket_id, guid, source, report_type, shopper_id)
 
+        alert = alert_mappings['hosted']['contentRemoved'].format(type=report_type, domain=domain)
+        self.crmalert.create_alert(shopper_id, alert, report_type, self.crmalert.low_severity, domain)
+
         return True
 
     def intentionally_malicious(self, data):
@@ -132,6 +137,9 @@ class HostedHandler:
             return False
 
         self.shoplocked.adminlock(shopper_id, note_mappings['hosted']['intentionallyMalicious']['shoplocked'])
+
+        alert = alert_mappings['hosted']['suspend'].format(domain=domain, type=report_type)
+        self.crmalert.create_alert(shopper_id, alert, report_type, self.crmalert.high_severity, domain)
 
         return self._suspend_product(data, guid, product)
 
@@ -188,6 +196,9 @@ class HostedHandler:
             self.slack.failed_sending_email(domain)
             return False
 
+        alert = alert_mappings['hosted']['suspend'].format(domain=domain, type=report_type)
+        self.crmalert.create_alert(shopper_id, alert, report_type, self.crmalert.high_severity, domain)
+
         return self._suspend_product(data, guid, product)
 
     def suspend(self, data):
@@ -214,6 +225,9 @@ class HostedHandler:
             self.slack.failed_sending_email(domain)
             return False
 
+        alert = alert_mappings['hosted']['suspend'].format(domain=domain, type=report_type)
+        self.crmalert.create_alert(shopper_id, alert, report_type, self.crmalert.low_severity, domain)
+
         return self._suspend_product(data, guid, product)
 
     def extensive_compromise(self, data):
@@ -239,6 +253,9 @@ class HostedHandler:
         if not self.hosted_mailer.send_extensive_compromise(ticket_id, domain, shopper_id):
             self.slack.failed_sending_email(domain)
             return False
+
+        alert = alert_mappings['hosted']['suspend'].format(domain=domain, type=report_type)
+        self.crmalert.create_alert(shopper_id, alert, report_type, self.crmalert.low_severity, domain)
 
         return self._suspend_product(data, guid, product)
 

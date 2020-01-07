@@ -5,11 +5,12 @@ from zeus.events.email.foreign_mailer import ForeignMailer
 from zeus.events.email.fraud_mailer import FraudMailer
 from zeus.events.email.registered_mailer import RegisteredMailer
 from zeus.events.email.ssl_mailer import SSLMailer
-from zeus.events.support_tools.constants import note_mappings
+from zeus.events.support_tools.constants import alert_mappings, note_mappings
 from zeus.events.support_tools.crm import ThrottledCRM
 from zeus.events.suspension.domains import ThrottledDomainService
 from zeus.handlers.interface import Handler
 from zeus.reviews.reviews import BasicReview
+from zeus.utils.crmalert import CRMAlert
 from zeus.utils.functions import (get_domain_id_from_dict,
                                   get_host_abuse_email_from_dict,
                                   get_host_brand_from_dict,
@@ -40,6 +41,7 @@ class RegisteredHandler(Handler):
         self.journal = Journal(app_settings)
         self.slack = SlackFailures(ThrottledSlack(app_settings))
         self.shoplocked = Shoplocked(app_settings)
+        self.crmalert = CRMAlert(app_settings)
 
         self.basic_review = BasicReview(app_settings)
         self.HOLD_TIME = app_settings.HOLD_TIME
@@ -122,6 +124,9 @@ class RegisteredHandler(Handler):
 
         self.shoplocked.adminlock(shopper_id, note_mappings['registered']['intentionallyMalicious']['shoplocked'])
 
+        alert = alert_mappings['registered']['suspend'].format(domain=domain, type=report_type)
+        self.crmalert.create_alert(shopper_id, alert, report_type, self.crmalert.high_severity, domain)
+
         return self._suspend_domain(domain, ticket_id, note)
 
     def shopper_compromise(self, data):
@@ -184,6 +189,9 @@ class RegisteredHandler(Handler):
                                                               report_type):
             self.slack.failed_sending_email(domain)
             return False
+
+        alert = alert_mappings['registered']['suspend'].format(domain=domain, type=report_type)
+        self.crmalert.create_alert(shopper_id, alert, report_type, self.crmalert.low_severity, domain)
 
         return self._suspend_domain(domain, ticket_id, note)
 
