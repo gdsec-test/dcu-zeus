@@ -54,6 +54,16 @@ spec:
               secretKeyRef:
                 name: auth-zeus-envs
                 key: diablopass
+          - name: PLESKUSER
+            valueFrom:
+              secretKeyRef:
+                name: auth-zeus-envs
+                key: pleskuser
+          - name: PLESKPASS
+            valueFrom:
+              secretKeyRef:
+                name: auth-zeus-envs
+                key: pleskpass
           - name: MWPONEUSER
             valueFrom:
               secretKeyRef:
