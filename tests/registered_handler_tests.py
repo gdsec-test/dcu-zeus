@@ -77,6 +77,18 @@ class TestRegisteredHandler:
     def test_intentionally_malicious_failed_shopper_email(self, ssl_mailer, service, crm, fraud, registered, slack, journal, shoplocked):
         assert_false(self._registered.intentionally_malicious(self.ticket_valid))
 
+    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(SlackFailures, 'failed_sending_revocation_email', return_value=None)
+    @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
+    @patch.object(RegisteredMailer, 'send_shopper_intentional_suspension', return_value=True)
+    @patch.object(FraudMailer, 'send_malicious_domain_notification', return_value=None)
+    @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
+    @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
+    @patch.object(SSLMailer, 'send_revocation_email', return_value=False)
+    def test_intentionally_malicious_failed_revocation_email(self, ssl_mailer, service, crm, fraud, registered, slack, slack_sll, journal, shoplocked):
+        assert_false(self._registered.intentionally_malicious(self.ticket_valid))
+
     @patch.object(CRMAlert, 'create_alert', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
