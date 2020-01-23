@@ -112,7 +112,7 @@ class TestHostedHandler:
     @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=False)
-    def test_intentionally_malicious_failed_shopper_email(self, ssl_mailer, can_suspend, scribe, slack, slack_ssl, mailer, journal, mimir, shoplocked):
+    def test_intentionally_malicious_failed_revocation_email(self, ssl_mailer, can_suspend, scribe, slack, slack_ssl, mailer, journal, mimir, shoplocked):
         assert_false(self._hosted.intentionally_malicious(self.ticket_valid))
 
     @patch.object(CRMAlert, 'create_alert', return_value=None)
