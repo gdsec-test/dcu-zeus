@@ -131,9 +131,10 @@ class HostedHandler:
         self.scribe.intentionally_malicious(ticket_id, guid, source, report_type, shopper_id)
 
         ssl_subscription = get_ssl_subscriptions_from_dict(data)
-        if not self.ssl_mailer.send_revocation_email(ticket_id, domain, shopper_id, ssl_subscription):
-            self.slack.failed_sending_revocation_email(ticket_id, domain, shopper_id, ssl_subscription)
-            return False
+        if ssl_subscription and shopper_id and domain:
+            if not self.ssl_mailer.send_revocation_email(ticket_id, domain, shopper_id, ssl_subscription):
+                self.slack.failed_sending_revocation_email(ticket_id, domain, shopper_id, ssl_subscription)
+                return False
 
         if not self.hosted_mailer.send_shopper_hosted_intentional_suspension(ticket_id, domain, shopper_id, report_type):
             self.slack.failed_sending_email(domain)

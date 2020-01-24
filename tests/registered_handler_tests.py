@@ -19,8 +19,8 @@ from zeus.utils.slack import SlackFailures
 class TestRegisteredHandler:
     ticket_invalid_type = {'hosted_status': 'REGISTERED'}
     ticket_no_shopper = {'hosted_status': 'REGISTERED', 'type': 'PHISHING'}
-    ticket_valid = {'hosted_status': 'REGISTERED', 'type': 'PHISHING', 'data': {
-        'domainQuery': {'shopperInfo': {'shopperId': 'test-id'}}}}
+    ticket_valid = {'hosted_status': 'REGISTERED', 'type': 'PHISHING', 'sourceDomainOrIp': 'domain',
+                    'data': {'domainQuery': {'shopperInfo': {'shopperId': 'test-id'}, 'sslSubscriptions': '1234'}}}
 
     @classmethod
     def setup(cls):

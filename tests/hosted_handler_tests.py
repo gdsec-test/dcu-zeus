@@ -19,10 +19,13 @@ class TestHostedHandler:
     phishing = 'PHISHING'
     guid = 'test-guid'
     sid = 'test-id'
+    ssl_subscription = '1234'
+    domain = 'domain'
     ticket_no_guid = {'type': phishing}
     ticket_no_shopper = {'type': phishing, 'data': {'domainQuery': {'host': {'guid': guid}}}}
-    ticket_valid = {'type': phishing,
-                    'data': {'domainQuery': {'host': {'guid': guid, 'shopperId': sid}}}}
+    ticket_valid = {'type': phishing, 'sourceDomainOrIp': domain,
+                    'data': {'domainQuery': {'host': {'guid': guid, 'shopperId': sid},
+                                             'sslSubscriptions': ssl_subscription}}}
 
     @classmethod
     def setup(cls):

@@ -39,9 +39,6 @@ class SSLMailer(Mailer):
         Return if there are no ssl certificates associated with the domain.
         Also return if the ticket does not contain both shopper and domain
         '''
-        if not (ssl_subscriptions and shopper_id and domain):
-            return False
-
         try:
             if self._throttle.can_ssl_revocation_email_be_sent(domain):
                 cert_details = ''

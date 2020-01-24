@@ -49,6 +49,3 @@ class TestSSLMailer:
 
     def test_handle_ssl_certs_invalid_request(self):
         assert_false(self._mailer.send_revocation_email('DCU123', None, None, None))
-
-    def test_handle_ssl_certs_ssl_cert_not_present(self):
-        assert_false(self._mailer.send_revocation_email('DCU123', 'abc.com', '1234', []))

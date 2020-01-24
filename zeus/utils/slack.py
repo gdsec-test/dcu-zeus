@@ -112,6 +112,6 @@ class SlackFailures:
     def failed_sending_revocation_email(self, ticket_id, domain, shopper_id, ssl_subscription):
         key = '{}_ssl_email_failed_to_send'.format(domain)
         message = 'SSL revocation email failed to send for ticketId: {} shopperId: {} domain: {} ssl: {}'.format(
-            ticket_id, domain, shopper_id, ssl_subscription)
+            ticket_id, shopper_id, domain, ssl_subscription)
         self._logger.error(message)
         self._slack.send_message(key, message)

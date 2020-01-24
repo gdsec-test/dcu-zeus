@@ -6,7 +6,8 @@ from zeus.utils.functions import (get_domain_create_date_from_dict,
                                   get_list_of_ids_to_notify,
                                   get_parent_child_shopper_ids_from_dict,
                                   get_shopper_create_date_from_dict,
-                                  get_shopper_id_from_dict)
+                                  get_shopper_id_from_dict,
+                                  get_ssl_subscriptions_from_dict)
 
 
 class TestFunctions:
@@ -106,3 +107,8 @@ class TestFunctions:
         data = {'data': {'domainQuery': {'shopperInfo': {'shopperCreateDate': '1 Jan, 1970'}}}}
         actual = get_shopper_create_date_from_dict(data)
         assert_equal(actual, '1 Jan, 1970')
+
+    def test_get_ssl_subscriptions_from_dict(self):
+        data = {'data': {'domainQuery': {'sslSubscriptions': '1234'}}}
+        actual = get_ssl_subscriptions_from_dict(data)
+        assert_equal(actual, '1234')

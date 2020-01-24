@@ -116,9 +116,10 @@ class RegisteredHandler(Handler):
         self.fraud_mailer.send_malicious_domain_notification(ticket_id, domain, shopper_id, report_type, source, target)
 
         ssl_subscription = get_ssl_subscriptions_from_dict(data)
-        if not self.ssl_mailer.send_revocation_email(ticket_id, domain, shopper_id, ssl_subscription):
-            self.slack.failed_sending_revocation_email(ticket_id, domain, shopper_id, ssl_subscription)
-            return False
+        if ssl_subscription and shopper_id and domain:
+            if not self.ssl_mailer.send_revocation_email(ticket_id, domain, shopper_id, ssl_subscription):
+                self.slack.failed_sending_revocation_email(ticket_id, domain, shopper_id, ssl_subscription)
+                return False
 
         if not self.registered_mailer.send_shopper_intentional_suspension(ticket_id, domain, domain_id, shopper_id_list,
                                                                           report_type):
