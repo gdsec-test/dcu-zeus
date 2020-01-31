@@ -6,6 +6,7 @@ from zeus.events.email.hosted_mailer import HostedMailer
 from zeus.events.email.ssl_mailer import SSLMailer
 from zeus.events.support_tools.constants import alert_mappings, note_mappings
 from zeus.events.suspension.hosting_service import ThrottledHostingService
+from zeus.handlers.interface import Handler
 from zeus.reviews.reviews import BasicReview
 from zeus.utils.crmalert import CRMAlert
 from zeus.utils.functions import (get_host_info_from_dict,
@@ -18,7 +19,7 @@ from zeus.utils.shoplocked import Shoplocked
 from zeus.utils.slack import SlackFailures, ThrottledSlack
 
 
-class HostedHandler:
+class HostedHandler(Handler):
     supported_types = ['PHISHING', 'MALWARE']
 
     def __init__(self, app_settings):
