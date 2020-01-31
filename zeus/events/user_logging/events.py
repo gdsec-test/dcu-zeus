@@ -10,7 +10,14 @@ def generate_event(ticket, reason, **kwargs):
     :param kwargs:
     :return:
     """
+    logger = logging.getLogger(__name__)
+
     data = dict(ticket=ticket)
+
     if kwargs:
         data.update(kwargs)
-    logging.getLogger(__name__).uevent(reason, extra=data)
+
+    try:
+        logger.uevent(reason, extra=data)
+    except Exception as e:
+        logger.error('Unable to log event for ticket {} & reason {}: {}'.format(ticket, reason, e.message))
