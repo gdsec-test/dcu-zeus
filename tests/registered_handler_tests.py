@@ -21,6 +21,8 @@ class TestRegisteredHandler:
     ticket_no_shopper = {'hosted_status': 'REGISTERED', 'type': 'PHISHING'}
     ticket_valid = {'hosted_status': 'REGISTERED', 'type': 'PHISHING', 'sourceDomainOrIp': 'domain',
                     'data': {'domainQuery': {'shopperInfo': {'shopperId': 'test-id'}, 'sslSubscriptions': '1234'}}}
+    ticket_protected_domain = {'hosted_status': 'REGISTERED', 'type': 'PHISHING', 'sourceDomainOrIp': 'myftpupload.com',
+                               'data': {'domainQuery': {'shopperInfo': {'shopperId': 'test-id'}, 'sslSubscriptions': '1234'}}}
 
     @classmethod
     def setup(cls):
@@ -185,3 +187,7 @@ class TestRegisteredHandler:
     @patch.object(ThrottledDomainService, 'suspend_domain', return_value=False)
     def test_suspend_domain_failed(self, service, slack):
         assert_false(self._registered._suspend_domain({}, 'test-id', 'reason'))
+
+    @patch.object(SlackFailures, 'failed_protected_domain_action', return_value=None)
+    def test_protected_domain_action(self, slack):
+        assert_false(self._registered.suspend(self.ticket_protected_domain))

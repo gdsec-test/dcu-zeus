@@ -46,6 +46,7 @@ class RegisteredHandler(Handler):
         self.basic_review = BasicReview(app_settings)
         self.HOLD_TIME = app_settings.HOLD_TIME
         self.ENTERED_BY = app_settings.ENTERED_BY
+        self.PROTECTED_DOMAINS = app_settings.PROTECTED_DOMAINS
 
         self.mapping = {
             'customer_warning': self.customer_warning,
@@ -69,6 +70,9 @@ class RegisteredHandler(Handler):
         domain_id = get_domain_id_from_dict(data)
         report_type = data.get('type')
         source = data.get('source')
+
+        if self._is_domain_protected(domain, action='customer_warning'):
+            return False
 
         if not self._validate_required_args(data):
             return False
@@ -98,6 +102,9 @@ class RegisteredHandler(Handler):
         source = data.get('source')
         target = data.get('target')
         report_type = data.get('type')
+
+        if self._is_domain_protected(domain, action='intentionally_malicious'):
+            return False
 
         if not self._validate_required_args(data):
             return False
@@ -143,6 +150,9 @@ class RegisteredHandler(Handler):
         target = data.get('target')
         report_type = data.get('type')
 
+        if self._is_domain_protected(domain, action='shopper_compromise'):
+            return False
+
         if not self._validate_required_args(data):
             return False
 
@@ -175,6 +185,9 @@ class RegisteredHandler(Handler):
         source = data.get('source')
         report_type = data.get('type')
 
+        if self._is_domain_protected(domain, action='suspend'):
+            return False
+
         if not self._validate_required_args(data):
             return False
 
@@ -198,6 +211,12 @@ class RegisteredHandler(Handler):
         self.crmalert.create_alert(shopper_id, alert, report_type, self.crmalert.low_severity, domain)
 
         return self._suspend_domain(domain, ticket_id, note)
+
+    def _is_domain_protected(self, domain, action):
+        if domain in self.PROTECTED_DOMAINS:
+            self.slack.failed_protected_domain_action(domain, action)
+            return True
+        return False
 
     def _suspend_domain(self, domain, ticket_id, reason):
         self._logger.info("Suspending domain {} for incident {}".format(domain, ticket_id))

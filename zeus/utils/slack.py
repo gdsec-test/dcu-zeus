@@ -63,6 +63,12 @@ class SlackFailures:
         self._logger.error(message)
         self._slack.send_message(key, message)
 
+    def failed_protected_domain_action(self, domain, action):
+        key = '{}_{}_action_failed'.format(domain, action)
+        message = '{} Action failed for a Protected Domain: {}'.format(action, domain)
+        self._logger.error(message)
+        self._slack.send_message(key, message)
+
     def invalid_abuse_type(self, ticket_id):
         key = '{}_not_valid_hold'.format(ticket_id)
         message = '{} not placed on hold - not a valid ticket type'.format(ticket_id)
