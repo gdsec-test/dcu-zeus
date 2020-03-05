@@ -4,6 +4,7 @@ from nose.tools import assert_false, assert_true
 from settings import TestingConfig
 from zeus.events.email.foreign_mailer import ForeignMailer
 from zeus.events.email.fraud_mailer import FraudMailer
+from zeus.events.email.oceo_mailer import OCEOMailer
 from zeus.events.email.registered_mailer import RegisteredMailer
 from zeus.events.email.ssl_mailer import SSLMailer
 from zeus.events.support_tools.crm import ThrottledCRM
@@ -17,12 +18,22 @@ from zeus.utils.slack import SlackFailures
 
 
 class TestRegisteredHandler:
-    ticket_invalid_type = {'hosted_status': 'REGISTERED'}
-    ticket_no_shopper = {'hosted_status': 'REGISTERED', 'type': 'PHISHING'}
-    ticket_valid = {'hosted_status': 'REGISTERED', 'type': 'PHISHING', 'sourceDomainOrIp': 'domain',
-                    'data': {'domainQuery': {'shopperInfo': {'shopperId': 'test-id'}, 'sslSubscriptions': '1234'}}}
-    ticket_protected_domain = {'hosted_status': 'REGISTERED', 'type': 'PHISHING', 'sourceDomainOrIp': 'myftpupload.com',
-                               'data': {'domainQuery': {'shopperInfo': {'shopperId': 'test-id'}, 'sslSubscriptions': '1234'}}}
+    phishing = 'PHISHING'
+    sid = 'test-id'
+    ssl_subscription = '1234'
+    domain = 'domain'
+    protected_domain = 'myftpupload.com'
+    reg = 'REGISTERED'
+    ticket_invalid_type = {'hosted_status': reg}
+    ticket_no_shopper = {'hosted_status': reg, 'type': phishing}
+    ticket_valid = {'hosted_status': reg, 'type': phishing, 'sourceDomainOrIp': domain,
+                    'data': {'domainQuery': {'shopperInfo': {'shopperId': sid}, 'sslSubscriptions': ssl_subscription}}}
+    ticket_fraud_hold = {'fraud_hold_reason': 'test', 'hosted_status': reg, 'type': phishing,
+                         'sourceDomainOrIp': domain, 'data': {'domainQuery': {'shopperInfo': {'shopperId': sid},
+                                                                              'sslSubscriptions': ssl_subscription}}}
+    ticket_protected_domain = {'hosted_status': reg, 'type': phishing, 'sourceDomainOrIp': protected_domain,
+                               'data': {'domainQuery': {'shopperInfo': {'shopperId': sid},
+                                                        'sslSubscriptions': ssl_subscription}}}
 
     @classmethod
     def setup(cls):
@@ -100,7 +111,20 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    def test_intentionally_malicious_success(self, ssl_mailer, service, crm, fraud, registered, handler, journal, shoplocked, crmalert):
+    def test_intentionally_malicious_no_termination_email(self, ssl_mailer, service, crm, fraud, registered, handler, journal, shoplocked, crmalert):
+        assert_true(self._registered.intentionally_malicious(self.ticket_fraud_hold))
+
+    @patch.object(CRMAlert, 'create_alert', return_value=None)
+    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(RegisteredHandler, '_suspend_domain', return_value=True)
+    @patch.object(RegisteredMailer, 'send_shopper_intentional_suspension', return_value=True)
+    @patch.object(FraudMailer, 'send_malicious_domain_notification', return_value=None)
+    @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
+    @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
+    @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
+    @patch.object(OCEOMailer, 'send_termination_email', return_value=True)
+    def test_intentionally_malicious_success(self, oceo_mailer, ssl_mailer, service, crm, fraud, registered, handler, journal, shoplocked, crmalert):
         assert_true(self._registered.intentionally_malicious(self.ticket_valid))
 
     @patch.object(SlackFailures, 'invalid_hosted_status', return_value=None)

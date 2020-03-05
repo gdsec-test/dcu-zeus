@@ -121,3 +121,10 @@ class SlackFailures:
             ticket_id, shopper_id, domain, ssl_subscription)
         self._logger.error(message)
         self._slack.send_message(key, message)
+
+    def failed_sending_termination_email(self, ticket_id, domain, shopper_id):
+        key = '{}_termination_email_failed_to_send'.format(domain)
+        message = 'Termination email to OCEO failed to send for ticketId: {} shopperId: {} domain: {}'.format(
+            ticket_id, shopper_id, domain)
+        self._logger.error(message)
+        self._slack.send_message(key, message)

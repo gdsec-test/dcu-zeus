@@ -44,12 +44,6 @@ class Throttle(object):
 
     ''' Domain specific time outs '''
 
-    def can_shopper_email_be_sent(self, domain):
-        if not self._get_anti_spam_key(domain):
-            self._set_anti_spam_key(domain)
-            return True
-        return False
-
     def can_fraud_email_be_sent(self, domain):
         fraud_key = 'fraud_hold_{}'.format(domain)
         if not self._get_anti_spam_key(fraud_key):
@@ -57,10 +51,16 @@ class Throttle(object):
             return True
         return False
 
-    def can_suspend_hosting_product(self, guid):
-        hosting_key = '{}_hosting_suspended'.format(guid)
-        if not self._get_anti_spam_key(hosting_key):
-            self._set_anti_spam_key(hosting_key)
+    def can_shopper_email_be_sent(self, domain):
+        if not self._get_anti_spam_key(domain):
+            self._set_anti_spam_key(domain)
+            return True
+        return False
+
+    def can_ssl_revocation_email_be_sent(self, domain):
+        ssl_cert_key = 'ssl_revocation_{}'.format(domain)
+        if not self._get_anti_spam_key(ssl_cert_key):
+            self._set_anti_spam_key(ssl_cert_key)
             return True
         return False
 
@@ -71,12 +71,16 @@ class Throttle(object):
             return True
         return False
 
-    def can_crm_be_notated(self, shopper_id):
-        crm_key = '{}_notated_24hr_hold'.format(shopper_id)
-        if not self._get_anti_spam_key(crm_key):
-            self._set_anti_spam_key(crm_key)
+    ''' GUID specific time outs '''
+
+    def can_suspend_hosting_product(self, guid):
+        hosting_key = '{}_hosting_suspended'.format(guid)
+        if not self._get_anti_spam_key(hosting_key):
+            self._set_anti_spam_key(hosting_key)
             return True
         return False
+
+    ''' Slack specific time outs '''
 
     def can_slack_message_be_sent(self, key):
         if not self._get_anti_spam_key(key):
@@ -84,9 +88,18 @@ class Throttle(object):
             return True
         return False
 
-    def can_ssl_revocation_email_be_sent(self, domain):
-        ssl_cert_key = 'ssl_revocation_{}'.format(domain)
-        if not self._get_anti_spam_key(ssl_cert_key):
-            self._set_anti_spam_key(ssl_cert_key)
+    ''' Shopper ID specific time outs '''
+
+    def can_crm_be_notated(self, shopper_id):
+        crm_key = '{}_notated_24hr_hold'.format(shopper_id)
+        if not self._get_anti_spam_key(crm_key):
+            self._set_anti_spam_key(crm_key)
+            return True
+        return False
+
+    def can_shopper_termination_email_be_sent(self, shopper_id):
+        crm_key = 'oceo_shopper_termination_{}'.format(shopper_id)
+        if not self._get_anti_spam_key(crm_key):
+            self._set_anti_spam_key(crm_key)
             return True
         return False

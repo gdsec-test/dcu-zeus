@@ -2,7 +2,6 @@ import logging
 
 from hermes.messenger import send_mail
 
-from settings import config_by_name
 from zeus.events.email.interface import Mailer
 from zeus.events.user_logging.events import generate_event
 from zeus.persist.notification_timeouts import Throttle
@@ -16,7 +15,7 @@ class FraudMailer(Mailer):
         super(FraudMailer, self).__init__(app_settings)
         self._logger = logging.getLogger(__name__)
         self._throttle = Throttle(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)
-        self.testing_email_address = [config_by_name[self.env].NON_PROD_EMAIL_ADDRESS] if self.env != 'prod' else []
+        self.testing_email_address = [app_settings.NON_PROD_EMAIL_ADDRESS] if self.env != 'prod' else []
 
     def send_new_domain_notification(self, ticket_id, domain, shopper_id, domain_create_date, report_type, source,
                                      target):

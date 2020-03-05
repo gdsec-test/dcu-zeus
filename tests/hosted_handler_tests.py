@@ -3,6 +3,7 @@ from nose.tools import assert_equal, assert_false, assert_true
 
 from settings import TestingConfig
 from zeus.events.email.hosted_mailer import HostedMailer
+from zeus.events.email.oceo_mailer import OCEOMailer
 from zeus.events.email.ssl_mailer import SSLMailer
 from zeus.events.suspension.hosting_service import ThrottledHostingService
 from zeus.handlers.hosted_handler import HostedHandler
@@ -26,6 +27,9 @@ class TestHostedHandler:
     ticket_valid = {'type': phishing, 'sourceDomainOrIp': domain,
                     'data': {'domainQuery': {'host': {'guid': guid, 'shopperId': sid},
                                              'sslSubscriptions': ssl_subscription}}}
+    ticket_fraud_hold = {'type': phishing, 'sourceDomainOrIp': domain, 'fraud_hold_reason': 'test',
+                         'data': {'domainQuery': {'host': {'guid': guid, 'shopperId': sid},
+                                                  'sslSubscriptions': ssl_subscription}}}
 
     @classmethod
     def setup(cls):
@@ -127,7 +131,20 @@ class TestHostedHandler:
     @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    def test_intentionally_malicious_success(self, ssl_mailer, can_suspend, scribe, mailer, suspend, journal, mimir, shoplocked, crmalert):
+    def test_intentionally_malicious_no_termination_email(self, ssl_mailer, can_suspend, scribe, mailer, suspend, journal, mimir, shoplocked, crmalert):
+        assert_true(self._hosted.intentionally_malicious(self.ticket_fraud_hold))
+
+    @patch.object(CRMAlert, 'create_alert', return_value=None)
+    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(HostedHandler, '_suspend_product', return_value=True)
+    @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=True)
+    @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
+    @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
+    @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
+    @patch.object(OCEOMailer, 'send_termination_email', return_value=True)
+    def test_intentionally_malicious_success(self, oceo_mailer, ssl_mailer, can_suspend, scribe, mailer, suspend, journal, mimir, shoplocked, crmalert):
         assert_true(self._hosted.intentionally_malicious(self.ticket_valid))
 
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
