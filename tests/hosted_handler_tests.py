@@ -103,12 +103,24 @@ class TestHostedHandler:
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=False)
+    @patch.object(SlackFailures, 'failed_sending_termination_email', return_value=None)
+    @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
+    @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
+    @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
+    def test_intentionally_malicious_failed_shopper_email_no_fraud_hold(self, ssl_mailer, can_suspend, scribe, slack, mailer, journal, mimir, shoplocked):
+        assert_false(self._hosted.intentionally_malicious(self.ticket_valid))
+
+    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=False)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    def test_intentionally_malicious_failed_shopper_email(self, ssl_mailer, can_suspend, scribe, slack, mailer, journal, mimir, shoplocked):
-        assert_false(self._hosted.intentionally_malicious(self.ticket_valid))
+    def test_intentionally_malicious_failed_shopper_email_fraud_hold(self, ssl_mailer, can_suspend, scribe, slack, mailer,
+                                                          journal, mimir, shoplocked):
+        assert_false(self._hosted.intentionally_malicious(self.ticket_fraud_hold))
 
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
