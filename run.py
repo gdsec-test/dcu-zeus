@@ -8,6 +8,7 @@ from dcdatabase.phishstorymongo import PhishstoryMongo
 
 from celeryconfig import CeleryConfig
 from settings import config_by_name
+from zeus.events.email.reporter_mailer import ReporterMailer
 from zeus.handlers.foreign_handler import ForeignHandler
 from zeus.handlers.fraud_handler import FraudHandler
 from zeus.handlers.hosted_handler import HostedHandler
@@ -36,6 +37,7 @@ fraud = FraudHandler(config)
 hosted = HostedHandler(config)
 registered = RegisteredHandler(config)
 foreign = ForeignHandler(config)
+reporter_mailer = ReporterMailer(config)
 
 
 def route_request(data, request_type):
@@ -126,3 +128,8 @@ def extensive_compromise(ticket_id):
 def shopper_compromise(ticket_id):
     data = get_database_handle().get_incident(ticket_id)
     return route_request(data, 'shopper_compromise') if data else None
+
+
+@celery.task()
+def send_acknowledgement(ticket_id, reporter_email):
+    return reporter_mailer.send_acknowledgement_email(ticket_id, reporter_email)
