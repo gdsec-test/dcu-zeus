@@ -89,6 +89,12 @@ def foreign_notice(ticket_id):
 
 
 @celery.task()
+def forward_user_gen_complaint(ticket_id):
+    data = get_database_handle().get_incident(ticket_id)
+    return route_request(data, 'forward_complaint') if data else None
+
+
+@celery.task()
 def customer_warning(ticket_id):
     data = get_database_handle().get_incident(ticket_id)
     return route_request(data, 'customer_warning') if data else None

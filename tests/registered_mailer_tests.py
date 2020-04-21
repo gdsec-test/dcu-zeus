@@ -29,8 +29,23 @@ class TestRegisteredMailer:
     ''' Registrant Warning Tests '''
 
     @patch('zeus.events.email.registered_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.registered_mailer.generate_event', return_value={})
+    def test_send_user_gen_complaint(self, generate_event, send_mail):
+        assert_true(self._mailer.send_user_gen_complaint('test-ticket', 'test-subdomain', 'test-domain-id', ['test-id'],
+                                                         'test-source'))
+
+    def test_send_user_gen_complaint_no_shoppers(self):
+        assert_false(self._mailer.send_user_gen_complaint(None, None, None, [], None))
+
+    @patch('hermes.messenger.send_mail', side_effect=OCMException())
+    @patch('zeus.events.email.registered_mailer.generate_event', return_value={})
+    def test_send_user_gen_complaint_exception(self, generate_event, send_mail):
+        assert_false(self._mailer.send_user_gen_complaint(None, None, None, ['test-id'], None))
+
+    @patch('zeus.events.email.registered_mailer.send_mail', return_value={})
     def test_send_registrant_warning(self, send_mail):
-        assert_true(self._mailer.send_registrant_warning('test-ticket', 'test-domain', 'test-domain-id', ['test-id'], 'test-source'))
+        assert_true(self._mailer.send_registrant_warning('test-ticket', 'test-domain', 'test-domain-id', ['test-id'],
+                                                         'test-source'))
 
     def test_send_registrant_warning_no_shoppers(self):
         assert_false(self._mailer.send_registrant_warning(None, None, None, [], None))
