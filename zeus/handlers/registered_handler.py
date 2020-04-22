@@ -17,6 +17,7 @@ from zeus.utils.functions import (get_domain_id_from_dict,
                                   get_host_brand_from_dict,
                                   get_host_info_from_dict,
                                   get_list_of_ids_to_notify,
+                                  get_parent_child_shopper_ids_from_dict,
                                   get_shopper_id_from_dict,
                                   get_ssl_subscriptions_from_dict)
 from zeus.utils.journal import EventTypes, Journal
@@ -122,7 +123,9 @@ class RegisteredHandler(Handler):
         self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
                            note_mappings['journal']['intentionallyMalicious'], [source])
 
-        self.fraud_mailer.send_malicious_domain_notification(ticket_id, domain, shopper_id, report_type, source, target)
+        # Notify fraud only if NOT an apiReseller
+        if not get_parent_child_shopper_ids_from_dict(data):
+            self.fraud_mailer.send_malicious_domain_notification(ticket_id, domain, shopper_id, report_type, source, target)
 
         ssl_subscription = get_ssl_subscriptions_from_dict(data)
         if ssl_subscription and shopper_id and domain:
@@ -169,7 +172,9 @@ class RegisteredHandler(Handler):
         self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
                            note_mappings['journal']['shopperCompromise'], [source])
 
-        self.fraud_mailer.send_malicious_domain_notification(ticket_id, domain, shopper_id, report_type, source, target)
+        # Notify fraud only if NOT an apiReseller
+        if not get_parent_child_shopper_ids_from_dict(data):
+            self.fraud_mailer.send_malicious_domain_notification(ticket_id, domain, shopper_id, report_type, source, target)
 
         self.shoplocked.adminlock(shopper_id, note_mappings['registered']['shopperCompromise']['shoplocked'])
 
