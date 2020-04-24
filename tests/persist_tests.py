@@ -61,9 +61,3 @@ class TestPersist:
 
         self._persist.set_key(self._domain)
         assert_false(self._persist.can_ssl_revocation_email_be_sent(self._domain))
-
-    def test_can_shopper_termination_email_be_sent(self):
-        assert_true(self._persist.can_shopper_termination_email_be_sent(self._domain))
-
-        self._persist.set_key(self._domain)
-        assert_false(self._persist.can_shopper_termination_email_be_sent(self._domain))

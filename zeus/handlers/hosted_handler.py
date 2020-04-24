@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 
 from zeus.events.email.fraud_mailer import FraudMailer
 from zeus.events.email.hosted_mailer import HostedMailer
-from zeus.events.email.oceo_mailer import OCEOMailer
 from zeus.events.email.ssl_mailer import SSLMailer
 from zeus.events.support_tools.constants import alert_mappings, note_mappings
 from zeus.events.suspension.hosting_service import ThrottledHostingService
@@ -27,7 +26,6 @@ class HostedHandler(Handler):
         self._logger = logging.getLogger(__name__)
         self.hosted_mailer = HostedMailer(app_settings)
         self.fraud_mailer = FraudMailer(app_settings)
-        self.oceo_mailer = OCEOMailer(app_settings)
 
         self.hosting_service = ThrottledHostingService(app_settings)
         self.scribe = HostedScribe(app_settings)
@@ -137,11 +135,6 @@ class HostedHandler(Handler):
         if ssl_subscription and shopper_id and domain:
             if not self.ssl_mailer.send_revocation_email(ticket_id, domain, shopper_id, ssl_subscription):
                 self.slack.failed_sending_revocation_email(ticket_id, domain, shopper_id, ssl_subscription)
-                return False
-
-        if not data.get('fraud_hold_reason'):  # send shopper termination email to OCEO if Fraud wasn't notified
-            if not self.oceo_mailer.send_termination_email(ticket_id, shopper_id, domain, data.get('type')):
-                self.slack.failed_sending_termination_email(ticket_id, domain, shopper_id)
                 return False
 
         if not self.hosted_mailer.send_shopper_hosted_intentional_suspension(ticket_id, domain, shopper_id, report_type):
