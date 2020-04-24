@@ -4,9 +4,10 @@ from nose.tools import assert_false, assert_true
 
 from settings import TestingConfig
 from zeus.events.email.reporter_mailer import ReporterMailer
+from zeus.persist.notification_timeouts import Throttle
 
 
-class TestForeignMailer(object):
+class TestReporterMailer(object):
 
     @classmethod
     def setup(cls):
@@ -14,10 +15,27 @@ class TestForeignMailer(object):
 
     @patch('zeus.events.email.reporter_mailer.send_mail', return_value={})
     @patch('zeus.events.email.reporter_mailer.generate_event')
-    def test_send_hosting_provider_notice(self, mock_event, send_mail):
+    @patch.object(Throttle, 'can_reporter_acknowledge_email_be_sent', return_value=True)
+    def test_send_hosting_provider_notice_success(self, throttle, gen_event, send_mail):
         assert_true(self._mailer.send_acknowledgement_email('ticket_id', 'dcuinternal@godaddy.com'))
+        assert throttle.called
+        assert send_mail.called
+        assert gen_event.called
+
+    @patch('zeus.events.email.reporter_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.reporter_mailer.generate_event')
+    @patch.object(Throttle, 'can_reporter_acknowledge_email_be_sent', return_value=False)
+    def test_send_hosting_provider_notice_fail_throttle(self, throttle, gen_event, send_mail):
+        assert_false(self._mailer.send_acknowledgement_email('ticket_id', 'dcuinternal@godaddy.com'))
+        assert throttle.called
+        assert not send_mail.called
+        assert not gen_event.called
 
     @patch('zeus.events.email.reporter_mailer.send_mail', side_effect=OCMException())
     @patch('zeus.events.email.reporter_mailer.generate_event')
-    def test_send_hosting_provider_notice_ocm_exception(self, mock_event, send_mail):
+    @patch.object(Throttle, 'can_reporter_acknowledge_email_be_sent', return_value=True)
+    def test_send_hosting_provider_notice_fail_ocm_exception(self, throttle, gen_event, send_mail):
         assert_false(self._mailer.send_acknowledgement_email('ticket_id', 'dcuinternal@godaddy.com'))
+        assert throttle.called
+        assert send_mail.called
+        assert gen_event.called

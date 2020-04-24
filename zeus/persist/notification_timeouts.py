@@ -103,3 +103,12 @@ class Throttle(object):
             self._set_anti_spam_key(crm_key)
             return True
         return False
+
+    ''' Non shopper specific time outs '''
+
+    def can_reporter_acknowledge_email_be_sent(self, reporter_email):
+        crm_key = '{}_acknowledge_email'.format(reporter_email)
+        if not self._get_anti_spam_key(crm_key):
+            self._set_anti_spam_key(crm_key)
+            return True
+        return False
