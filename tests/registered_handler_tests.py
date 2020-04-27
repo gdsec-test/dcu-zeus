@@ -137,8 +137,7 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    @patch.object(OCEOMailer, 'send_termination_email', return_value=True)
-    def test_intentionally_malicious_success_api_reseller(self, oceo_mailer, ssl_mailer, service, crm, fraud, registered, handler, journal, shoplocked, crmalert):
+    def test_intentionally_malicious_success_api_reseller(self, ssl_mailer, service, crm, fraud, registered, handler, journal, shoplocked, crmalert):
         assert_true(self._registered.intentionally_malicious(self.ticket_valid_api_reseller))
 
     @patch.object(SlackFailures, 'invalid_hosted_status', return_value=None)
