@@ -62,17 +62,19 @@ If you would like to run Zeus locally you will need to specify the following env
 * `BROKER_PASS` (The Broker Pass for the RabbitMQ server to connect to)
 * `MWPONEUSER` & `MWPONEPASS` (Account credentials to access the managed wordpress API)
 * `DIABLOUSER` & `DIABLOPASS` (Account credentials to access the diablo API)
-* `CMAP_PROXY_CERT` Path to proxyuser.cmap.int.godaddy.com certificate file (for connecting to CMAP Proxy, prod only)
-* `CMAP_PROXY_KEY` Path to proxyuser.cmap.int.godaddy.com key file(for connecting to CMAP Proxy, prod only)
+* `PLESKUSER` & `PLESKPASS` (Account credentials to access the plesk API)
+* `VPS4USER` & `VPS4PASS` (Account credentials to access the vps4 API)
+* `CMAP_PROXY_CERT` Path to certificate file (for connecting to CMAP Proxy `proxyuser.cmap.int.godaddy.com` prod only)
+* `CMAP_PROXY_KEY` Path to key file(for connecting to CMAP Proxy `proxyuser.cmap.int.godaddy.com`  prod only)
 * `CMAP_PROXY_USER` (User for CMAP Proxy)
 * `CMAP_PROXY_PASS` (Password for CMAP Proxy)
-* `OCM_SSL_CERT` (The path to the SSL Cert white-listed for OCM API)
-* `OCM_SSL_KEY` (The path to the SSL Key white-listed for OCM API)
-* `ORION_SSL_CERT` (The path to the SSL Cert white-listed for Orion Web Service)
-* `ORION_SSL_KEY` (The path to the SSL Key white-listed for Orion Web Service)
-* `ZEUS_SSL_CERT` (The path to the SSL Cert for communicating with DCU Journal)
-* `ZEUS_SSL_KEY` (The path to the SSL Key for communicating with DCU Journal)
-* `EMAIL_RECIPIENT` (The email address you want `non-shopper` emails sent to while testing, instead of emailing fraud. e.g. user@example.com)
+* `OCM_SSL_CERT` (The path to the SSL Cert white-listed for OCM API `phishstory.int.`)
+* `OCM_SSL_KEY` (The path to the SSL Key white-listed for OCM API `phishstory.int.`)
+* `ORION_SSL_CERT` (The path to the SSL Cert white-listed for Orion Web Service `dcu.ecomm.dev.authclient.int.godaddy.com` prod only)
+* `ORION_SSL_KEY` (The path to the SSL Key white-listed for Orion Web Service `dcu.ecomm.dev.authclient.int.godaddy.com` prod only)
+* `ZEUS_SSL_CERT` (The path to the SSL Cert for communicating with DCU Journal `proxyuser.cmap.int.godaddy.com` prod only)
+* `ZEUS_SSL_KEY` (The path to the SSL Key for communicating with DCU Journal `proxyuser.cmap.int.godaddy.com` prod only)
+* `EMAIL_RECIPIENT` (The email address you want `non-shopper` emails sent to while testing, instead of emailing fraud. e.g. user@example.com)  *** *ONLY WORKS WITH TEMPLATES THAT SEND TO NON-SHOPPERS* ***
  
 ## Handling failures to create Mimir Infractions in Production.
 1. Create dictionary of required infraction fields. Data will come from mongo record for the ticket. Majority of data in `data>domainQuery>host`
