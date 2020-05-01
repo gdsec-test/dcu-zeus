@@ -51,6 +51,7 @@ class RegisteredHandler(Handler):
 
         self.mapping = {
             'customer_warning': self.customer_warning,
+            'forward_complaint': self.forward_user_gen_complaint,
             'intentionally_malicious': self.intentionally_malicious,
             'shopper_compromise': self.shopper_compromise,
             'suspend': self.suspend
@@ -90,6 +91,22 @@ class RegisteredHandler(Handler):
                            note_mappings['journal']['customerWarning'], [source])
 
         if not self.registered_mailer.send_registrant_warning(ticket_id, domain, domain_id, shopper_id_list, source):
+            self.slack.failed_sending_email(domain)
+            return False
+        return True
+
+    def forward_user_gen_complaint(self, data):
+        ticket_id = data.get('ticketId')
+        subdomain = data.get('sourceSubDomain')
+        domain = data.get('sourceDomainOrIp')
+        domain_id = get_domain_id_from_dict(data)
+        shopper_id = get_shopper_id_from_dict(data)
+        source = data.get('source')
+
+        if not self._validate_required_args(data):
+            return False
+
+        if not self.registered_mailer.send_user_gen_complaint(ticket_id, subdomain, domain_id, shopper_id, source):
             self.slack.failed_sending_email(domain)
             return False
         return True

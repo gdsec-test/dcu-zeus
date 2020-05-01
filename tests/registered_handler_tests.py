@@ -65,6 +65,21 @@ class TestRegisteredHandler:
     def test_customer_warning_failed_registrant_warning(self, review, hosting, registrant, crm, slack, journal):
         assert_false(self._registered.customer_warning(self.ticket_valid))
 
+    @patch.object(RegisteredHandler, '_validate_required_args', return_value=False)
+    def test_forward_user_gen_complaint_failed_arg_validation(self, validation):
+        assert_false(self._registered.forward_user_gen_complaint({}))
+
+    @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
+    @patch.object(RegisteredMailer, 'send_user_gen_complaint', return_value=False)
+    @patch.object(RegisteredHandler, '_validate_required_args', return_value=True)
+    def test_forward_user_gen_complaint_failed_send_mail(self, validation, registrant, slack):
+        assert_false(self._registered.forward_user_gen_complaint({}))
+
+    @patch.object(RegisteredMailer, 'send_user_gen_complaint', return_value=True)
+    @patch.object(RegisteredHandler, '_validate_required_args', return_value=True)
+    def test_forward_user_gen_complaint_successful_validation_email_send(self, validation, registrant):
+        assert_true(self._registered.forward_user_gen_complaint({}))
+
     @patch.object(SlackFailures, 'invalid_hosted_status', return_value=None)
     def test_intentionally_malicious_none(self, invalid_hosted_status):
         assert_false(self._registered.intentionally_malicious({}))
