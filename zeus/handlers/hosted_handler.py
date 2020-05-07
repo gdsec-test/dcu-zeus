@@ -11,6 +11,7 @@ from zeus.reviews.reviews import BasicReview
 from zeus.utils.crmalert import CRMAlert
 from zeus.utils.functions import (get_host_info_from_dict,
                                   get_host_shopper_id_from_dict,
+                                  get_parent_child_shopper_ids_from_dict,
                                   get_ssl_subscriptions_from_dict)
 from zeus.utils.journal import EventTypes, Journal
 from zeus.utils.mimir import InfractionTypes, Mimir
@@ -38,6 +39,7 @@ class HostedHandler(Handler):
 
         self.basic_review = BasicReview(app_settings)
         self.HOLD_TIME = app_settings.HOLD_TIME
+        self.FRAUD_REVIEW_TIME = app_settings.FRAUD_REVIEW_TIME
 
         self.mapping = {
             'customer_warning': self.customer_warning,
@@ -115,6 +117,7 @@ class HostedHandler(Handler):
         source = data.get('source')
         ticket_id = data.get('ticketId')
         product = get_host_info_from_dict(data).get('product')
+        target = data.get('target')
 
         report_type, guid, shopper_id = self._validate_required_args(data)
         if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
@@ -130,6 +133,8 @@ class HostedHandler(Handler):
         self.mimir.write(InfractionTypes.intentionally_malicious, shopper_id, ticket_id, domain, guid)
 
         self.scribe.intentionally_malicious(ticket_id, guid, source, report_type, shopper_id)
+
+        self._notify_fraud(data, ticket_id, domain, shopper_id, guid, source, report_type, target)
 
         ssl_subscription = get_ssl_subscriptions_from_dict(data)
         if ssl_subscription and shopper_id and domain:
@@ -153,6 +158,7 @@ class HostedHandler(Handler):
         source = data.get('source')
         ticket_id = data.get('ticketId')
         product = get_host_info_from_dict(data).get('product')
+        target = data.get('target')
 
         report_type, guid, shopper_id = self._validate_required_args(data)
         if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
@@ -164,6 +170,8 @@ class HostedHandler(Handler):
         self.mimir.write(InfractionTypes.shopper_compromise, shopper_id, ticket_id, domain, guid)
 
         self.scribe.shopper_compromise(ticket_id, guid, source, report_type, shopper_id)
+
+        self._notify_fraud(data, ticket_id, domain, shopper_id, guid, source, report_type, target)
 
         self.shoplocked.adminlock(shopper_id, note_mappings['hosted']['shopperCompromise']['shoplocked'])
 
@@ -263,6 +271,20 @@ class HostedHandler(Handler):
         self.crmalert.create_alert(shopper_id, alert, report_type, self.crmalert.low_severity, domain)
 
         return self._suspend_product(data, guid, product)
+
+    def _can_fraud_review(self, data):
+        # Hosting created within FRAUD_REVIEW_TIME number of days can be sent to Fraud for review
+        hosting_create_date = data.get('data', {}).get('domainQuery', {}).get('host', {}).get('createdDate', self.EPOCH)
+        timeframe = datetime.utcnow() - timedelta(days=self.FRAUD_REVIEW_TIME)
+
+        return hosting_create_date >= timeframe
+
+    def _notify_fraud(self, data, ticket_id, domain, shopper_id, guid, source, report_type, target):
+        # Notify fraud only if NOT previously sent to fraud, domain created within 90 days, and NOT an apiReseller
+        if not data.get('fraud_hold_reason') and self._can_fraud_review(data):
+            if not get_parent_child_shopper_ids_from_dict(data):
+                self.fraud_mailer.send_malicious_hosting_notification(ticket_id, domain, shopper_id, guid, source,
+                                                                      report_type, target)
 
     def _suspend_product(self, data, guid, product):
         guid = get_host_info_from_dict(data).get('mwpId') or guid

@@ -1,7 +1,10 @@
-from mock import patch
+from datetime import datetime, timedelta
+
+from mock import Mock, patch
 from nose.tools import assert_equal, assert_false, assert_true
 
 from settings import TestingConfig
+from zeus.events.email.fraud_mailer import FraudMailer
 from zeus.events.email.hosted_mailer import HostedMailer
 from zeus.events.email.ssl_mailer import SSLMailer
 from zeus.events.suspension.hosting_service import ThrottledHostingService
@@ -21,6 +24,8 @@ class TestHostedHandler:
     sid = 'test-id'
     ssl_subscription = '1234'
     domain = 'domain'
+    current_test_date = datetime(2020, 05, 07, 14, 57)  # +7 hours because of UTC
+    oldest_valid_fraud_review_test_date = current_test_date - timedelta(days=TestingConfig.FRAUD_REVIEW_TIME)
     ticket_no_guid = {'type': phishing}
     ticket_no_shopper = {'type': phishing, 'data': {'domainQuery': {'host': {'guid': guid}}}}
     ticket_valid = {'type': phishing, 'sourceDomainOrIp': domain,
@@ -29,6 +34,15 @@ class TestHostedHandler:
     ticket_fraud_hold = {'type': phishing, 'sourceDomainOrIp': domain, 'fraud_hold_reason': 'test',
                          'data': {'domainQuery': {'host': {'guid': guid, 'shopperId': sid},
                                                   'sslSubscriptions': ssl_subscription}}}
+    ticket_valid_api_reseller = {'type': phishing, 'sourceDomainOrIp': domain,
+                                 'data': {'domainQuery': {'apiReseller': {'parent': '1234567', 'child': '7654321'},
+                                                          'host': {'createdDate': oldest_valid_fraud_review_test_date,
+                                                                   'guid': guid, 'shopperId': sid},
+                                                          'sslSubscriptions': ssl_subscription}}}
+    ticket_no_hold_or_reseller = {'type': phishing, 'sourceDomainOrIp': domain,
+                                  'data': {'domainQuery': {'host': {'createdDate': oldest_valid_fraud_review_test_date,
+                                                                    'guid': guid, 'shopperId': sid},
+                                                           'sslSubscriptions': ssl_subscription}}}
 
     @classmethod
     def setup(cls):
@@ -145,6 +159,36 @@ class TestHostedHandler:
     def test_intentionally_malicious_success(self, ssl_mailer, can_suspend, scribe, mailer, suspend, journal, mimir, shoplocked, crmalert):
         assert_true(self._hosted.intentionally_malicious(self.ticket_valid))
 
+    @patch.object(FraudMailer, 'send_malicious_hosting_notification', return_value=None)
+    @patch.object(CRMAlert, 'create_alert', return_value=None)
+    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(HostedHandler, '_suspend_product', return_value=True)
+    @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=True)
+    @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
+    @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
+    @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
+    def test_intentionally_malicious_no_fraud_email(self, ssl_mailer, can_suspend, scribe, mailer, suspend, journal, mimir, shoplocked, crmalert, fraud):
+        self._hosted.intentionally_malicious(self.ticket_valid_api_reseller)
+        fraud.assert_not_called()
+
+    @patch.object(FraudMailer, 'send_malicious_hosting_notification', return_value=None)
+    @patch.object(CRMAlert, 'create_alert', return_value=None)
+    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(HostedHandler, '_suspend_product', return_value=True)
+    @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=True)
+    @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
+    @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
+    @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
+    @patch('zeus.handlers.hosted_handler.datetime')
+    def test_intentionally_malicious_success_fraud_email(self, mock_date, ssl_mailer, can_suspend, scribe, mailer, suspend, journal, mimir, shoplocked, crmalert, fraud):
+        mock_date.utcnow = Mock(return_value=self.current_test_date)
+        self._hosted.intentionally_malicious(self.ticket_no_hold_or_reseller)
+        fraud.assert_called()
+
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
     def test_shopper_compromise_none(self, invalid_abuse_type):
         assert_false(self._hosted.shopper_compromise({}))
@@ -179,6 +223,34 @@ class TestHostedHandler:
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     def test_shopper_compromise_success(self, ssl_mailer, can_suspend, scribe, mailer, suspend, journal, mimir, shoplocked):
         assert_true(self._hosted.shopper_compromise(self.ticket_valid))
+
+    @patch.object(FraudMailer, 'send_malicious_hosting_notification', return_value=None)
+    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(HostedMailer, 'send_shopper_compromise_hosted_suspension', return_value=False)
+    @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
+    @patch.object(HostedScribe, 'shopper_compromise', return_value=None)
+    @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
+    @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
+    def test_shopper_compromise_no_fraud_email(self, ssl_mailer, can_suspend, scribe, slack, mailer, journal, mimir, shoplocked, fraud):
+        self._hosted.shopper_compromise(self.ticket_valid_api_reseller)
+        fraud.assert_not_called()
+
+    @patch.object(FraudMailer, 'send_malicious_hosting_notification', return_value=None)
+    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(HostedHandler, '_suspend_product', return_value=True)
+    @patch.object(HostedMailer, 'send_shopper_compromise_hosted_suspension', return_value=True)
+    @patch.object(HostedScribe, 'shopper_compromise', return_value=None)
+    @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
+    @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
+    @patch('zeus.handlers.hosted_handler.datetime')
+    def test_shopper_compromise_success_fraud_email(self, mock_date, ssl_mailer, can_suspend, scribe, mailer, suspend, journal, mimir, shoplocked, fraud):
+        mock_date.utcnow = Mock(return_value=self.current_test_date)
+        self._hosted.shopper_compromise(self.ticket_no_hold_or_reseller)
+        fraud.assert_called()
 
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
     def test_suspend_none(self, invalid_abuse_type):

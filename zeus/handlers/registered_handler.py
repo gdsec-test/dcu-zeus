@@ -48,6 +48,7 @@ class RegisteredHandler(Handler):
         self.HOLD_TIME = app_settings.HOLD_TIME
         self.ENTERED_BY = app_settings.ENTERED_BY
         self.PROTECTED_DOMAINS = app_settings.PROTECTED_DOMAINS
+        self.FRAUD_REVIEW_TIME = app_settings.FRAUD_REVIEW_TIME
 
         self.mapping = {
             'customer_warning': self.customer_warning,
@@ -138,9 +139,7 @@ class RegisteredHandler(Handler):
         self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
                            note_mappings['journal']['intentionallyMalicious'], [source])
 
-        # Notify fraud only if NOT an apiReseller
-        if not get_parent_child_shopper_ids_from_dict(data):
-            self.fraud_mailer.send_malicious_domain_notification(ticket_id, domain, shopper_id, report_type, source, target)
+        self._notify_fraud(data, ticket_id, domain, shopper_id, report_type, source, target)
 
         ssl_subscription = get_ssl_subscriptions_from_dict(data)
         if ssl_subscription and shopper_id and domain:
@@ -182,9 +181,7 @@ class RegisteredHandler(Handler):
         self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
                            note_mappings['journal']['shopperCompromise'], [source])
 
-        # Notify fraud only if NOT an apiReseller
-        if not get_parent_child_shopper_ids_from_dict(data):
-            self.fraud_mailer.send_malicious_domain_notification(ticket_id, domain, shopper_id, report_type, source, target)
+        self._notify_fraud(data, ticket_id, domain, shopper_id, report_type, source, target)
 
         self.shoplocked.adminlock(shopper_id, note_mappings['registered']['shopperCompromise']['shoplocked'])
 
@@ -234,11 +231,26 @@ class RegisteredHandler(Handler):
 
         return self._suspend_domain(domain, ticket_id, note)
 
+    def _can_fraud_review(self, data):
+        # Domains created within FRAUD_REVIEW_TIME number of days can be sent to Fraud for review
+        domain_create_date = data.get('data', {}).get('domainQuery', {}).get('registrar', {}).get('domainCreateDate',
+                                                                                                  self.EPOCH)
+        timeframe = datetime.utcnow() - timedelta(days=self.FRAUD_REVIEW_TIME)
+
+        return domain_create_date >= timeframe
+
     def _is_domain_protected(self, domain, action):
         if domain in self.PROTECTED_DOMAINS:
             self.slack.failed_protected_domain_action(domain, action)
             return True
         return False
+
+    def _notify_fraud(self, data, ticket_id, domain, shopper_id, report_type, source, target):
+        # Notify fraud only if NOT previously sent to fraud, domain created within 90 days, and NOT an apiReseller
+        if not data.get('fraud_hold_reason') and self._can_fraud_review(data):
+            if not get_parent_child_shopper_ids_from_dict(data):
+                self.fraud_mailer.send_malicious_domain_notification(ticket_id, domain, shopper_id, report_type, source,
+                                                                     target)
 
     def _suspend_domain(self, domain, ticket_id, reason):
         self._logger.info("Suspending domain {} for incident {}".format(domain, ticket_id))
