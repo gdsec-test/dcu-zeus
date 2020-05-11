@@ -137,5 +137,5 @@ def shopper_compromise(ticket_id):
 
 
 @celery.task()
-def send_acknowledgement(ticket_id, reporter_email):
-    return reporter_mailer.send_acknowledgement_email(ticket_id, reporter_email)
+def send_acknowledgement(source, reporter_email):
+    return reporter_mailer.send_acknowledgement_email(source, reporter_email)

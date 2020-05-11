@@ -14,10 +14,10 @@ class ReporterMailer(Mailer):
         self._throttle = Throttle(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)
         self._CAN_FLOOD = app_settings.CAN_FLOOD
 
-    def send_acknowledgement_email(self, ticket_id, reporter_email):
+    def send_acknowledgement_email(self, source, reporter_email):
         """
         Sends an acknowledgement email to FOS reporters
-        :param ticket_id:
+        :param source:
         :param reporter_email:
         :return: boolean
         """
@@ -34,11 +34,11 @@ class ReporterMailer(Mailer):
                 kwargs['recipients'] = [{'email': reporter_email}]
                 resp = send_mail(template, {}, **kwargs)
                 resp.update({'type': message_type, 'template': 3454})
-                generate_event(ticket_id, success_message, **resp)
+                generate_event(source, success_message, **resp)
                 return True
             else:
-                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, ticket_id))
+                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, source))
         except Exception as e:
-            self._logger.error("Unable to send {} for {}: {}".format(template, ticket_id, e.message))
-            generate_event(ticket_id, exception_type, type=message_type)
+            self._logger.error("Unable to send {} for {}: {}".format(template, source, e.message))
+            generate_event(source, exception_type, type=message_type)
         return False
