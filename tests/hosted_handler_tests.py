@@ -20,10 +20,12 @@ from zeus.utils.slack import SlackFailures
 
 class TestHostedHandler:
     phishing = 'PHISHING'
+    child_abuse = 'CHILD_ABUSE'
     guid = 'test-guid'
     sid = 'test-id'
     ssl_subscription = '1234'
     domain = 'domain'
+    ncmecReportID = '5678'
     current_test_date = datetime(2020, 05, 07, 14, 57)  # +7 hours because of UTC
     oldest_valid_fraud_review_test_date = current_test_date - timedelta(days=TestingConfig.FRAUD_REVIEW_TIME)
     ticket_no_guid = {'type': phishing}
@@ -43,6 +45,9 @@ class TestHostedHandler:
                                   'data': {'domainQuery': {'host': {'createdDate': oldest_valid_fraud_review_test_date,
                                                                     'guid': guid, 'shopperId': sid},
                                                            'sslSubscriptions': ssl_subscription}}}
+    ticket_valid_child_abuse = {'type': child_abuse, 'sourceDomainOrIp': domain, 'ncmecReportID': ncmecReportID,
+                                'data': {'domainQuery': {'host': {'guid': guid, 'shopperId': sid},
+                                                         'sslSubscriptions': ssl_subscription}}}
 
     @classmethod
     def setup(cls):
@@ -341,3 +346,11 @@ class TestHostedHandler:
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
     def test_extensive_compromise_success(self, can_suspend, scribe, mailer, suspend, journal, mimir, crmalert):
         assert_true(self._hosted.extensive_compromise(self.ticket_valid))
+
+    @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
+    def test_ncmec_submitted_none(self, invalid_abuse_type):
+        assert_false(self._hosted.ncmec_submitted({}))
+
+    @patch.object(Mimir, 'write', return_value=None)
+    def test_ncmec_submitted_success(self, mimir):
+        assert_true(self._hosted.ncmec_submitted(self.ticket_valid_child_abuse))

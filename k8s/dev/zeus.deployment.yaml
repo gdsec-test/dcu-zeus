@@ -46,6 +46,11 @@ spec:
               secretKeyRef:
                 name: db-zeus
                 key: password
+          - name: DB_KELVIN_PASS
+            valueFrom:
+              secretKeyRef:
+                name: db-kelvin-zeus
+                key: password
 
           - name: DIABLOUSER
             valueFrom:

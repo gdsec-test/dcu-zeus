@@ -21,7 +21,7 @@ from zeus.utils.slack import SlackFailures, ThrottledSlack
 
 
 class HostedHandler(Handler):
-    supported_types = ['PHISHING', 'MALWARE']
+    supported_types = ['PHISHING', 'MALWARE', 'CHILD_ABUSE']
 
     def __init__(self, app_settings):
         self._logger = logging.getLogger(__name__)
@@ -48,7 +48,8 @@ class HostedHandler(Handler):
             'repeat_offender': self.repeat_offender,
             'shopper_compromise': self.shopper_compromise,
             'suspend': self.suspend,
-            'extensive_compromise': self.extensive_compromise
+            'extensive_compromise': self.extensive_compromise,
+            'ncmec_submitted': self.ncmec_submitted
         }
 
     def process(self, data, request_type):
@@ -272,6 +273,19 @@ class HostedHandler(Handler):
 
         return self._suspend_product(data, guid, product)
 
+    def ncmec_submitted(self, data):
+        domain = data.get('sourceDomainOrIP')
+        ticket_id = data.get('ticketID')
+        ncmecreport_id = data.get('ncmecReportID')
+
+        report_type, guid, shopper_id = self._validate_required_args(data)
+        if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
+            return False
+
+        note = note_mappings['hosted']['ncmecSubmitted']['mimir'].format(type=report_type, guid=guid)
+        self.mimir.write(InfractionTypes.ncmec_report_submitted, shopper_id, ticket_id, domain, guid, note, ncmecreport_id)
+        return True
+
     def _can_fraud_review(self, data):
         # Hosting created within FRAUD_REVIEW_TIME number of days can be sent to Fraud for review
         hosting_create_date = data.get('data', {}).get('domainQuery', {}).get('host', {}).get('createdDate', self.EPOCH)
@@ -301,7 +315,7 @@ class HostedHandler(Handler):
     def _validate_required_args(self, data):
         guid = get_host_info_from_dict(data).get('guid')
         shopper_id = get_host_shopper_id_from_dict(data)
-        ticket_id = data.get('ticketId')
+        ticket_id = data.get('ticketId') or data.get('ticketID')
         report_type = data.get('type')
 
         if report_type not in self.supported_types:

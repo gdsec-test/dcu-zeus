@@ -4,6 +4,7 @@ import os
 import yaml
 from celery import Celery
 from celery.utils.log import get_task_logger
+from dcdatabase.kelvinmongo import KelvinMongo
 from dcdatabase.phishstorymongo import PhishstoryMongo
 
 from celeryconfig import CeleryConfig
@@ -41,7 +42,7 @@ reporter_mailer = ReporterMailer(config)
 
 
 def route_request(data, request_type):
-    hosted_status = data.get('hosted_status')
+    hosted_status = data.get('hosted_status') or data.get('hostedStatus')
 
     if hosted_status == 'HOSTED':
         return hosted.process(data, request_type)
@@ -53,6 +54,10 @@ def route_request(data, request_type):
 
 def get_database_handle():
     return PhishstoryMongo(config)
+
+
+def get_kelvin_database_handle():
+    return KelvinMongo(config.DB_KELVIN, config.DB_KELVIN_URL, config.COLLECTION)
 
 
 ''' Fraud Tasks '''
@@ -139,3 +144,12 @@ def shopper_compromise(ticket_id):
 @celery.task()
 def send_acknowledgement(source, reporter_email):
     return reporter_mailer.send_acknowledgement_email(source, reporter_email)
+
+
+''' CSAM Tasks '''
+
+
+@celery.task()
+def submitted_to_ncmec(ticket_id):
+    data = get_kelvin_database_handle().get_incident(ticket_id)
+    return route_request(data, 'ncmec_submitted') if data else None

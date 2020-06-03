@@ -15,6 +15,7 @@ class InfractionTypes(Enum):
     shopper_compromise = 'SHOPPER_COMPROMISE'
     suspended = 'SUSPENDED'
     extensive_compromise = 'EXTENSIVE_COMPROMISE'
+    ncmec_report_submitted = 'NCMEC_REPORT_SUBMITTED'
 
 
 class Mimir:
@@ -25,13 +26,11 @@ class Mimir:
         self._logger = logging.getLogger(__name__)
         self._sso_endpoint = app_settings.SSO_URL + '/v1/secure/api/token'
         self._mimir_endpoint = app_settings.MIMIR_URL + '/v1/infractions'
-
         self.slack = SlackFailures(ThrottledSlack(app_settings))
-
         cert = (app_settings.ZEUS_SSL_CERT, app_settings.ZEUS_SSL_KEY)
         self._headers.update({'Authorization': self._get_jwt(cert)})
 
-    def write(self, infraction_type, shopper_number, ticket_number, domain, guid):
+    def write(self, infraction_type, shopper_number, ticket_number, domain, guid, note=None, ncmecReportID=None):
         """
         Create an infraction entry in DCU Mimir
         :param infraction_type: One of CONTENT_REMOVED, CUSTOMER_WARNING, EXTENSIVE_COMPROMISE, INTENTIONALLY_MALICIOUS,
@@ -40,6 +39,8 @@ class Mimir:
         :param ticket_number: DCU SNOW ticket number
         :param domain: Domain name
         :param guid: Guid of hosting account
+        :param note: Mimir note in case of CSAM infractions
+        :param ncmecReportID: NCMEC Report ID from NCMEC report submissions for CSAM infractions
         :return:
         """
 
@@ -53,7 +54,7 @@ class Mimir:
             return
 
         body = {'infractionType': infraction_type, 'shopperId': shopper_number, 'ticketId': ticket_number,
-                'sourceDomainOrIp': domain, 'hostingGuid': guid}
+                'sourceDomainOrIp': domain, 'hostingGuid': guid, 'note': note, 'ncmecReportID': ncmecReportID}
 
         try:
             response = requests.post(self._mimir_endpoint, json=body, headers=self._headers)

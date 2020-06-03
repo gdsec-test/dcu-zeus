@@ -31,6 +31,9 @@ note_mappings = {
         },
         'extensiveCompromise': {
             'crm': "Hosting {{guid}} suspended due to extensive compromise. {{type}} content reported at {{location}} {}".format(support_doc)
+        },
+        'ncmecSubmitted': {
+            'mimir': "{type} report submitted to NCMEC for hosting {guid}"
         }
     },
     'registered': {
