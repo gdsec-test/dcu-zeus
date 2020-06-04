@@ -30,7 +30,7 @@ class Mimir:
         cert = (app_settings.ZEUS_SSL_CERT, app_settings.ZEUS_SSL_KEY)
         self._headers.update({'Authorization': self._get_jwt(cert)})
 
-    def write(self, infraction_type, shopper_number, ticket_number, domain, guid, note=None, ncmecReportID=None):
+    def write(self, infraction_type, shopper_number, ticket_number, domain, guid, note='', ncmecReportID=''):
         """
         Create an infraction entry in DCU Mimir
         :param infraction_type: One of CONTENT_REMOVED, CUSTOMER_WARNING, EXTENSIVE_COMPROMISE, INTENTIONALLY_MALICIOUS,
