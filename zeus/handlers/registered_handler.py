@@ -233,8 +233,10 @@ class RegisteredHandler(Handler):
 
     def _can_fraud_review(self, data):
         # Domains created within FRAUD_REVIEW_TIME number of days can be sent to Fraud for review
-        domain_create_date = data.get('data', {}).get('domainQuery', {}).get('registrar', {}).get('domainCreateDate',
-                                                                                                  self.EPOCH)
+        domain_create_date = data.get('data', {}).get('domainQuery', {}).get('registrar', {}).get('domainCreateDate')
+        if not domain_create_date:
+            domain_create_date = self.EPOCH
+
         timeframe = datetime.utcnow() - timedelta(days=self.FRAUD_REVIEW_TIME)
 
         return domain_create_date >= timeframe

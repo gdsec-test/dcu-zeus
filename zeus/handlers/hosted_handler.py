@@ -288,7 +288,10 @@ class HostedHandler(Handler):
 
     def _can_fraud_review(self, data):
         # Hosting created within FRAUD_REVIEW_TIME number of days can be sent to Fraud for review
-        hosting_create_date = data.get('data', {}).get('domainQuery', {}).get('host', {}).get('createdDate', self.EPOCH)
+        hosting_create_date = data.get('data', {}).get('domainQuery', {}).get('host', {}).get('createdDate')
+        if not hosting_create_date:
+            hosting_create_date = self.EPOCH
+
         timeframe = datetime.utcnow() - timedelta(days=self.FRAUD_REVIEW_TIME)
 
         return hosting_create_date >= timeframe
