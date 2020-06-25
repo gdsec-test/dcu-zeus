@@ -19,7 +19,6 @@ class InfractionTypes(Enum):
 
 
 class Mimir:
-    _types = {item.value for item in InfractionTypes}  # Construct mappings of the values for easy set look-up
     _headers = {'Accept': 'application/json'}
 
     def __init__(self, app_settings):
@@ -30,7 +29,8 @@ class Mimir:
         cert = (app_settings.ZEUS_SSL_CERT, app_settings.ZEUS_SSL_KEY)
         self._headers.update({'Authorization': self._get_jwt(cert)})
 
-    def write(self, infraction_type, shopper_number, ticket_number, domain, guid, note='', ncmecReportID=''):
+    def write(self, infraction_type, shopper_number, ticket_number, domain, guid,
+              abuse_type, note='', ncmecReportID=''):
         """
         Create an infraction entry in DCU Mimir
         :param infraction_type: One of CONTENT_REMOVED, CUSTOMER_WARNING, EXTENSIVE_COMPROMISE, INTENTIONALLY_MALICIOUS,
@@ -39,6 +39,7 @@ class Mimir:
         :param ticket_number: DCU SNOW ticket number
         :param domain: Domain name
         :param guid: Guid of hosting account
+        :param abuse_type: Abuse Type of the incident
         :param note: Mimir note in case of CSAM infractions
         :param ncmecReportID: NCMEC Report ID from NCMEC report submissions for CSAM infractions
         :return:
@@ -48,13 +49,9 @@ class Mimir:
         if not isinstance(infraction_type, basestring):
             infraction_type = infraction_type.value
 
-        if infraction_type not in self._types:
-            message = 'Unable to write to mimir. Unsupported type {}'.format(type)
-            self.slack.failed_infraction_creation(guid, ticket_number, message)
-            return
-
         body = {'infractionType': infraction_type, 'shopperId': shopper_number, 'ticketId': ticket_number,
-                'sourceDomainOrIp': domain, 'hostingGuid': guid, 'note': note, 'ncmecReportID': ncmecReportID}
+                'sourceDomainOrIp': domain, 'hostingGuid': guid, 'note': note, 'ncmecReportID': ncmecReportID,
+                'abuseType': abuse_type}
 
         try:
             response = requests.post(self._mimir_endpoint, json=body, headers=self._headers)
