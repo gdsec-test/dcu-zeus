@@ -20,6 +20,7 @@ from zeus.utils.functions import (get_domain_id_from_dict,
                                   get_shopper_id_from_dict,
                                   get_ssl_subscriptions_from_dict)
 from zeus.utils.journal import EventTypes, Journal
+from zeus.utils.mimir import InfractionTypes, Mimir
 from zeus.utils.shoplocked import Shoplocked
 from zeus.utils.slack import SlackFailures, ThrottledSlack
 
@@ -43,6 +44,7 @@ class RegisteredHandler(Handler):
         self.slack = SlackFailures(ThrottledSlack(app_settings))
         self.shoplocked = Shoplocked(app_settings)
         self.crmalert = CRMAlert(app_settings)
+        self.mimir = Mimir(app_settings)
 
         self.basic_review = BasicReview(app_settings)
         self.HOLD_TIME = app_settings.HOLD_TIME
@@ -54,6 +56,7 @@ class RegisteredHandler(Handler):
             'customer_warning': self.customer_warning,
             'forward_complaint': self.forward_user_gen_complaint,
             'intentionally_malicious': self.intentionally_malicious,
+            'repeat_offender': self.repeat_offender,
             'shopper_compromise': self.shopper_compromise,
             'suspend': self.suspend
         }
@@ -64,15 +67,17 @@ class RegisteredHandler(Handler):
         return self.mapping[request_type](data)
 
     def customer_warning(self, data):
-        hosted_brand = get_host_brand_from_dict(data)
-        recipients = get_host_abuse_email_from_dict(data)
-        shopper_id_list = get_list_of_ids_to_notify(data)
-        ip = get_host_info_from_dict(data).get('ip')
-        ticket_id = data.get('ticketId')
         domain = data.get('sourceDomainOrIp')
         domain_id = get_domain_id_from_dict(data)
+        hosted_brand = get_host_brand_from_dict(data)
+        hosted_status = data.get('hosted_status')
+        ip = get_host_info_from_dict(data).get('ip')
+        recipients = get_host_abuse_email_from_dict(data)
         report_type = data.get('type')
+        shopper_id = get_shopper_id_from_dict(data)
+        shopper_id_list = get_list_of_ids_to_notify(data)
         source = data.get('source')
+        ticket_id = data.get('ticketId')
 
         if self._is_domain_protected(domain, action='customer_warning'):
             return False
@@ -91,18 +96,26 @@ class RegisteredHandler(Handler):
         self.journal.write(EventTypes.customer_warning, self.DOMAIN, domain, report_type,
                            note_mappings['journal']['customerWarning'], [source])
 
+        self.mimir.write(abuse_type=report_type,
+                         domain=domain,
+                         domain_id=domain_id,
+                         hosted_status=hosted_status,
+                         infraction_type=InfractionTypes.customer_warning,
+                         shopper_number=shopper_id,
+                         ticket_number=ticket_id)
+
         if not self.registered_mailer.send_registrant_warning(ticket_id, domain, domain_id, shopper_id_list, source):
             self.slack.failed_sending_email(domain)
             return False
         return True
 
     def forward_user_gen_complaint(self, data):
-        ticket_id = data.get('ticketId')
-        subdomain = data.get('sourceSubDomain')
         domain = data.get('sourceDomainOrIp')
         domain_id = get_domain_id_from_dict(data)
         shopper_id = get_shopper_id_from_dict(data)
         source = data.get('source')
+        subdomain = data.get('sourceSubDomain')
+        ticket_id = data.get('ticketId')
 
         if not self._validate_required_args(data):
             return False
@@ -113,14 +126,15 @@ class RegisteredHandler(Handler):
         return True
 
     def intentionally_malicious(self, data):
-        shopper_id = get_shopper_id_from_dict(data)
-        shopper_id_list = get_list_of_ids_to_notify(data)
-        ticket_id = data.get('ticketId')
         domain = data.get('sourceDomainOrIp')
         domain_id = get_domain_id_from_dict(data)
+        hosted_status = data.get('hosted_status')
+        report_type = data.get('type')
+        shopper_id = get_shopper_id_from_dict(data)
+        shopper_id_list = get_list_of_ids_to_notify(data)
         source = data.get('source')
         target = data.get('target')
-        report_type = data.get('type')
+        ticket_id = data.get('ticketId')
 
         if self._is_domain_protected(domain, action='intentionally_malicious'):
             return False
@@ -138,6 +152,14 @@ class RegisteredHandler(Handler):
         self.crm.notate_crm_account([shopper_id], ticket_id, note)
         self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
                            note_mappings['journal']['intentionallyMalicious'], [source])
+
+        self.mimir.write(abuse_type=report_type,
+                         domain=domain,
+                         domain_id=domain_id,
+                         hosted_status=hosted_status,
+                         infraction_type=InfractionTypes.intentionally_malicious,
+                         shopper_number=shopper_id,
+                         ticket_number=ticket_id)
 
         self._notify_fraud(data, ticket_id, domain, shopper_id, report_type, source, target)
 
@@ -160,14 +182,15 @@ class RegisteredHandler(Handler):
         return self._suspend_domain(domain, ticket_id, note)
 
     def shopper_compromise(self, data):
-        shopper_id = get_shopper_id_from_dict(data)
-        shopper_id_list = get_list_of_ids_to_notify(data)
-        ticket_id = data.get('ticketId')
         domain = data.get('sourceDomainOrIp')
         domain_id = get_domain_id_from_dict(data)
+        hosted_status = data.get('hosted_status')
+        report_type = data.get('type')
+        shopper_id = get_shopper_id_from_dict(data)
+        shopper_id_list = get_list_of_ids_to_notify(data)
         source = data.get('source')
         target = data.get('target')
-        report_type = data.get('type')
+        ticket_id = data.get('ticketId')
 
         if self._is_domain_protected(domain, action='shopper_compromise'):
             return False
@@ -180,6 +203,14 @@ class RegisteredHandler(Handler):
         self.crm.notate_crm_account([shopper_id], ticket_id, note)
         self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
                            note_mappings['journal']['shopperCompromise'], [source])
+
+        self.mimir.write(abuse_type=report_type,
+                         domain=domain,
+                         domain_id=domain_id,
+                         hosted_status=hosted_status,
+                         infraction_type=InfractionTypes.shopper_compromise,
+                         shopper_number=shopper_id,
+                         ticket_number=ticket_id)
 
         self._notify_fraud(data, ticket_id, domain, shopper_id, report_type, source, target)
 
@@ -195,14 +226,60 @@ class RegisteredHandler(Handler):
 
         return self._suspend_domain(domain, ticket_id, note)
 
-    def suspend(self, data):
-        shopper_id = get_shopper_id_from_dict(data)
-        shopper_id_list = get_list_of_ids_to_notify(data)
-        ticket_id = data.get('ticketId')
+    def repeat_offender(self, data):
         domain = data.get('sourceDomainOrIp')
         domain_id = get_domain_id_from_dict(data)
-        source = data.get('source')
+        hosted_status = data.get('hosted_status')
         report_type = data.get('type')
+        shopper_id = get_shopper_id_from_dict(data)
+        shopper_id_list = get_list_of_ids_to_notify(data)
+        source = data.get('source')
+        ticket_id = data.get('ticketId')
+
+        if self._is_domain_protected(domain, action='repeat_offender'):
+            return False
+
+        elif not self._validate_required_args(data):
+            return False
+
+        elif not self.domain_service.can_suspend_domain(domain):
+            self._logger.info("Domain {} already suspended".format(domain))
+            return False
+
+        note = note_mappings['registered']['repeatOffender']['crm'].format(domain=domain,
+                                                                           type=report_type,
+                                                                           location=source)
+        self.crm.notate_crm_account([shopper_id], ticket_id, note)
+        self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
+                           note_mappings['journal']['repeatOffender'], [source])
+
+        self.mimir.write(abuse_type=report_type,
+                         domain=domain,
+                         domain_id=domain_id,
+                         hosted_status=hosted_status,
+                         infraction_type=InfractionTypes.repeat_offender,
+                         shopper_number=shopper_id,
+                         ticket_number=ticket_id)
+
+        if not self.registered_mailer.send_repeat_offender_suspension(ticket_id, domain, domain_id,
+                                                                      shopper_id_list, source):
+            self.slack.failed_sending_email(domain)
+            return False
+
+        alert = alert_mappings['registered']['suspend'].format(domain=domain, type=report_type)
+        self.crmalert.create_alert(shopper_id, alert, report_type, self.crmalert.high_severity, domain)
+
+        return self._suspend_domain(domain, ticket_id, note)
+
+    def suspend(self, data):
+        domain = data.get('sourceDomainOrIp')
+        domain_id = get_domain_id_from_dict(data)
+        hosted_status = data.get('hosted_status')
+        report_type = data.get('type')
+        shopper_id = get_shopper_id_from_dict(data)
+        shopper_id_list = get_list_of_ids_to_notify(data)
+        source = data.get('source')
+        ticket_id = data.get('ticketId')
 
         if self._is_domain_protected(domain, action='suspend'):
             return False
@@ -220,6 +297,14 @@ class RegisteredHandler(Handler):
         self.crm.notate_crm_account([shopper_id], ticket_id, note)
         self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
                            note_mappings['journal']['suspension'], [source])
+
+        self.mimir.write(abuse_type=report_type,
+                         domain=domain,
+                         domain_id=domain_id,
+                         hosted_status=hosted_status,
+                         infraction_type=InfractionTypes.suspended,
+                         shopper_number=shopper_id,
+                         ticket_number=ticket_id)
 
         if not self.registered_mailer.send_shopper_suspension(ticket_id, domain, domain_id, shopper_id_list, source,
                                                               report_type):

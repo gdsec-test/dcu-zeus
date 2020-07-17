@@ -59,9 +59,10 @@ class HostedHandler(Handler):
 
     def customer_warning(self, data):
         domain = data.get('sourceDomainOrIp')
+        hosted_status = data.get('hosted_status')
+        product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
         ticket_id = data.get('ticketId')
-        product = get_host_info_from_dict(data).get('product')
 
         self.basic_review.place_in_review(ticket_id, datetime.utcnow() + timedelta(seconds=self.HOLD_TIME),
                                           '24hr_notice_sent')
@@ -83,13 +84,20 @@ class HostedHandler(Handler):
                            note_mappings['journal']['customerWarning'], [source])
 
         abuse_type = data.get('type', '').upper()
-        self.mimir.write(InfractionTypes.customer_warning, shopper_id, ticket_id, domain, guid, abuse_type)
+        self.mimir.write(abuse_type=abuse_type,
+                         domain=domain,
+                         guid=guid,
+                         hosted_status=hosted_status,
+                         infraction_type=InfractionTypes.customer_warning,
+                         shopper_number=shopper_id,
+                         ticket_number=ticket_id)
         self.scribe.customer_warning(ticket_id, guid, source, report_type, shopper_id)
 
         return True
 
     def content_removed(self, data):
         domain = data.get('sourceDomainOrIp')
+        hosted_status = data.get('hosted_status')
         source = data.get('source')
         ticket_id = data.get('ticketId')
 
@@ -107,7 +115,13 @@ class HostedHandler(Handler):
             return False
 
         abuse_type = data.get('type', '').upper()
-        self.mimir.write(InfractionTypes.content_removed, shopper_id, ticket_id, domain, guid, abuse_type)
+        self.mimir.write(abuse_type=abuse_type,
+                         domain=domain,
+                         guid=guid,
+                         hosted_status=hosted_status,
+                         infraction_type=InfractionTypes.content_removed,
+                         shopper_number=shopper_id,
+                         ticket_number=ticket_id)
         self.scribe.content_removed(ticket_id, guid, source, report_type, shopper_id)
 
         alert = alert_mappings['hosted']['contentRemoved'].format(type=report_type, domain=domain)
@@ -117,10 +131,11 @@ class HostedHandler(Handler):
 
     def intentionally_malicious(self, data):
         domain = data.get('sourceDomainOrIp')
-        source = data.get('source')
-        ticket_id = data.get('ticketId')
+        hosted_status = data.get('hosted_status')
         product = get_host_info_from_dict(data).get('product')
+        source = data.get('source')
         target = data.get('target')
+        ticket_id = data.get('ticketId')
 
         report_type, guid, shopper_id = self._validate_required_args(data)
         if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
@@ -134,7 +149,13 @@ class HostedHandler(Handler):
                            note_mappings['journal']['intentionallyMalicious'], [source])
 
         abuse_type = data.get('type', '').upper()
-        self.mimir.write(InfractionTypes.intentionally_malicious, shopper_id, ticket_id, domain, guid, abuse_type)
+        self.mimir.write(abuse_type=abuse_type,
+                         domain=domain,
+                         guid=guid,
+                         hosted_status=hosted_status,
+                         infraction_type=InfractionTypes.intentionally_malicious,
+                         shopper_number=shopper_id,
+                         ticket_number=ticket_id)
 
         self.scribe.intentionally_malicious(ticket_id, guid, source, report_type, shopper_id)
 
@@ -146,7 +167,8 @@ class HostedHandler(Handler):
                 self.slack.failed_sending_revocation_email(ticket_id, domain, shopper_id, ssl_subscription)
                 return False
 
-        if not self.hosted_mailer.send_shopper_hosted_intentional_suspension(ticket_id, domain, shopper_id, report_type):
+        if not self.hosted_mailer.send_shopper_hosted_intentional_suspension(ticket_id, domain,
+                                                                             shopper_id, report_type):
             self.slack.failed_sending_email(domain)
             return False
 
@@ -159,10 +181,11 @@ class HostedHandler(Handler):
 
     def shopper_compromise(self, data):
         domain = data.get('sourceDomainOrIp')
-        source = data.get('source')
-        ticket_id = data.get('ticketId')
+        hosted_status = data.get('hosted_status')
         product = get_host_info_from_dict(data).get('product')
+        source = data.get('source')
         target = data.get('target')
+        ticket_id = data.get('ticketId')
 
         report_type, guid, shopper_id = self._validate_required_args(data)
         if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
@@ -172,7 +195,13 @@ class HostedHandler(Handler):
                            note_mappings['journal']['shopperCompromise'], [source])
 
         abuse_type = data.get('type', '').upper()
-        self.mimir.write(InfractionTypes.shopper_compromise, shopper_id, ticket_id, domain, guid, abuse_type)
+        self.mimir.write(abuse_type=abuse_type,
+                         domain=domain,
+                         guid=guid,
+                         hosted_status=hosted_status,
+                         infraction_type=InfractionTypes.shopper_compromise,
+                         shopper_number=shopper_id,
+                         ticket_number=ticket_id)
 
         self.scribe.shopper_compromise(ticket_id, guid, source, report_type, shopper_id)
 
@@ -192,9 +221,10 @@ class HostedHandler(Handler):
 
     def repeat_offender(self, data):
         domain = data.get('sourceDomainOrIp')
+        hosted_status = data.get('hosted_status')
+        product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
         ticket_id = data.get('ticketId')
-        product = get_host_info_from_dict(data).get('product')
 
         report_type, guid, shopper_id = self._validate_required_args(data)
         if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
@@ -208,7 +238,13 @@ class HostedHandler(Handler):
                            note_mappings['journal']['repeatOffender'], [source])
 
         abuse_type = data.get('type', '').upper()
-        self.mimir.write(InfractionTypes.repeat_offender, shopper_id, ticket_id, domain, guid, abuse_type)
+        self.mimir.write(abuse_type=abuse_type,
+                         domain=domain,
+                         guid=guid,
+                         hosted_status=hosted_status,
+                         infraction_type=InfractionTypes.repeat_offender,
+                         shopper_number=shopper_id,
+                         ticket_number=ticket_id)
 
         self.scribe.repeat_offender(ticket_id, guid, source, report_type, shopper_id)
         if not self.hosted_mailer.send_repeat_offender(ticket_id, domain, shopper_id, source):
@@ -222,9 +258,10 @@ class HostedHandler(Handler):
 
     def suspend(self, data):
         domain = data.get('sourceDomainOrIp')
+        hosted_status = data.get('hosted_status')
+        product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
         ticket_id = data.get('ticketId')
-        product = get_host_info_from_dict(data).get('product')
 
         report_type, guid, shopper_id = self._validate_required_args(data)
         if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
@@ -238,7 +275,13 @@ class HostedHandler(Handler):
                            note_mappings['journal']['suspension'], [source])
 
         abuse_type = data.get('type', '').upper()
-        self.mimir.write(InfractionTypes.suspended, shopper_id, ticket_id, domain, guid, abuse_type)
+        self.mimir.write(abuse_type=abuse_type,
+                         domain=domain,
+                         guid=guid,
+                         hosted_status=hosted_status,
+                         infraction_type=InfractionTypes.suspended,
+                         shopper_number=shopper_id,
+                         ticket_number=ticket_id)
 
         self.scribe.suspension(ticket_id, guid, source, report_type, shopper_id)
         if not self.hosted_mailer.send_shopper_hosted_suspension(ticket_id, domain, shopper_id, source):
@@ -252,9 +295,10 @@ class HostedHandler(Handler):
 
     def extensive_compromise(self, data):
         domain = data.get('sourceDomainOrIp')
+        hosted_status = data.get('hosted_status')
+        product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
         ticket_id = data.get('ticketId')
-        product = get_host_info_from_dict(data).get('product')
 
         report_type, guid, shopper_id = self._validate_required_args(data)
         if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
@@ -268,7 +312,13 @@ class HostedHandler(Handler):
                            note_mappings['journal']['extensiveCompromise'], [source])
 
         abuse_type = data.get('type', '').upper()
-        self.mimir.write(InfractionTypes.extensive_compromise, shopper_id, ticket_id, domain, guid, abuse_type)
+        self.mimir.write(abuse_type=abuse_type,
+                         domain=domain,
+                         guid=guid,
+                         hosted_status=hosted_status,
+                         infraction_type=InfractionTypes.extensive_compromise,
+                         shopper_number=shopper_id,
+                         ticket_number=ticket_id)
 
         self.scribe.extensive_compromise(ticket_id, guid, source, report_type, shopper_id)
         if not self.hosted_mailer.send_extensive_compromise(ticket_id, domain, shopper_id):
@@ -282,8 +332,9 @@ class HostedHandler(Handler):
 
     def ncmec_submitted(self, data):
         domain = data.get('sourceDomainOrIP')
-        ticket_id = data.get('ticketID')
+        hosted_status = data.get('hosted_status')
         ncmecreport_id = data.get('ncmecReportID')
+        ticket_id = data.get('ticketID')
 
         report_type, guid, shopper_id = self._validate_required_args(data)
         if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
@@ -291,8 +342,15 @@ class HostedHandler(Handler):
 
         note = note_mappings['hosted']['ncmecSubmitted']['mimir'].format(type=report_type, guid=guid)
         abuse_type = data.get('type', '').upper()
-        self.mimir.write(InfractionTypes.ncmec_report_submitted, shopper_id, ticket_id, domain, guid,
-                         abuse_type, note, ncmecreport_id)
+        self.mimir.write(abuse_type=abuse_type,
+                         domain=domain,
+                         guid=guid,
+                         hosted_status=hosted_status,
+                         infraction_type=InfractionTypes.ncmec_report_submitted,
+                         ncmec_report_id=ncmecreport_id,
+                         note=note,
+                         shopper_number=shopper_id,
+                         ticket_number=ticket_id)
         return True
 
     def _can_fraud_review(self, data):

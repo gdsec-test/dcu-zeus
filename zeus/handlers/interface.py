@@ -15,6 +15,10 @@ class Handler(object):
         pass
 
     @abc.abstractmethod
+    def repeat_offender(self, data):
+        pass
+
+    @abc.abstractmethod
     def shopper_compromise(self, data):
         pass
 

@@ -29,19 +29,38 @@ class Mimir:
         cert = (app_settings.ZEUS_SSL_CERT, app_settings.ZEUS_SSL_KEY)
         self._headers.update({'Authorization': self._get_jwt(cert)})
 
-    def write(self, infraction_type, shopper_number, ticket_number, domain, guid,
-              abuse_type, note='', ncmecReportID=''):
+    @staticmethod
+    def _clean_dict_for_mimir(query_dict):
+        """
+        Remove any keys which have an empty or None value
+        :param query_dict: dictionary of Mimir query parameters
+        """
+        return {k: v for k, v in query_dict.items() if v}
+
+    def write(self,
+              abuse_type,
+              domain,
+              hosted_status,
+              infraction_type,
+              shopper_number,
+              ticket_number,
+              domain_id=None,
+              guid=None,
+              ncmec_report_id=None,
+              note=None):
         """
         Create an infraction entry in DCU Mimir
+        :param abuse_type: Abuse Type of the incident
+        :param domain: Domain name
+        :param hosted_status: HOSTED, REGISTERED or FOREIGN
         :param infraction_type: One of CONTENT_REMOVED, CUSTOMER_WARNING, EXTENSIVE_COMPROMISE, INTENTIONALLY_MALICIOUS,
             REPEAT_OFFENDER, SHOPPER_COMPROMISE or SUSPENDED
         :param shopper_number: Shopper account number
         :param ticket_number: DCU SNOW ticket number
-        :param domain: Domain name
-        :param guid: Guid of hosting account
-        :param abuse_type: Abuse Type of the incident
-        :param note: Mimir note in case of CSAM infractions
-        :param ncmecReportID: NCMEC Report ID from NCMEC report submissions for CSAM infractions
+        :param domain_id: Optional: The domain identifier
+        :param guid: Optional: Guid of hosting account
+        :param ncmec_report_id: Optional: NCMEC Report ID from NCMEC report submissions for CSAM infractions
+        :param note: Optional: Mimir note in case of CSAM infractions
         :return:
         """
 
@@ -49,9 +68,18 @@ class Mimir:
         if not isinstance(infraction_type, basestring):
             infraction_type = infraction_type.value
 
-        body = {'infractionType': infraction_type, 'shopperId': shopper_number, 'ticketId': ticket_number,
-                'sourceDomainOrIp': domain, 'hostingGuid': guid, 'note': note, 'ncmecReportID': ncmecReportID,
-                'abuseType': abuse_type}
+        body = {'abuseType': abuse_type,
+                'domainId': domain_id,
+                'hostedStatus': hosted_status,
+                'hostingGuid': guid,
+                'infractionType': infraction_type,
+                'ncmecReportID': ncmec_report_id,
+                'note': note,
+                'shopperId': shopper_number,
+                'sourceDomainOrIp': domain,
+                'ticketId': ticket_number
+                }
+        body = Mimir._clean_dict_for_mimir(body)
 
         try:
             response = requests.post(self._mimir_endpoint, json=body, headers=self._headers)

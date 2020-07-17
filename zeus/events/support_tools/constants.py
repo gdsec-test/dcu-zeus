@@ -44,6 +44,9 @@ note_mappings = {
         'suspension': {
             'crm': "{{domain}} suspended. {{type}} content still present at {{location}} {}".format(support_doc)
         },
+        'repeatOffender': {
+            'crm': "{{domain}} suspended for excessive repeat occurences. {{type}} content reported at {{location}} {}".format(support_doc)
+        },
         'intentionallyMalicious': {
             'crm': "{{domain}} suspended for intentional {{type}} at {{location}} {}".format(support_doc),
             'shoplocked': INTENTIONALLY_MALICIOUS_ADMINLOCK

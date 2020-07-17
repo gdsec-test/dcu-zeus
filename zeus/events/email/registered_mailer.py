@@ -104,6 +104,50 @@ class RegisteredMailer(Mailer):
             return False
         return True
 
+    def send_repeat_offender_suspension(self, ticket_id, domain, domain_id, shopper_ids, source):
+        """
+        Sends a notification to the shopper account and administrative contact email address(es) found for the domain
+        :param ticket_id:
+        :param domain:
+        :param domain_id:
+        :param shopper_ids:
+        :param source:
+        :return:
+        """
+        if not shopper_ids:
+            return False
+
+        template = "registered.repeat_offender"
+
+        message_type = "reg-only_repeat_offender"
+        exception_type = "reg-only_repeat_offender_email_exception"
+        success_message = "reg-only_repeat_offender_email_sent"
+
+        kwargs = self.generate_kwargs_for_hermes()
+
+        try:
+            if self._throttle.can_shopper_email_be_sent(domain) or self._CAN_FLOOD:
+
+                # If the domain is associated with a parent/child API reseller
+                #  account, then email both the parent and child account
+                for shopper_id in shopper_ids:
+                    substitution_values = {'ACCOUNT_NUMBER': shopper_id,
+                                           'DOMAIN': domain,
+                                           'SANITIZED_URL': sanitize_url(source)}
+
+                    kwargs['domain_id'] = domain_id
+                    resp = send_mail(template, substitution_values, **kwargs)
+                    resp.update(
+                        {'type': message_type, 'template': 5493})  # template provided for backwards compatibility
+                    generate_event(ticket_id, success_message, **resp)
+            else:
+                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+        except Exception as e:
+            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            generate_event(ticket_id, exception_type, type=message_type)
+            return False
+        return True
+
     def send_shopper_suspension(self, ticket_id, domain, domain_id, shopper_ids, source, report_type):
         """
         Sends a suspension notification to the shopper account and administrative contact email address(es)

@@ -30,7 +30,7 @@ class TestHostedHandler:
     oldest_valid_fraud_review_test_date = current_test_date - timedelta(days=TestingConfig.FRAUD_REVIEW_TIME)
     ticket_no_guid = {'type': phishing}
     ticket_no_shopper = {'type': phishing, 'data': {'domainQuery': {'host': {'guid': guid}}}}
-    ticket_valid = {'type': phishing, 'sourceDomainOrIp': domain,
+    ticket_valid = {'type': phishing, 'sourceDomainOrIp': domain, 'hosted_status': 'HOSTED',
                     'data': {'domainQuery': {'host': {'guid': guid, 'shopperId': sid},
                                              'sslSubscriptions': ssl_subscription}}}
     ticket_fraud_hold = {'type': phishing, 'sourceDomainOrIp': domain, 'fraud_hold_reason': 'test',

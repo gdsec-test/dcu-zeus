@@ -14,6 +14,7 @@ from zeus.handlers.registered_handler import RegisteredHandler
 from zeus.reviews.reviews import BasicReview
 from zeus.utils.crmalert import CRMAlert
 from zeus.utils.journal import Journal
+from zeus.utils.mimir import Mimir
 from zeus.utils.shoplocked import Shoplocked
 from zeus.utils.slack import SlackFailures
 
@@ -21,16 +22,19 @@ from zeus.utils.slack import SlackFailures
 class TestRegisteredHandler:
     phishing = 'PHISHING'
     sid = 'test-id'
+    did = 'test-domain-id'
     ssl_subscription = '1234'
     domain = 'domain'
     protected_domain = 'myftpupload.com'
     reg = 'REGISTERED'
+    JWT = 'JWT_STRING'
     current_test_date = datetime(2020, 05, 07, 14, 57)  # +7 hours because of UTC
     oldest_valid_fraud_review_test_date = current_test_date - timedelta(days=TestingConfig.FRAUD_REVIEW_TIME)
     ticket_invalid_type = {'hosted_status': reg}
     ticket_no_shopper = {'hosted_status': reg, 'type': phishing}
     ticket_valid = {'hosted_status': reg, 'type': phishing, 'sourceDomainOrIp': domain,
-                    'data': {'domainQuery': {'shopperInfo': {'shopperId': sid}, 'sslSubscriptions': ssl_subscription}}}
+                    'data': {'domainQuery': {'shopperInfo': {'shopperId': sid}, 'sslSubscriptions': ssl_subscription,
+                                             'registrar': {'domainId': did}}}}
     ticket_fraud_hold = {'fraud_hold_reason': 'test', 'hosted_status': reg, 'type': phishing,
                          'sourceDomainOrIp': domain, 'data': {'domainQuery': {'shopperInfo': {'shopperId': sid},
                                                                               'sslSubscriptions': ssl_subscription}}}
@@ -105,6 +109,7 @@ class TestRegisteredHandler:
     def test_intentionally_malicious_already_suspended(self, throttle):
         assert_false(self._registered.intentionally_malicious(self.ticket_valid))
 
+    @patch.object(Mimir, 'write', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
@@ -112,9 +117,11 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    def test_intentionally_malicious_failed_shopper_email_fraud_hold(self, ssl_mailer, service, crm, registered, slack, journal, shoplocked):
+    def test_intentionally_malicious_failed_shopper_email_fraud_hold(self, ssl_mailer, service, crm, registered,
+                                                                     slack, journal, shoplocked, mimir):
         assert_false(self._registered.intentionally_malicious(self.ticket_fraud_hold))
 
+    @patch.object(Mimir, 'write', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
     @patch.object(SlackFailures, 'failed_sending_revocation_email', return_value=None)
@@ -123,9 +130,11 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=False)
-    def test_intentionally_malicious_failed_revocation_email(self, ssl_mailer, service, crm, registered, slack, slack_sll, journal, shoplocked):
+    def test_intentionally_malicious_failed_revocation_email(self, ssl_mailer, service, crm, registered, slack,
+                                                             slack_sll, journal, shoplocked, mimir):
         assert_false(self._registered.intentionally_malicious(self.ticket_valid))
 
+    @patch.object(Mimir, 'write', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
@@ -134,9 +143,11 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    def test_intentionally_malicious_no_termination_email(self, ssl_mailer, service, crm, registered, handler, journal, shoplocked, crmalert):
+    def test_intentionally_malicious_no_termination_email(self, ssl_mailer, service, crm, registered, handler,
+                                                          journal, shoplocked, crmalert, mimir):
         assert_true(self._registered.intentionally_malicious(self.ticket_fraud_hold))
 
+    @patch.object(Mimir, 'write', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
@@ -145,9 +156,11 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    def test_intentionally_malicious_success(self, ssl_mailer, service, crm, registered, handler, journal, shoplocked, crmalert):
+    def test_intentionally_malicious_success(self, ssl_mailer, service, crm, registered, handler, journal, shoplocked,
+                                             crmalert, mimir):
         assert_true(self._registered.intentionally_malicious(self.ticket_valid))
 
+    @patch.object(Mimir, 'write', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
@@ -157,10 +170,12 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    def test_intentionally_malicious_no_fraud_email(self, ssl_mailer, service, crm, fraud, registered, handler, journal, shoplocked, crmalert):
+    def test_intentionally_malicious_no_fraud_email(self, ssl_mailer, service, crm, fraud, registered, handler,
+                                                    journal, shoplocked, crmalert, mimir):
         self._registered.intentionally_malicious(self.ticket_valid_api_reseller)
         fraud.assert_not_called()
 
+    @patch.object(Mimir, 'write', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
@@ -171,10 +186,48 @@ class TestRegisteredHandler:
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     @patch('zeus.handlers.registered_handler.datetime')
-    def test_intentionally_malicious_success_fraud_email(self, mock_date, ssl_mailer, service, crm, fraud, registered, handler, journal, shoplocked, crmalert):
+    def test_intentionally_malicious_success_fraud_email(self, mock_date, ssl_mailer, service, crm, fraud,
+                                                         registered, handler, journal, shoplocked, crmalert, mimir):
         mock_date.utcnow = Mock(return_value=self.current_test_date)
         self._registered.intentionally_malicious(self.ticket_no_hold_or_reseller)
         fraud.assert_called()
+
+    @patch.object(SlackFailures, 'invalid_hosted_status', return_value=None)
+    def test_repeat_offender_none(self, invalid_hosted_status):
+        assert_false(self._registered.repeat_offender({}))
+
+    @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
+    def test_repeat_offender_unsupported_type(self, invalid_abuse_type):
+        assert_false(self._registered.repeat_offender(self.ticket_invalid_type))
+
+    @patch.object(SlackFailures, 'failed_to_determine_shoppers', return_value=None)
+    def test_repeat_offender_no_shoppers(self, failed_to_determine_shoppers):
+        assert_false(self._registered.repeat_offender(self.ticket_no_shopper))
+
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
+    @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=False)
+    def test_repeat_offender_already_suspended(self, service, crm, journal, mimir):
+        assert_false(self._registered.repeat_offender(self.ticket_valid))
+
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
+    @patch.object(RegisteredMailer, 'send_repeat_offender_suspension', return_value=False)
+    @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
+    @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
+    def test_repeat_offender_failed_shopper_email(self, service, crm, registered, slack, journal, mimir):
+        assert_false(self._registered.repeat_offender(self.ticket_valid))
+
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(RegisteredHandler, '_suspend_domain', return_value=True)
+    @patch.object(RegisteredMailer, 'send_repeat_offender_suspension', return_value=True)
+    @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
+    @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
+    def test_repeat_offender_success(self, service, crm, registered, handler, journal, mimir):
+        assert_true(self._registered.repeat_offender(self.ticket_valid))
 
     @patch.object(SlackFailures, 'invalid_hosted_status', return_value=None)
     def test_shopper_compromise_none(self, invalid_hosted_status):
@@ -188,14 +241,16 @@ class TestRegisteredHandler:
     def test_shopper_compromise_no_shoppers(self, failed_to_determine_shoppers):
         assert_false(self._registered.shopper_compromise(self.ticket_no_shopper))
 
+    @patch.object(Mimir, 'write', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=False)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    def test_shopper_compromise_already_suspended(self, ssl_mailer, service, crm, journal, shoplocked):
+    def test_shopper_compromise_already_suspended(self, ssl_mailer, service, crm, journal, shoplocked, mimir):
         assert_false(self._registered.shopper_compromise(self.ticket_valid))
 
+    @patch.object(Mimir, 'write', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
@@ -203,9 +258,11 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    def test_shopper_compromise_failed_shopper_email(self, ssl_mailer, service, crm, registered, slack, journal, shoplocked):
+    def test_shopper_compromise_failed_shopper_email(self, ssl_mailer, service, crm, registered, slack, journal,
+                                                     shoplocked, mimir):
         assert_false(self._registered.shopper_compromise(self.ticket_valid))
 
+    @patch.object(Mimir, 'write', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
     @patch.object(RegisteredHandler, '_suspend_domain', return_value=True)
@@ -213,9 +270,11 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    def test_shopper_compromise_success(self, ssl_mailer, service, crm, registered, handler, journal, shoplocked):
+    def test_shopper_compromise_success(self, ssl_mailer, service, crm, registered, handler, journal, shoplocked,
+                                        mimir):
         assert_true(self._registered.shopper_compromise(self.ticket_valid))
 
+    @patch.object(Mimir, 'write', return_value=None)
     @patch.object(FraudMailer, 'send_malicious_domain_notification', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
@@ -224,10 +283,12 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    def test_shopper_compromise_no_fraud_email(self, ssl_mailer, service, crm, registered, handler, journal, shoplocked, fraud):
+    def test_shopper_compromise_no_fraud_email(self, ssl_mailer, service, crm, registered, handler, journal,
+                                               shoplocked, fraud, mimir):
         self._registered.shopper_compromise(self.ticket_valid_api_reseller)
         fraud.assert_not_called()
 
+    @patch.object(Mimir, 'write', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
     @patch.object(RegisteredHandler, '_suspend_domain', return_value=True)
@@ -237,7 +298,8 @@ class TestRegisteredHandler:
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     @patch('zeus.handlers.registered_handler.datetime')
-    def test_shopper_compromise_success_fraud_email(self, mock_date, ssl_mailer, service, crm, fraud, registered, handler, journal, shoplocked):
+    def test_shopper_compromise_success_fraud_email(self, mock_date, ssl_mailer, service, crm, fraud, registered,
+                                                    handler, journal, shoplocked, mimir):
         mock_date.utcnow = Mock(return_value=self.current_test_date)
         self._registered.shopper_compromise(self.ticket_no_hold_or_reseller)
         fraud.assert_called()
@@ -258,21 +320,23 @@ class TestRegisteredHandler:
     def test_suspend_already_suspended(self, service):
         assert_false(self._registered.suspend(self.ticket_valid))
 
+    @patch.object(Mimir, 'write', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(RegisteredMailer, 'send_shopper_suspension', return_value=False)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
-    def test_suspend_failed_shopper_email(self, service, crm, mailer, slack, journal):
+    def test_suspend_failed_shopper_email(self, service, crm, mailer, slack, journal, mimir):
         assert_false(self._registered.suspend(self.ticket_valid))
 
+    @patch.object(Mimir, 'write', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
     @patch.object(RegisteredHandler, '_suspend_domain', return_value=True)
     @patch.object(RegisteredMailer, 'send_shopper_suspension', return_value=True)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
-    def test_suspend_success(self, service, crm, mailer, handler, journal, crmalert):
+    def test_suspend_success(self, service, crm, mailer, handler, journal, crmalert, mimir):
         assert_true(self._registered.suspend(self.ticket_valid))
 
     @patch.object(ThrottledDomainService, 'suspend_domain', return_value=True)
