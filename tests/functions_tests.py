@@ -7,7 +7,8 @@ from zeus.utils.functions import (get_domain_create_date_from_dict,
                                   get_parent_child_shopper_ids_from_dict,
                                   get_shopper_create_date_from_dict,
                                   get_shopper_id_from_dict,
-                                  get_ssl_subscriptions_from_dict)
+                                  get_ssl_subscriptions_from_dict,
+                                  sanitize_url)
 
 
 class TestFunctions:
@@ -112,3 +113,11 @@ class TestFunctions:
         data = {'data': {'domainQuery': {'sslSubscriptions': '1234'}}}
         actual = get_ssl_subscriptions_from_dict(data)
         assert_equal(actual, '1234')
+
+    def test_sanitize_url(self, url='https://someurl.com/path/to/bad/'):
+        sanitized = sanitize_url(url)
+        assert_equal('hxxps://someurl.com/path/to/bad/', sanitized)
+
+    def test_sanitize_url_with_email(self, url='https://anotherurl.xyz/?email=reporter@domain.biz'):
+        sanitized = sanitize_url(url)
+        assert_equal('hxxps://anotherurl.xyz/?email=redacted@redacted.tld', sanitized)

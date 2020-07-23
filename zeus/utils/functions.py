@@ -1,8 +1,10 @@
 import re
 
 
-def sanitize_url(url):
-    return re.sub(r'^http', 'hxxp', url)
+def sanitize_url(url, replace_email='redacted@redacted.tld'):
+    email_id_regex = re.compile(r'\b[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,63}\b', re.IGNORECASE | re.MULTILINE)
+    redact_email = re.sub(email_id_regex, replace_email, url)
+    return re.sub(r'^http', 'hxxp', redact_email)
 
 
 def _get_domain_query(dict_to_search):
