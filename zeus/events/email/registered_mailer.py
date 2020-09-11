@@ -279,3 +279,39 @@ class RegisteredMailer(Mailer):
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
+
+    def send_csam_shopper_suspension(self, ticket_id, domain, shopper_id):
+        """
+        Sends a notification to the shopper account email address found for the domain account
+        :param ticket_id:
+        :param domain:
+        :param shopper_id:
+        :return:
+        """
+
+        if not shopper_id:
+            return False
+
+        template = "csam.suspend"
+
+        message_type = "registered_shopper_suspend_CSAM_notice"
+        exception_type = "registered_shopper_suspend_CSAM_email_exception"
+        success_message = "registered_shopper_suspend_CSAM_notice_email_sent"
+
+        redis_key = "{}_suspended_email".format(domain)
+
+        try:
+            if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
+                substitution_values = {'ACCOUNT_NUMBER': shopper_id,
+                                       'DOMAIN': domain}
+
+                resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
+                resp.update({'type': message_type, 'template': 5722})
+                generate_event(ticket_id, success_message, **resp)
+            else:
+                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+        except Exception as e:
+            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            generate_event(ticket_id, exception_type, type=message_type)
+            return False
+        return True

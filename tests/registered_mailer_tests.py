@@ -69,6 +69,13 @@ class TestRegisteredMailer:
     def test_send_shopper_suspension_exception(self, send_mail):
         assert_false(self._mailer.send_shopper_suspension(None, None, None, ['test-id'], None, None))
 
+    ''' CSAM Shopper Suspension test '''
+
+    @patch('zeus.events.email.registered_mailer.send_mail', return_value={})
+    def test_send_csam_shopper_suspension(self, send_mail):
+        actual = self._mailer.send_csam_shopper_suspension('test-id', 'test-domain', ['test-id'])
+        assert_true(actual)
+
     ''' Shopper Intentional Suspension Tests '''
 
     @patch('zeus.events.email.registered_mailer.send_mail', return_value={})

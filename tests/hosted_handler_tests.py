@@ -354,3 +354,13 @@ class TestHostedHandler:
     @patch.object(Mimir, 'write', return_value=None)
     def test_ncmec_submitted_success(self, mimir):
         assert_true(self._hosted.ncmec_submitted(self.ticket_valid_child_abuse))
+
+    @patch.object(CRMAlert, 'create_alert', return_value=None)
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(HostedHandler, '_suspend_product', return_value=True)
+    @patch.object(HostedMailer, 'send_csam_hosted_suspension', return_value=True)
+    @patch.object(HostedScribe, 'suspension', return_value=None)
+    @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
+    def test_csam_suspend_success(self, can_suspend, scribe, mailer, handler, journal, mimir, crmalert):
+        assert_true(self._hosted.suspend(self.ticket_valid_child_abuse))

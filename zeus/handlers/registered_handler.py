@@ -26,7 +26,7 @@ from zeus.utils.slack import SlackFailures, ThrottledSlack
 
 
 class RegisteredHandler(Handler):
-    TYPES = ['PHISHING', 'MALWARE']
+    TYPES = ['PHISHING', 'MALWARE', 'CHILD_ABUSE']
     REGISTERED = 'REGISTERED'
     DOMAIN = 'Domain'
 
@@ -306,10 +306,15 @@ class RegisteredHandler(Handler):
                          shopper_number=shopper_id,
                          ticket_number=ticket_id)
 
-        if not self.registered_mailer.send_shopper_suspension(ticket_id, domain, domain_id, shopper_id_list, source,
-                                                              report_type):
-            self.slack.failed_sending_email(domain)
-            return False
+        if report_type == 'CHILD_ABUSE':
+            if not self.registered_mailer.send_csam_shopper_suspension(ticket_id, domain, shopper_id):
+                self.slack.failed_sending_email(domain)
+                return False
+        else:
+            if not self.registered_mailer.send_shopper_suspension(ticket_id, domain, domain_id, shopper_id_list, source,
+                                                                  report_type):
+                self.slack.failed_sending_email(domain)
+                return False
 
         alert = alert_mappings['registered']['suspend'].format(domain=domain, type=report_type)
         self.crmalert.create_alert(shopper_id, alert, report_type, self.crmalert.low_severity, domain)

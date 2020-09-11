@@ -56,6 +56,12 @@ class TestRegisteredMailer:
     def test_send_shopper_hosted_suspension_exception(self, send_mail):
         assert_false(self._mailer.send_shopper_hosted_suspension(None, None, 'test-id', None))
 
+    ''' CSAM Hosted Suspension Tests '''
+
+    @patch('zeus.events.email.hosted_mailer.send_mail', return_value={})
+    def test_send_csam_hosted_suspension(self, send_mail):
+        assert_true(self._mailer.send_csam_hosted_suspension(None, None, 'test-id'))
+
     ''' Intentional Hosted Suspension Tests '''
 
     @patch('zeus.events.email.hosted_mailer.send_mail', return_value={})

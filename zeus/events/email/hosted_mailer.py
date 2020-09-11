@@ -24,6 +24,7 @@ class HostedMailer(Mailer):
         :param source:
         :return:
         """
+
         template = "hosted.suspension_warning"
 
         message_type = "hosted_24hr_warning"
@@ -58,6 +59,7 @@ class HostedMailer(Mailer):
         :param shopper_id:
         :return:
         """
+
         template = "hosted.content_removed"
 
         message_type = "hosted_content_removed_notice"
@@ -92,6 +94,7 @@ class HostedMailer(Mailer):
         :param source:
         :return:
         """
+
         template = "hosted.repeat_offender"
 
         message_type = "hosted_repeat_offender"
@@ -126,6 +129,7 @@ class HostedMailer(Mailer):
         :param source:
         :return:
         """
+
         template = "hosted.suspend"
 
         message_type = "hosted_shopper_suspend_notice"
@@ -160,6 +164,7 @@ class HostedMailer(Mailer):
         :param report_type:
         :return:
         """
+
         template = "hosted.suspend_intentionally_malicious"
 
         message_type = "hosted_shopper_suspend_intentional_notice"
@@ -193,6 +198,7 @@ class HostedMailer(Mailer):
         :param shopper_id:
         :return:
         """
+
         template = "hosted.suspend_shopper_compromise"
 
         message_type = "hosted_shopper_compromise_suspend_notice"
@@ -225,6 +231,7 @@ class HostedMailer(Mailer):
         :param shopper_id:
         :return:
         """
+
         template = "hosted.extensive_compromise"
 
         message_type = "hosted_extensive_compromise"
@@ -240,6 +247,39 @@ class HostedMailer(Mailer):
 
                 resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
                 resp.update({'type': message_type, 'template': 4809})
+                generate_event(ticket_id, success_message, **resp)
+            else:
+                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+        except Exception as e:
+            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            generate_event(ticket_id, exception_type, type=message_type)
+            return False
+        return True
+
+    def send_csam_hosted_suspension(self, ticket_id, domain, shopper_id):
+        """
+        Sends a notification to the shopper account email address found for the hosting account
+        :param ticket_id:
+        :param domain:
+        :param shopper_id:
+        :return:
+        """
+
+        template = "csam.suspend"
+
+        message_type = "hosted_shopper_suspend_CSAM_notice"
+        exception_type = "hosted_shopper_suspend_CSAM_email_exception"
+        success_message = "hosted_shopper_suspend_CSAM_notice_email_sent"
+
+        redis_key = "{}_suspended_email".format(domain)
+
+        try:
+            if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
+                substitution_values = {'ACCOUNT_NUMBER': shopper_id,
+                                       'DOMAIN': domain}
+
+                resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
+                resp.update({'type': message_type, 'template': 5722})
                 generate_event(ticket_id, success_message, **resp)
             else:
                 self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))

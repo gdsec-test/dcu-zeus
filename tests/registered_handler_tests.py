@@ -21,6 +21,7 @@ from zeus.utils.slack import SlackFailures
 
 class TestRegisteredHandler:
     phishing = 'PHISHING'
+    childabuse = 'CHILD_ABUSE'
     sid = 'test-id'
     did = 'test-domain-id'
     ssl_subscription = '1234'
@@ -49,6 +50,10 @@ class TestRegisteredHandler:
     ticket_no_hold_or_reseller = {'hosted_status': reg, 'type': phishing, 'sourceDomainOrIp': domain,
                                   'data': {'domainQuery': {'shopperInfo': {'shopperId': sid},
                                            'registrar': {'domainCreateDate': oldest_valid_fraud_review_test_date}}}}
+    ticket_valid_child_abuse = {'hosted_status': reg, 'type': childabuse, 'sourceDomainOrIp': domain,
+                                'data': {'domainQuery': {'shopperInfo': {'shopperId': sid},
+                                                         'sslSubscriptions': ssl_subscription,
+                                                         'registrar': {'domainId': did}}}}
 
     @classmethod
     def setup(cls):
@@ -338,6 +343,16 @@ class TestRegisteredHandler:
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     def test_suspend_success(self, service, crm, mailer, handler, journal, crmalert, mimir):
         assert_true(self._registered.suspend(self.ticket_valid))
+
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(CRMAlert, 'create_alert', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(RegisteredHandler, '_suspend_domain', return_value=True)
+    @patch.object(RegisteredMailer, 'send_csam_shopper_suspension', return_value=True)
+    @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
+    @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
+    def test_csam_suspend_success(self, service, crm, mailer, handler, journal, crmalert, mimir):
+        assert_true(self._registered.suspend(self.ticket_valid_child_abuse))
 
     @patch.object(ThrottledDomainService, 'suspend_domain', return_value=True)
     def test_suspend_domain_success(self, service):

@@ -284,9 +284,15 @@ class HostedHandler(Handler):
                          ticket_number=ticket_id)
 
         self.scribe.suspension(ticket_id, guid, source, report_type, shopper_id)
-        if not self.hosted_mailer.send_shopper_hosted_suspension(ticket_id, domain, shopper_id, source):
-            self.slack.failed_sending_email(domain)
-            return False
+
+        if report_type == 'CHILD_ABUSE':
+            if not self.hosted_mailer.send_csam_hosted_suspension(ticket_id, domain, shopper_id):
+                self.slack.failed_sending_email(domain)
+                return False
+        else:
+            if not self.hosted_mailer.send_shopper_hosted_suspension(ticket_id, domain, shopper_id, source):
+                self.slack.failed_sending_email(domain)
+                return False
 
         alert = alert_mappings['hosted']['suspend'].format(domain=domain, type=report_type)
         self.crmalert.create_alert(shopper_id, alert, report_type, self.crmalert.low_severity, domain)
