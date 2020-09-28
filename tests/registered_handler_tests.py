@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from dcdatabase.phishstorymongo import PhishstoryMongo
 from mock import Mock, patch
 from nose.tools import assert_false, assert_true
 
@@ -98,22 +99,27 @@ class TestRegisteredHandler:
     def test_forward_user_gen_complaint_successful_validation_email_send(self, validation, registrant):
         assert_true(self._registered.forward_user_gen_complaint({}))
 
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(SlackFailures, 'invalid_hosted_status', return_value=None)
-    def test_intentionally_malicious_none(self, invalid_hosted_status):
+    def test_intentionally_malicious_none(self, invalid_hosted_status, mock_db):
         assert_false(self._registered.intentionally_malicious({}))
 
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
-    def test_intentionally_malicious_unsupported_type(self, invalid_abuse_type):
+    def test_intentionally_malicious_unsupported_type(self, invalid_abuse_type, mock_db):
         assert_false(self._registered.intentionally_malicious(self.ticket_invalid_type))
 
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(SlackFailures, 'failed_to_determine_shoppers', return_value=None)
-    def test_intentionally_malicious_no_shoppers(self, failed_to_determine_shoppers):
+    def test_intentionally_malicious_no_shoppers(self, failed_to_determine_shoppers, mock_db):
         assert_false(self._registered.intentionally_malicious(self.ticket_no_shopper))
 
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=False)
-    def test_intentionally_malicious_already_suspended(self, throttle):
+    def test_intentionally_malicious_already_suspended(self, throttle, mock_db):
         assert_false(self._registered.intentionally_malicious(self.ticket_valid))
 
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
@@ -123,9 +129,10 @@ class TestRegisteredHandler:
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     def test_intentionally_malicious_failed_shopper_email_fraud_hold(self, ssl_mailer, service, crm, registered,
-                                                                     slack, journal, shoplocked, mimir):
+                                                                     slack, journal, shoplocked, mimir, mock_db):
         assert_false(self._registered.intentionally_malicious(self.ticket_fraud_hold))
 
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
@@ -136,9 +143,10 @@ class TestRegisteredHandler:
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=False)
     def test_intentionally_malicious_failed_revocation_email(self, ssl_mailer, service, crm, registered, slack,
-                                                             slack_sll, journal, shoplocked, mimir):
+                                                             slack_sll, journal, shoplocked, mimir, mock_db):
         assert_false(self._registered.intentionally_malicious(self.ticket_valid))
 
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
@@ -149,9 +157,10 @@ class TestRegisteredHandler:
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     def test_intentionally_malicious_no_termination_email(self, ssl_mailer, service, crm, registered, handler,
-                                                          journal, shoplocked, crmalert, mimir):
+                                                          journal, shoplocked, crmalert, mimir, mock_db):
         assert_true(self._registered.intentionally_malicious(self.ticket_fraud_hold))
 
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
@@ -162,9 +171,10 @@ class TestRegisteredHandler:
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     def test_intentionally_malicious_success(self, ssl_mailer, service, crm, registered, handler, journal, shoplocked,
-                                             crmalert, mimir):
+                                             crmalert, mimir, mock_db):
         assert_true(self._registered.intentionally_malicious(self.ticket_valid))
 
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
@@ -176,10 +186,11 @@ class TestRegisteredHandler:
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     def test_intentionally_malicious_no_fraud_email(self, ssl_mailer, service, crm, fraud, registered, handler,
-                                                    journal, shoplocked, crmalert, mimir):
+                                                    journal, shoplocked, crmalert, mimir, mock_db):
         self._registered.intentionally_malicious(self.ticket_valid_api_reseller)
         fraud.assert_not_called()
 
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
@@ -192,7 +203,8 @@ class TestRegisteredHandler:
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     @patch('zeus.handlers.registered_handler.datetime')
     def test_intentionally_malicious_success_fraud_email(self, mock_date, ssl_mailer, service, crm, fraud,
-                                                         registered, handler, journal, shoplocked, crmalert, mimir):
+                                                         registered, handler, journal, shoplocked, crmalert,
+                                                         mimir, mock_db):
         mock_date.utcnow = Mock(return_value=self.current_test_date)
         self._registered.intentionally_malicious(self.ticket_no_hold_or_reseller)
         fraud.assert_called()
@@ -234,27 +246,33 @@ class TestRegisteredHandler:
     def test_repeat_offender_success(self, service, crm, registered, handler, journal, mimir):
         assert_true(self._registered.repeat_offender(self.ticket_valid))
 
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(SlackFailures, 'invalid_hosted_status', return_value=None)
-    def test_shopper_compromise_none(self, invalid_hosted_status):
+    def test_shopper_compromise_none(self, invalid_hosted_status, mock_db):
         assert_false(self._registered.shopper_compromise({}))
 
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
-    def test_shopper_compromise_unsupported_type(self, invalid_abuse_type):
+    def test_shopper_compromise_unsupported_type(self, invalid_abuse_type, mock_db):
         assert_false(self._registered.shopper_compromise(self.ticket_invalid_type))
 
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(SlackFailures, 'failed_to_determine_shoppers', return_value=None)
-    def test_shopper_compromise_no_shoppers(self, failed_to_determine_shoppers):
+    def test_shopper_compromise_no_shoppers(self, failed_to_determine_shoppers, mock_db):
         assert_false(self._registered.shopper_compromise(self.ticket_no_shopper))
 
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=False)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    def test_shopper_compromise_already_suspended(self, ssl_mailer, service, crm, journal, shoplocked, mimir):
+    def test_shopper_compromise_already_suspended(self, ssl_mailer, service, crm, journal, shoplocked, mimir,
+                                                  mock_db):
         assert_false(self._registered.shopper_compromise(self.ticket_valid))
 
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
@@ -264,9 +282,10 @@ class TestRegisteredHandler:
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     def test_shopper_compromise_failed_shopper_email(self, ssl_mailer, service, crm, registered, slack, journal,
-                                                     shoplocked, mimir):
+                                                     shoplocked, mimir, mock_db):
         assert_false(self._registered.shopper_compromise(self.ticket_valid))
 
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
@@ -276,9 +295,10 @@ class TestRegisteredHandler:
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     def test_shopper_compromise_success(self, ssl_mailer, service, crm, registered, handler, journal, shoplocked,
-                                        mimir):
+                                        mimir, mock_db):
         assert_true(self._registered.shopper_compromise(self.ticket_valid))
 
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(FraudMailer, 'send_malicious_domain_notification', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
@@ -289,10 +309,11 @@ class TestRegisteredHandler:
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     def test_shopper_compromise_no_fraud_email(self, ssl_mailer, service, crm, registered, handler, journal,
-                                               shoplocked, fraud, mimir):
+                                               shoplocked, fraud, mimir, mock_db):
         self._registered.shopper_compromise(self.ticket_valid_api_reseller)
         fraud.assert_not_called()
 
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
@@ -304,7 +325,7 @@ class TestRegisteredHandler:
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     @patch('zeus.handlers.registered_handler.datetime')
     def test_shopper_compromise_success_fraud_email(self, mock_date, ssl_mailer, service, crm, fraud, registered,
-                                                    handler, journal, shoplocked, mimir):
+                                                    handler, journal, shoplocked, mimir, mock_db):
         mock_date.utcnow = Mock(return_value=self.current_test_date)
         self._registered.shopper_compromise(self.ticket_no_hold_or_reseller)
         fraud.assert_called()
