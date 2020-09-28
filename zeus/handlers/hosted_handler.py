@@ -1,6 +1,8 @@
 import logging.config
 from datetime import datetime, timedelta
 
+from dcdatabase.phishstorymongo import PhishstoryMongo
+
 from zeus.events.email.fraud_mailer import FraudMailer
 from zeus.events.email.hosted_mailer import HostedMailer
 from zeus.events.email.ssl_mailer import SSLMailer
@@ -40,6 +42,8 @@ class HostedHandler(Handler):
         self.basic_review = BasicReview(app_settings)
         self.HOLD_TIME = app_settings.HOLD_TIME
         self.FRAUD_REVIEW_TIME = app_settings.FRAUD_REVIEW_TIME
+
+        self._db = PhishstoryMongo(app_settings)
 
         self.mapping = {
             'customer_warning': self.customer_warning,
@@ -163,6 +167,10 @@ class HostedHandler(Handler):
 
         ssl_subscription = get_ssl_subscriptions_from_dict(data)
         if ssl_subscription and shopper_id and domain:
+            # Send the cert authority ssl revocation email template and log to actions
+            self._db.update_actions_sub_document(ticket_id,
+                                                 'email sent cert_authority_ssl_revocation',
+                                                 data.get('investigator_user_id'))
             if not self.ssl_mailer.send_revocation_email(ticket_id, domain, shopper_id, ssl_subscription):
                 self.slack.failed_sending_revocation_email(ticket_id, domain, shopper_id, ssl_subscription)
                 return False
@@ -373,8 +381,12 @@ class HostedHandler(Handler):
         # Notify fraud only if NOT previously sent to fraud, domain created within 90 days, and NOT an apiReseller
         if not data.get('fraud_hold_reason') and self._can_fraud_review(data):
             if not get_parent_child_shopper_ids_from_dict(data):
+                # Send the fraud intentionally malicious domain email template and log to actions
                 self.fraud_mailer.send_malicious_hosting_notification(ticket_id, domain, shopper_id, guid, source,
                                                                       report_type, target)
+                self._db.update_actions_sub_document(ticket_id,
+                                                     'email sent fraud_intentionally_malicious_domain',
+                                                     data.get('investigator_user_id'))
 
     def _suspend_product(self, data, guid, product):
         guid = get_host_info_from_dict(data).get('mwpId') or guid

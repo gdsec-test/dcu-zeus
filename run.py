@@ -106,8 +106,10 @@ def customer_warning(ticket_id):
 
 
 @celery.task()
-def intentionally_malicious(ticket_id):
+def intentionally_malicious(ticket_id, investigator_id):
     data = get_database_handle().get_incident(ticket_id)
+    # Add investigator user id to data so its available in _notify_fraud and ssl subscription check
+    data['investigator_user_id'] = investigator_id
     return route_request(data, 'intentionally_malicious') if data else None
 
 
@@ -136,8 +138,10 @@ def extensive_compromise(ticket_id):
 
 
 @celery.task()
-def shopper_compromise(ticket_id):
+def shopper_compromise(ticket_id, investigator_id):
     data = get_database_handle().get_incident(ticket_id)
+    # Add investigator user id to data so its available in _notify_fraud()
+    data['investigator_user_id'] = investigator_id
     return route_request(data, 'shopper_compromise') if data else None
 
 

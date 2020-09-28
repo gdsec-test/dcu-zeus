@@ -23,6 +23,7 @@ class RegisteredMailer(Mailer):
         """
         Sends a notice to the shopper and administrative contact email address(es) found for the user generated domain.
         This replaces manual review for these blacklisted Registered Only domains that will never be suspended.
+        success_message = 'reg-only_user_gen_email_sent', 'template': 5518
         :param ticket_id:
         :param subdomain:
         :param domain_id:
@@ -31,14 +32,12 @@ class RegisteredMailer(Mailer):
         :return:
         """
         if not shopper_id:
-            self._logger.info("User Generated Notice was not sent for {}: No Shopper ID found".format(ticket_id))
+            self._logger.info('User Generated Notice was not sent for {}: No Shopper ID found'.format(ticket_id))
             return False
 
-        template = "registered.forwarding_complaint"
-
-        message_type = "forwarded_user_gen_complaint"
-        exception_type = "reg-only_user_gen_email_exception"
-        success_message = "reg-only_user_gen_email_sent"
+        template = 'registered.forwarding_complaint'
+        message_type = 'forwarded_user_gen_complaint'
+        exception_type = 'reg-only_user_gen_email_exception'
 
         kwargs = self.generate_kwargs_for_hermes()
 
@@ -48,14 +47,11 @@ class RegisteredMailer(Mailer):
                                        'SANITIZED_URL': sanitize_url(source)}
 
                 kwargs[self.DOMAIN_ID] = domain_id
-                resp = send_mail(template, substitution_values, **kwargs)
-                resp.update(
-                    {'type': message_type, 'template': 5518})  # template provided for backwards compatibility
-                generate_event(ticket_id, success_message, **resp)
+                send_mail(template, substitution_values, **kwargs)
             else:
-                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, subdomain))
+                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, subdomain))
         except Exception as e:
-            self._logger.error("Unable to send {} for {}: {}".format(template, subdomain, e.message))
+            self._logger.error('Unable to send {} for {}: {}'.format(template, subdomain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -63,6 +59,7 @@ class RegisteredMailer(Mailer):
     def send_registrant_warning(self, ticket_id, domain, domain_id, shopper_ids, source):
         """
         Sends a notification to the shopper account and administrative contact email address(es) found for the domain
+        success_message = 'reg-only_shopper_warning_email_sent', 'template': 3132
         :param ticket_id:
         :param domain:
         :param domain_id:
@@ -73,11 +70,9 @@ class RegisteredMailer(Mailer):
         if not shopper_ids:
             return False
 
-        template = "registered.suspension_warning"
-
-        message_type = "reg-only_24hr_warning"
-        exception_type = "reg-only_shopper_warning_email_exception"
-        success_message = "reg-only_shopper_warning_email_sent"
+        template = 'registered.suspension_warning'
+        message_type = 'reg-only_24hr_warning'
+        exception_type = 'reg-only_shopper_warning_email_exception'
 
         kwargs = self.generate_kwargs_for_hermes()
 
@@ -92,14 +87,11 @@ class RegisteredMailer(Mailer):
                                            'SANITIZED_URL': sanitize_url(source)}
 
                     kwargs[self.DOMAIN_ID] = domain_id
-                    resp = send_mail(template, substitution_values, **kwargs)
-                    resp.update(
-                        {'type': message_type, 'template': 3132})  # template provided for backwards compatibility
-                    generate_event(ticket_id, success_message, **resp)
+                    send_mail(template, substitution_values, **kwargs)
             else:
-                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
         except Exception as e:
-            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -107,6 +99,7 @@ class RegisteredMailer(Mailer):
     def send_repeat_offender_suspension(self, ticket_id, domain, domain_id, shopper_ids, source):
         """
         Sends a notification to the shopper account and administrative contact email address(es) found for the domain
+        success_message = 'reg-only_repeat_offender_email_sent', 'template': 5493
         :param ticket_id:
         :param domain:
         :param domain_id:
@@ -117,11 +110,9 @@ class RegisteredMailer(Mailer):
         if not shopper_ids:
             return False
 
-        template = "registered.repeat_offender"
-
-        message_type = "reg-only_repeat_offender"
-        exception_type = "reg-only_repeat_offender_email_exception"
-        success_message = "reg-only_repeat_offender_email_sent"
+        template = 'registered.repeat_offender'
+        message_type = 'reg-only_repeat_offender'
+        exception_type = 'reg-only_repeat_offender_email_exception'
 
         kwargs = self.generate_kwargs_for_hermes()
 
@@ -136,14 +127,11 @@ class RegisteredMailer(Mailer):
                                            'SANITIZED_URL': sanitize_url(source)}
 
                     kwargs['domain_id'] = domain_id
-                    resp = send_mail(template, substitution_values, **kwargs)
-                    resp.update(
-                        {'type': message_type, 'template': 5493})  # template provided for backwards compatibility
-                    generate_event(ticket_id, success_message, **resp)
+                    send_mail(template, substitution_values, **kwargs)
             else:
-                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
         except Exception as e:
-            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -151,6 +139,7 @@ class RegisteredMailer(Mailer):
     def send_shopper_suspension(self, ticket_id, domain, domain_id, shopper_ids, source, report_type):
         """
         Sends a suspension notification to the shopper account and administrative contact email address(es)
+        success_message = 'reg-only_shopper_suspend_email_sent', 'template': 3760
         found for the domain
         :param ticket_id:
         :param domain:
@@ -163,11 +152,9 @@ class RegisteredMailer(Mailer):
         if not shopper_ids:
             return False
 
-        template = "registered.suspend"
-
-        message_type = "reg-only_domain_suspension"
-        exception_type = "reg-only_shopper_suspend_email_exception"
-        success_message = "reg-only_shopper_suspend_email_sent"
+        template = 'registered.suspend'
+        message_type = 'reg-only_domain_suspension'
+        exception_type = 'reg-only_shopper_suspend_email_exception'
 
         kwargs = self.generate_kwargs_for_hermes()
 
@@ -183,14 +170,11 @@ class RegisteredMailer(Mailer):
                                            'MALICIOUS_ACTIVITY': report_type}
 
                     kwargs[self.DOMAIN_ID] = domain_id
-                    resp = send_mail(template, substitution_values, **kwargs)
-                    resp.update(
-                        {'type': message_type, 'template': 3760})  # template provided for backwards compatibility
-                    generate_event(ticket_id, success_message, **resp)
+                    send_mail(template, substitution_values, **kwargs)
             else:
-                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
         except Exception as e:
-            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -198,6 +182,7 @@ class RegisteredMailer(Mailer):
     def send_shopper_intentional_suspension(self, ticket_id, domain, domain_id, shopper_ids, report_type):
         """
         Sends an intentional suspension notification to the shopper account email address found for the domain
+        success_message = 'reg-only_shopper_suspend_intentional_email_sent', 'template': 4044
         :param ticket_id:
         :param domain:
         :param domain_id:
@@ -208,11 +193,9 @@ class RegisteredMailer(Mailer):
         if not shopper_ids:
             return False
 
-        template = "registered.suspend_intentionally_malicious"
-
-        message_type = "reg-only_domain_suspension_intentional"
-        exception_type = "reg-only_shopper_suspend_intentional_email_exception"
-        success_message = "reg-only_shopper_suspend_intentional_email_sent"
+        template = 'registered.suspend_intentionally_malicious'
+        message_type = 'reg-only_domain_suspension_intentional'
+        exception_type = 'reg-only_shopper_suspend_intentional_email_exception'
 
         kwargs = self.generate_kwargs_for_hermes()
 
@@ -227,14 +210,11 @@ class RegisteredMailer(Mailer):
                                            'MALICIOUS_ACTIVITY': report_type}
 
                     kwargs[self.DOMAIN_ID] = domain_id
-                    resp = send_mail(template, substitution_values, **kwargs)
-                    resp.update(
-                        {'type': message_type, 'template': 4044})  # template provided for backwards compatibility
-                    generate_event(ticket_id, success_message, **resp)
+                    send_mail(template, substitution_values, **kwargs)
             else:
-                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
         except Exception as e:
-            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -242,6 +222,7 @@ class RegisteredMailer(Mailer):
     def send_shopper_compromise_suspension(self, ticket_id, domain, domain_id, shopper_ids):
         """
         Sends an intentional suspension notification to the shopper account email address found for the domain
+        success_message = 'reg-only_shopper_compromise_suspend_email_sent', 'template': 5282
         :param ticket_id:
         :param domain:
         :param domain_id:
@@ -251,11 +232,9 @@ class RegisteredMailer(Mailer):
         if not shopper_ids:
             return False
 
-        template = "registered.suspend_shopper_compromise"
-
-        message_type = "reg-only_domain_suspension_compromise"
-        exception_type = "reg-only_shopper_compromise_suspend_email_exception"
-        success_message = "reg-only_shopper_compromise_suspend_email_sent"
+        template = 'registered.suspend_shopper_compromise'
+        message_type = 'reg-only_domain_suspension_compromise'
+        exception_type = 'reg-only_shopper_compromise_suspend_email_exception'
 
         kwargs = self.generate_kwargs_for_hermes()
 
@@ -268,14 +247,11 @@ class RegisteredMailer(Mailer):
                     substitution_values = {'ACCOUNT_NUMBER': shopper_id}
 
                     kwargs[self.DOMAIN_ID] = domain_id
-                    resp = send_mail(template, substitution_values, **kwargs)
-                    resp.update(
-                        {'type': message_type, 'template': 5282})  # template provided for backwards compatibility
-                    generate_event(ticket_id, success_message, **resp)
+                    send_mail(template, substitution_values, **kwargs)
             else:
-                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
         except Exception as e:
-            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -283,6 +259,7 @@ class RegisteredMailer(Mailer):
     def send_csam_shopper_suspension(self, ticket_id, domain, shopper_id):
         """
         Sends a notification to the shopper account email address found for the domain account
+        success_message = 'registered_shopper_suspend_CSAM_notice_email_sent', 'template': 5722
         :param ticket_id:
         :param domain:
         :param shopper_id:
@@ -292,26 +269,22 @@ class RegisteredMailer(Mailer):
         if not shopper_id:
             return False
 
-        template = "csam.suspend"
+        template = 'csam.suspend'
+        message_type = 'registered_shopper_suspend_CSAM_notice'
+        exception_type = 'registered_shopper_suspend_CSAM_email_exception'
 
-        message_type = "registered_shopper_suspend_CSAM_notice"
-        exception_type = "registered_shopper_suspend_CSAM_email_exception"
-        success_message = "registered_shopper_suspend_CSAM_notice_email_sent"
-
-        redis_key = "{}_suspended_email".format(domain)
+        redis_key = '{}_suspended_email'.format(domain)
 
         try:
             if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
                 substitution_values = {'ACCOUNT_NUMBER': shopper_id,
                                        'DOMAIN': domain}
 
-                resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
-                resp.update({'type': message_type, 'template': 5722})
-                generate_event(ticket_id, success_message, **resp)
+                send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
             else:
-                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
         except Exception as e:
-            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True

@@ -18,6 +18,7 @@ class HostedMailer(Mailer):
     def send_hosted_warning(self, ticket_id, domain, shopper_id, source):
         """
         Sends a notification to the shopper account email address found for the hosted domain
+        success_message = 'hosted_shopper_warning_email_sent', 'template': 3996
         :param ticket_id:
         :param domain:
         :param shopper_id:
@@ -25,13 +26,11 @@ class HostedMailer(Mailer):
         :return:
         """
 
-        template = "hosted.suspension_warning"
+        template = 'hosted.suspension_warning'
+        message_type = 'hosted_24hr_warning'
+        exception_type = 'hosted_shopper_warning_email_exception'
 
-        message_type = "hosted_24hr_warning"
-        exception_type = "hosted_shopper_warning_email_exception"
-        success_message = "hosted_shopper_warning_email_sent"
-
-        redis_key = "{}_warning_email".format(domain)
+        redis_key = '{}_warning_email'.format(domain)
 
         try:
             if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
@@ -39,13 +38,11 @@ class HostedMailer(Mailer):
                                        'DOMAIN': domain,
                                        'MALICIOUS_CONTENT_REPORTED': sanitize_url(source)}
 
-                resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
-                resp.update({'type': message_type, 'template': 3996})
-                generate_event(ticket_id, success_message, **resp)
+                send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
             else:
-                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
         except Exception as e:
-            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -54,32 +51,29 @@ class HostedMailer(Mailer):
         """
         Sends a notification to the shopper account email address found for the hosted domain regarding
         content that was removed
+        success_message = 'hosted_content_removed_notice_email_sent', 'template': 3994
         :param ticket_id:
         :param domain:
         :param shopper_id:
         :return:
         """
 
-        template = "hosted.content_removed"
+        template = 'hosted.content_removed'
+        message_type = 'hosted_content_removed_notice'
+        exception_type = 'hosted_content_removed_notice_email_exception'
 
-        message_type = "hosted_content_removed_notice"
-        exception_type = "hosted_content_removed_notice_email_exception"
-        success_message = "hosted_content_removed_notice_email_sent"
-
-        redis_key = "{}_cleaned_email".format(domain)
+        redis_key = '{}_cleaned_email'.format(domain)
 
         try:
             if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
                 substitution_values = {'ACCOUNT_NUMBER': shopper_id,
                                        'DOMAIN': domain}
 
-                resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
-                resp.update({'type': message_type, 'template': 3994})
-                generate_event(ticket_id, success_message, **resp)
+                send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
             else:
-                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
         except Exception as e:
-            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -88,6 +82,7 @@ class HostedMailer(Mailer):
         """
         Sends a notification to the shopper account email address found for the hosted domain regarding
         action taken due to repeat hosting offenses
+        success_message = 'hosted_repeat_offender_email_sent', 'template': 4807
         :param ticket_id:
         :param domain:
         :param shopper_id:
@@ -95,13 +90,11 @@ class HostedMailer(Mailer):
         :return:
         """
 
-        template = "hosted.repeat_offender"
+        template = 'hosted.repeat_offender'
+        message_type = 'hosted_repeat_offender'
+        exception_type = 'hosted_repeat_offender_email_exception'
 
-        message_type = "hosted_repeat_offender"
-        exception_type = "hosted_repeat_offender_email_exception"
-        success_message = "hosted_repeat_offender_email_sent"
-
-        redis_key = "{}_repeat_offender".format(domain)
+        redis_key = '{}_repeat_offender'.format(domain)
 
         try:
             if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
@@ -109,13 +102,11 @@ class HostedMailer(Mailer):
                                        'DOMAIN': domain,
                                        'SANITIZED_URL': sanitize_url(source)}
 
-                resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
-                resp.update({'type': message_type, 'template': 4807})
-                generate_event(ticket_id, success_message, **resp)
+                send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
             else:
-                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
         except Exception as e:
-            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -123,6 +114,7 @@ class HostedMailer(Mailer):
     def send_shopper_hosted_suspension(self, ticket_id, domain, shopper_id, source):
         """
         Sends a notification to the shopper account email address found for the hosting account
+        success_message = 'hosted_shopper_suspend_notice_email_sent', 'template': 3998
         :param ticket_id:
         :param domain:
         :param shopper_id:
@@ -130,13 +122,11 @@ class HostedMailer(Mailer):
         :return:
         """
 
-        template = "hosted.suspend"
+        template = 'hosted.suspend'
+        message_type = 'hosted_shopper_suspend_notice'
+        exception_type = 'hosted_shopper_suspend_email_exception'
 
-        message_type = "hosted_shopper_suspend_notice"
-        exception_type = "hosted_shopper_suspend_email_exception"
-        success_message = "hosted_shopper_suspend_notice_email_sent"
-
-        redis_key = "{}_suspended_email".format(domain)
+        redis_key = '{}_suspended_email'.format(domain)
 
         try:
             if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
@@ -144,13 +134,11 @@ class HostedMailer(Mailer):
                                        'DOMAIN': domain,
                                        'MALICIOUS_CONTENT_REPORTED': sanitize_url(source)}
 
-                resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
-                resp.update({'type': message_type, 'template': 3998})
-                generate_event(ticket_id, success_message, **resp)
+                send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
             else:
-                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
         except Exception as e:
-            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -158,6 +146,7 @@ class HostedMailer(Mailer):
     def send_shopper_hosted_intentional_suspension(self, ticket_id, domain, shopper_id, report_type):
         """
         Sends a notification to the shopper account email address found for the hosting account
+        success_message = 'hosted_shopper_suspend_intentional_notice_email_sent', 'template': 4046
         :param ticket_id:
         :param domain:
         :param shopper_id:
@@ -165,13 +154,11 @@ class HostedMailer(Mailer):
         :return:
         """
 
-        template = "hosted.suspend_intentionally_malicious"
+        template = 'hosted.suspend_intentionally_malicious'
+        message_type = 'hosted_shopper_suspend_intentional_notice'
+        exception_type = 'hosted_shopper_suspend_intentional_email_exception'
 
-        message_type = "hosted_shopper_suspend_intentional_notice"
-        exception_type = "hosted_shopper_suspend_intentional_email_exception"
-        success_message = "hosted_shopper_suspend_intentional_notice_email_sent"
-
-        redis_key = "{}_intentional_suspended_email".format(domain)
+        redis_key = '{}_intentional_suspended_email'.format(domain)
 
         try:
             if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
@@ -179,13 +166,11 @@ class HostedMailer(Mailer):
                                        'DOMAIN': domain,
                                        'MALICIOUS_ACTIVITY': report_type}
 
-                resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
-                resp.update({'type': message_type, 'template': 4046})
-                generate_event(ticket_id, success_message, **resp)
+                send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
             else:
-                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
         except Exception as e:
-            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -193,31 +178,28 @@ class HostedMailer(Mailer):
     def send_shopper_compromise_hosted_suspension(self, ticket_id, domain, shopper_id):
         """
         Sends a notification to the shopper account email address found for the hosting account
+        success_message = 'hosted_shopper_compromise_suspend_notice_email_sent', 'template': 5282
         :param ticket_id:
         :param domain:
         :param shopper_id:
         :return:
         """
 
-        template = "hosted.suspend_shopper_compromise"
+        template = 'hosted.suspend_shopper_compromise'
+        message_type = 'hosted_shopper_compromise_suspend_notice'
+        exception_type = 'hosted_shopper_compromise_suspend_email_exception'
 
-        message_type = "hosted_shopper_compromise_suspend_notice"
-        exception_type = "hosted_shopper_compromise_suspend_email_exception"
-        success_message = "hosted_shopper_compromise_suspend_notice_email_sent"
-
-        redis_key = "{}_compromise_suspended_email".format(domain)
+        redis_key = '{}_compromise_suspended_email'.format(domain)
 
         try:
             if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
                 substitution_values = {'ACCOUNT_NUMBER': shopper_id}
 
-                resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
-                resp.update({'type': message_type, 'template': 5282})
-                generate_event(ticket_id, success_message, **resp)
+                send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
             else:
-                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
         except Exception as e:
-            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -226,32 +208,29 @@ class HostedMailer(Mailer):
         """
         Sends a notification to the shopper account email address found for the hosting account regarding
         action taken due to extensive compromise
+        success_message = 'hosted_extensive_compromise_email_sent', 'template': 4809
         :param ticket_id:
         :param domain:
         :param shopper_id:
         :return:
         """
 
-        template = "hosted.extensive_compromise"
+        template = 'hosted.extensive_compromise'
+        message_type = 'hosted_extensive_compromise'
+        exception_type = 'hosted_extensive_compromise_email_exception'
 
-        message_type = "hosted_extensive_compromise"
-        exception_type = "hosted_extensive_compromise_email_exception"
-        success_message = "hosted_extensive_compromise_email_sent"
-
-        redis_key = "{}_extensive_compromise".format(domain)
+        redis_key = '{}_extensive_compromise'.format(domain)
 
         try:
             if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
                 substitution_values = {'ACCOUNT_NUMBER': shopper_id,
                                        'DOMAIN': domain}
 
-                resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
-                resp.update({'type': message_type, 'template': 4809})
-                generate_event(ticket_id, success_message, **resp)
+                send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
             else:
-                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
         except Exception as e:
-            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -259,32 +238,29 @@ class HostedMailer(Mailer):
     def send_csam_hosted_suspension(self, ticket_id, domain, shopper_id):
         """
         Sends a notification to the shopper account email address found for the hosting account
+        success_message = 'hosted_shopper_suspend_CSAM_notice_email_sent', 'template': 5722
         :param ticket_id:
         :param domain:
         :param shopper_id:
         :return:
         """
 
-        template = "csam.suspend"
+        template = 'csam.suspend'
+        message_type = 'hosted_shopper_suspend_CSAM_notice'
+        exception_type = 'hosted_shopper_suspend_CSAM_email_exception'
 
-        message_type = "hosted_shopper_suspend_CSAM_notice"
-        exception_type = "hosted_shopper_suspend_CSAM_email_exception"
-        success_message = "hosted_shopper_suspend_CSAM_notice_email_sent"
-
-        redis_key = "{}_suspended_email".format(domain)
+        redis_key = '{}_suspended_email'.format(domain)
 
         try:
             if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
                 substitution_values = {'ACCOUNT_NUMBER': shopper_id,
                                        'DOMAIN': domain}
 
-                resp = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
-                resp.update({'type': message_type, 'template': 5722})
-                generate_event(ticket_id, success_message, **resp)
+                send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
             else:
-                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, domain))
+                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
         except Exception as e:
-            self._logger.error("Unable to send {} for {}: {}".format(template, domain, e.message))
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
