@@ -76,8 +76,8 @@ class SlackFailures:
         self._slack.send_message(key, message)
 
     def invalid_hosted_status(self, ticket_id):
-        key = '{}_not_valid_hold'.format(ticket_id)
-        message = '{} not placed on hold - not a valid hosted status'.format(ticket_id)
+        key = '{}_no action taken'.format(ticket_id)
+        message = '{} no action taken - not a valid hosted status'.format(ticket_id)
         self._logger.error(message)
         self._slack.send_message(key, message)
 
@@ -99,9 +99,11 @@ class SlackFailures:
         self._logger.error(message)
         self._slack.send_message(key, message)
 
-    def failed_sending_email(self, domain):
-        key = '{}_email_failed_to_send'.format(domain)
-        message = 'Email failed to send for {}'.format(domain)
+    # Identifier will be ticketId in case of CHILD_ABUSE tickets,
+    # domain for other abuse types.
+    def failed_sending_email(self, identifier):
+        key = '{}_email_failed_to_send'.format(identifier)
+        message = 'Email failed to send for {}'.format(identifier)
         self._logger.error(message)
         self._slack.send_message(key, message)
 

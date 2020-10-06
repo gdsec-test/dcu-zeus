@@ -132,3 +132,11 @@ def get_list_of_ids_to_notify(data):
 def get_ssl_subscriptions_from_dict(data):
     # Return the ssl subscription information associated with the account
     return _get_domain_query(data).get('sslSubscriptions', [])
+
+
+def get_kelvin_domain_id_from_dict(dict_to_search):
+    #  The domainId field is located in...
+    #    1: domain->domainId
+    if isinstance(dict_to_search, dict):
+        return dict_to_search.get('domain', {}).get('domainId')
+    return None

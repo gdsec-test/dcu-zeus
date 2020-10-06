@@ -29,7 +29,10 @@ class TestRegisteredHandler:
     domain = 'domain'
     protected_domain = 'myftpupload.com'
     reg = 'REGISTERED'
+    domainId = '1234'
+    ticketID = '4321'
     JWT = 'JWT_STRING'
+
     current_test_date = datetime(2020, 05, 07, 14, 57)  # +7 hours because of UTC
     oldest_valid_fraud_review_test_date = current_test_date - timedelta(days=TestingConfig.FRAUD_REVIEW_TIME)
     ticket_invalid_type = {'hosted_status': reg}
@@ -51,7 +54,8 @@ class TestRegisteredHandler:
     ticket_no_hold_or_reseller = {'hosted_status': reg, 'type': phishing, 'sourceDomainOrIp': domain,
                                   'data': {'domainQuery': {'shopperInfo': {'shopperId': sid},
                                            'registrar': {'domainCreateDate': oldest_valid_fraud_review_test_date}}}}
-    ticket_valid_child_abuse = {'hosted_status': reg, 'type': childabuse, 'sourceDomainOrIp': domain,
+    ticket_valid_child_abuse = {'hosted_status': reg, 'type': childabuse, 'sourceDomainOrIP': domain, 'ticketID': ticketID,
+                                'domain': {'domainId': domainId},
                                 'data': {'domainQuery': {'shopperInfo': {'shopperId': sid},
                                                          'sslSubscriptions': ssl_subscription,
                                                          'registrar': {'domainId': did}}}}
@@ -373,7 +377,7 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     def test_csam_suspend_success(self, service, crm, mailer, handler, journal, crmalert, mimir):
-        assert_true(self._registered.suspend(self.ticket_valid_child_abuse))
+        assert_true(self._registered.suspend_csam(self.ticket_valid_child_abuse))
 
     @patch.object(ThrottledDomainService, 'suspend_domain', return_value=True)
     def test_suspend_domain_success(self, service):
@@ -387,3 +391,27 @@ class TestRegisteredHandler:
     @patch.object(SlackFailures, 'failed_protected_domain_action', return_value=None)
     def test_protected_domain_action(self, slack):
         assert_false(self._registered.suspend(self.ticket_protected_domain))
+
+    @patch.object(SlackFailures, 'invalid_hosted_status', return_value=None)
+    def test_suspend_csam_none(self, invalid_hosted_status):
+        assert_false(self._registered.suspend_csam({}))
+
+    @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
+    def test_suspend_csam_unsupported_type(self, invalid_abuse_type):
+        assert_false(self._registered.suspend_csam(self.ticket_invalid_type))
+
+    @patch.object(SlackFailures, 'failed_to_determine_shoppers', return_value=None)
+    def test_suspend_csam_no_shoppers(self, failed_to_determine_shoppers):
+        assert_false(self._registered.suspend_csam(self.ticket_no_shopper))
+
+    @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=False)
+    def test_suspend_csam_already_suspended(self, service):
+        assert_false(self._registered.suspend_csam(self.ticket_valid_child_abuse))
+
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
+    @patch.object(RegisteredMailer, 'send_csam_shopper_suspension', return_value=False)
+    @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
+    @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
+    def test_suspend_csam_failed_shopper_email(self, service, crm, mailer, slack, journal):
+        assert_false(self._registered.suspend_csam(self.ticket_valid_child_abuse))

@@ -46,7 +46,7 @@ class TestHostedHandler:
                                   'data': {'domainQuery': {'host': {'createdDate': oldest_valid_fraud_review_test_date,
                                                                     'guid': guid, 'shopperId': sid},
                                                            'sslSubscriptions': ssl_subscription}}}
-    ticket_valid_child_abuse = {'type': child_abuse, 'sourceDomainOrIp': domain, 'ncmecReportID': ncmecReportID,
+    ticket_valid_child_abuse = {'type': child_abuse, 'sourceDomainOrIP': domain, 'ncmecReportID': ncmecReportID,
                                 'data': {'domainQuery': {'host': {'guid': guid, 'shopperId': sid},
                                                          'sslSubscriptions': ssl_subscription}}}
 
@@ -71,6 +71,9 @@ class TestHostedHandler:
 
     def test_validate_required(self):
         assert_equal((self.phishing, self.guid, self.sid), self._hosted._validate_required_args(self.ticket_valid))
+
+    def test_validate_required_csam(self):
+        assert_equal((self.child_abuse, self.guid, self.sid), self._hosted._validate_required_args(self.ticket_valid_child_abuse))
 
     @patch.object(BasicReview, 'place_in_review', return_value=None)
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
@@ -392,4 +395,4 @@ class TestHostedHandler:
     @patch.object(HostedScribe, 'suspension', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
     def test_csam_suspend_success(self, can_suspend, scribe, mailer, handler, journal, mimir, crmalert):
-        assert_true(self._hosted.suspend(self.ticket_valid_child_abuse))
+        assert_true(self._hosted.suspend_csam(self.ticket_valid_child_abuse))

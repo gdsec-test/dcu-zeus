@@ -17,6 +17,7 @@ from zeus.utils.functions import (get_domain_id_from_dict,
                                   get_host_abuse_email_from_dict,
                                   get_host_brand_from_dict,
                                   get_host_info_from_dict,
+                                  get_kelvin_domain_id_from_dict,
                                   get_list_of_ids_to_notify,
                                   get_parent_child_shopper_ids_from_dict,
                                   get_shopper_id_from_dict,
@@ -62,7 +63,8 @@ class RegisteredHandler(Handler):
             'intentionally_malicious': self.intentionally_malicious,
             'repeat_offender': self.repeat_offender,
             'shopper_compromise': self.shopper_compromise,
-            'suspend': self.suspend
+            'suspend': self.suspend,
+            'suspend_csam': self.suspend_csam
         }
 
     def process(self, data, request_type):
@@ -314,18 +316,37 @@ class RegisteredHandler(Handler):
                          shopper_number=shopper_id,
                          ticket_number=ticket_id)
 
-        if report_type == 'CHILD_ABUSE':
-            if not self.registered_mailer.send_csam_shopper_suspension(ticket_id, domain, shopper_id):
-                self.slack.failed_sending_email(domain)
-                return False
-        else:
-            if not self.registered_mailer.send_shopper_suspension(ticket_id, domain, domain_id, shopper_id_list, source,
-                                                                  report_type):
-                self.slack.failed_sending_email(domain)
-                return False
+        if not self.registered_mailer.send_shopper_suspension(ticket_id, domain, domain_id, shopper_id_list, source,
+                                                              report_type):
+            self.slack.failed_sending_email(domain)
+            return False
 
         alert = alert_mappings['registered']['suspend'].format(domain=domain, type=report_type)
         self.crmalert.create_alert(shopper_id, alert, report_type, self.crmalert.low_severity, domain)
+
+        return self._suspend_domain(domain, ticket_id, note)
+
+    def suspend_csam(self, data):
+        shopper_id = get_shopper_id_from_dict(data)
+        ticket_id = data.get('ticketID')
+        domain = data.get('sourceDomainOrIP')
+        domain_id = get_kelvin_domain_id_from_dict(data)
+        report_type = data.get('type')
+
+        if not self._validate_required_args(data):
+            return False
+
+        if not self.domain_service.can_suspend_domain(domain):
+            self._logger.info("Domain {} already suspended".format(domain))
+            return False
+
+        note = note_mappings['registered']['suspension']['csam']['crm'].format(domain=domain,
+                                                                               type=report_type)
+        self.crm.notate_crm_account([shopper_id], ticket_id, note)
+
+        if not self.registered_mailer.send_csam_shopper_suspension(ticket_id, domain, shopper_id, domain_id):
+            self.slack.failed_sending_email(ticket_id)
+            return False
 
         return self._suspend_domain(domain, ticket_id, note)
 
@@ -365,9 +386,12 @@ class RegisteredHandler(Handler):
         return True
 
     def _validate_required_args(self, data):
-        ticket_id = data.get('ticketId')
+        # ticketId for Phishstory and ticketID for Kelvin
+        ticket_id = data.get('ticketId', data.get('ticketID'))
+        # hosted_status for Phishstory and hostedStatus for Kelvin
+        hosted_status = data.get('hosted_status', data.get('hostedStatus'))
 
-        if data.get('hosted_status') != self.REGISTERED:
+        if hosted_status != self.REGISTERED:
             self.slack.invalid_hosted_status(ticket_id)
         elif data.get('type') not in self.TYPES:
             self.slack.invalid_abuse_type(ticket_id)

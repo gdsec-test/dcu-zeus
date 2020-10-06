@@ -53,7 +53,8 @@ class HostedHandler(Handler):
             'shopper_compromise': self.shopper_compromise,
             'suspend': self.suspend,
             'extensive_compromise': self.extensive_compromise,
-            'ncmec_submitted': self.ncmec_submitted
+            'ncmec_submitted': self.ncmec_submitted,
+            'suspend_csam': self.suspend_csam
         }
 
     def process(self, data, request_type):
@@ -293,14 +294,9 @@ class HostedHandler(Handler):
 
         self.scribe.suspension(ticket_id, guid, source, report_type, shopper_id)
 
-        if report_type == 'CHILD_ABUSE':
-            if not self.hosted_mailer.send_csam_hosted_suspension(ticket_id, domain, shopper_id):
-                self.slack.failed_sending_email(domain)
-                return False
-        else:
-            if not self.hosted_mailer.send_shopper_hosted_suspension(ticket_id, domain, shopper_id, source):
-                self.slack.failed_sending_email(domain)
-                return False
+        if not self.hosted_mailer.send_shopper_hosted_suspension(ticket_id, domain, shopper_id, source):
+            self.slack.failed_sending_email(domain)
+            return False
 
         alert = alert_mappings['hosted']['suspend'].format(domain=domain, type=report_type)
         self.crmalert.create_alert(shopper_id, alert, report_type, self.crmalert.low_severity, domain)
@@ -354,7 +350,7 @@ class HostedHandler(Handler):
         if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
             return False
 
-        note = note_mappings['hosted']['ncmecSubmitted']['mimir'].format(type=report_type, guid=guid)
+        note = note_mappings['hosted']['ncmecSubmitted']['mimir'].format(domain=domain)
         abuse_type = data.get('type', '').upper()
         self.mimir.write(abuse_type=abuse_type,
                          domain=domain,
@@ -365,7 +361,32 @@ class HostedHandler(Handler):
                          note=note,
                          shopper_number=shopper_id,
                          ticket_number=ticket_id)
+
         return True
+
+    def suspend_csam(self, data):
+        domain = data.get('sourceDomainOrIP')
+        source = data.get('source')
+        ticket_id = data.get('ticketID')
+        product = get_host_info_from_dict(data).get('product')
+
+        report_type, guid, shopper_id = self._validate_required_args(data)
+        if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
+            return False
+
+        if not self.hosting_service.can_suspend_hosting_product(guid):
+            self._logger.info("Hosting {} already suspended".format(guid))
+            return False
+
+        note = note_mappings['hosted']['suspension']['csam']['mimir'].format(domain=domain)
+        self.mimir.write(InfractionTypes.suspended, shopper_id, ticket_id, domain, guid, note)
+
+        self.scribe.suspension(ticket_id, guid, source, report_type, shopper_id)
+        if not self.hosted_mailer.send_csam_hosted_suspension(ticket_id, domain, shopper_id):
+            self.slack.failed_sending_email(ticket_id)
+            return False
+
+        return self._suspend_product(data, guid, product)
 
     def _can_fraud_review(self, data):
         # Hosting created within FRAUD_REVIEW_TIME number of days can be sent to Fraud for review
@@ -403,7 +424,8 @@ class HostedHandler(Handler):
     def _validate_required_args(self, data):
         guid = get_host_info_from_dict(data).get('guid')
         shopper_id = get_host_shopper_id_from_dict(data)
-        ticket_id = data.get('ticketId') or data.get('ticketID')
+        # ticketId for Phishstory and ticketID for Kelvin
+        ticket_id = data.get('ticketId', data.get('ticketID'))
         report_type = data.get('type')
 
         if report_type not in self.supported_types:

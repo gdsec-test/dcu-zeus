@@ -17,7 +17,10 @@ class HostedScribe:
         return True
 
     def suspension(self, ticket, guid, url, report_type, shopper_id):
-        crm_note = note_mappings['hosted']['suspension']['crm'].format(guid=guid, type=report_type, location=url)
+        if report_type == 'CHILD_ABUSE':
+            crm_note = note_mappings['hosted']['suspension']['csam']['crm'].format(guid=guid, type=report_type)
+        else:
+            crm_note = note_mappings['hosted']['suspension']['crm'].format(guid=guid, type=report_type, location=url)
         self.crm.notate_crm_account(shopper_id, ticket, crm_note)
         return True
 

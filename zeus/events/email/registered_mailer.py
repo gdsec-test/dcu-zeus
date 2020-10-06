@@ -256,13 +256,14 @@ class RegisteredMailer(Mailer):
             return False
         return True
 
-    def send_csam_shopper_suspension(self, ticket_id, domain, shopper_id):
+    def send_csam_shopper_suspension(self, ticket_id, domain, shopper_id, domain_id):
         """
         Sends a notification to the shopper account email address found for the domain account
         success_message = 'registered_shopper_suspend_CSAM_notice_email_sent', 'template': 5722
         :param ticket_id:
         :param domain:
         :param shopper_id:
+        :param domain_id:
         :return:
         """
 
@@ -273,6 +274,8 @@ class RegisteredMailer(Mailer):
         message_type = 'registered_shopper_suspend_CSAM_notice'
         exception_type = 'registered_shopper_suspend_CSAM_email_exception'
 
+        kwargs = self.generate_kwargs_for_hermes()
+
         redis_key = '{}_suspended_email'.format(domain)
 
         try:
@@ -280,7 +283,8 @@ class RegisteredMailer(Mailer):
                 substitution_values = {'ACCOUNT_NUMBER': shopper_id,
                                        'DOMAIN': domain}
 
-                send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
+                kwargs[self.DOMAIN_ID] = domain_id
+                send_mail(template, substitution_values, **kwargs)
             else:
                 self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
         except Exception as e:

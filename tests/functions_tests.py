@@ -3,6 +3,7 @@ from nose.tools import assert_equal, assert_is_none
 from zeus.utils.functions import (get_domain_create_date_from_dict,
                                   get_host_abuse_email_from_dict,
                                   get_host_brand_from_dict,
+                                  get_kelvin_domain_id_from_dict,
                                   get_list_of_ids_to_notify,
                                   get_parent_child_shopper_ids_from_dict,
                                   get_shopper_create_date_from_dict,
@@ -113,6 +114,16 @@ class TestFunctions:
         data = {'data': {'domainQuery': {'sslSubscriptions': '1234'}}}
         actual = get_ssl_subscriptions_from_dict(data)
         assert_equal(actual, '1234')
+
+    def test_get_kelvin_domain_id_from_dict(self):
+        data = {'domain': {'domainId': '1234'}}
+        actual = get_kelvin_domain_id_from_dict(data)
+        assert_equal(actual, '1234')
+
+    def test_get_kelvin_domain_id_from_dict_none(self):
+        data = {'domain': {'brand': 'BRAND'}}
+        actual = get_kelvin_domain_id_from_dict(data)
+        assert_is_none(actual)
 
     def test_sanitize_url(self, url='https://someurl.com/path/to/bad/'):
         sanitized = sanitize_url(url)

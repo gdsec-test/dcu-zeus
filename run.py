@@ -157,3 +157,9 @@ def send_acknowledgement(source, reporter_email):
 def submitted_to_ncmec(ticket_id):
     data = get_kelvin_database_handle().get_incident(ticket_id)
     return route_request(data, 'ncmec_submitted') if data else None
+
+
+@celery.task()
+def suspend_csam(ticket_id):
+    data = get_kelvin_database_handle().get_incident(ticket_id)
+    return route_request(data, 'suspend_csam') if data else None

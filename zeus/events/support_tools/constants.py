@@ -19,7 +19,11 @@ note_mappings = {
             'crm': "Hosting {{guid}} suspended for excessive repeat occurences. {{type}} content reported at {{location}} {}".format(support_doc)
         },
         'suspension': {
-            'crm': "Hosting {{guid}} suspended. {{type}} content still present at {{location}} {}".format(support_doc)
+            'crm': "Hosting {{guid}} suspended. {{type}} content still present at {{location}} {}".format(support_doc),
+            'csam': {
+                'mimir': "Hosted domain {domain} suspended",
+                'crm': "Hosting {{guid}} suspended. {{type}} content still present {}".format(support_doc)
+            }
         },
         'intentionallyMalicious': {
             'crm': "Hosting {{guid}} suspended for intentional {{type}} at {{location}} {}".format(support_doc),
@@ -33,7 +37,7 @@ note_mappings = {
             'crm': "Hosting {{guid}} suspended due to extensive compromise. {{type}} content reported at {{location}} {}".format(support_doc)
         },
         'ncmecSubmitted': {
-            'mimir': "{type} report submitted to NCMEC for hosting {guid}"
+            'mimir': "Report submitted to NCMEC for hosted domain {domain}"
         }
     },
     'registered': {
@@ -42,7 +46,10 @@ note_mappings = {
             (support_doc)
         },
         'suspension': {
-            'crm': "{{domain}} suspended. {{type}} content still present at {{location}} {}".format(support_doc)
+            'crm': "{{domain}} suspended. {{type}} content still present at {{location}} {}".format(support_doc),
+            'csam': {
+                'crm': "{{domain}} suspended. {{type}} content still present {}".format(support_doc)
+            }
         },
         'repeatOffender': {
             'crm': "{{domain}} suspended for excessive repeat occurences. {{type}} content reported at {{location}} {}".format(support_doc)
