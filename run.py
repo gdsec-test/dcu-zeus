@@ -41,15 +41,30 @@ foreign = ForeignHandler(config)
 reporter_mailer = ReporterMailer(config)
 
 
-def route_request(data, request_type):
+def route_request(data, request_type, dual_suspension=False):
     hosted_status = data.get('hosted_status') or data.get('hostedStatus')
 
-    if hosted_status == 'HOSTED':
-        return hosted.process(data, request_type)
-    elif hosted_status in ['REGISTERED', 'FOREIGN']:
-        return registered.process(data, request_type)
+    if dual_suspension:
+        registrar_brand = data.get('data', {}).get('domainQuery', {}).get('registrar', {}).get('brand')
 
-    return 'Unable to route request', hosted_status
+        if hosted_status == 'HOSTED':
+            hosted_suspension = hosted.process(data, request_type)
+            registered_suspension = True
+            if registrar_brand == 'GODADDY':
+                registered_suspension = registered.process(data, request_type)
+            return hosted_suspension and registered_suspension
+        elif hosted_status in ['REGISTERED', 'FOREIGN']:
+            return registered.process(data, request_type)
+        else:
+            return 'Unable to route request for dual suspension: Hosting Status = {}, Registrar Brand = {}' \
+                .format(hosted_status, registrar_brand)
+    else:
+        if hosted_status == 'HOSTED':
+            return hosted.process(data, request_type)
+        elif hosted_status in ['REGISTERED', 'FOREIGN']:
+            return registered.process(data, request_type)
+        else:
+            return 'Unable to route request', hosted_status
 
 
 def get_database_handle():
@@ -162,4 +177,4 @@ def submitted_to_ncmec(ticket_id):
 @celery.task()
 def suspend_csam(ticket_id):
     data = get_kelvin_database_handle().get_incident(ticket_id)
-    return route_request(data, 'suspend_csam') if data else None
+    return route_request(data, 'suspend_csam', True) if data else None
