@@ -16,6 +16,7 @@ class InfractionTypes(Enum):
     suspended = 'SUSPENDED'
     extensive_compromise = 'EXTENSIVE_COMPROMISE'
     ncmec_report_submitted = 'NCMEC_REPORT_SUBMITTED'
+    suspended_csam = 'SUSPENDED_CSAM'
 
 
 class Mimir:

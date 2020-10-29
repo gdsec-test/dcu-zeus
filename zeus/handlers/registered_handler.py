@@ -329,6 +329,7 @@ class RegisteredHandler(Handler):
     def suspend_csam(self, data):
         shopper_id = get_shopper_id_from_dict(data)
         ticket_id = data.get('ticketID')
+        hosted_status = data.get('hostedStatus')
         domain = data.get('sourceDomainOrIP')
         domain_id = get_kelvin_domain_id_from_dict(data)
         report_type = data.get('type')
@@ -343,6 +344,14 @@ class RegisteredHandler(Handler):
         note = note_mappings['registered']['suspension']['csam']['crm'].format(domain=domain,
                                                                                type=report_type)
         self.crm.notate_crm_account([shopper_id], ticket_id, note)
+
+        self.mimir.write(abuse_type=report_type,
+                         domain=domain,
+                         domain_id=domain_id,
+                         hosted_status=hosted_status,
+                         infraction_type=InfractionTypes.suspended_csam,
+                         shopper_number=shopper_id,
+                         ticket_number=ticket_id)
 
         if not self.registered_mailer.send_csam_shopper_suspension(ticket_id, domain, shopper_id, domain_id):
             self.slack.failed_sending_email(ticket_id)

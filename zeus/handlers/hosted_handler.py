@@ -367,6 +367,7 @@ class HostedHandler(Handler):
     def suspend_csam(self, data):
         domain = data.get('sourceDomainOrIP')
         source = data.get('source')
+        hosted_status = data.get('hostedStatus')
         ticket_id = data.get('ticketID')
         product = get_host_info_from_dict(data).get('product')
 
@@ -379,7 +380,13 @@ class HostedHandler(Handler):
             return False
 
         note = note_mappings['hosted']['suspension']['csam']['mimir'].format(domain=domain)
-        self.mimir.write(InfractionTypes.suspended, shopper_id, ticket_id, domain, guid, note)
+        self.mimir.write(abuse_type=report_type,
+                         domain=domain,
+                         hosted_status=hosted_status,
+                         infraction_type=InfractionTypes.suspended_csam,
+                         note=note,
+                         shopper_number=shopper_id,
+                         ticket_number=ticket_id)
 
         self.scribe.suspension(ticket_id, guid, source, report_type, shopper_id)
         if not self.hosted_mailer.send_csam_hosted_suspension(ticket_id, domain, shopper_id):
