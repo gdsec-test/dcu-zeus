@@ -125,7 +125,7 @@ def intentionally_malicious(ticket_id, investigator_id):
     data = get_database_handle().get_incident(ticket_id)
     # Add investigator user id to data so its available in _notify_fraud and ssl subscription check
     data['investigator_user_id'] = investigator_id
-    return route_request(data, 'intentionally_malicious') if data else None
+    return route_request(data, 'intentionally_malicious', True) if data else None
 
 
 @celery.task()
