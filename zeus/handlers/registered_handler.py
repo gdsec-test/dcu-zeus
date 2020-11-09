@@ -31,6 +31,7 @@ from zeus.utils.slack import SlackFailures, ThrottledSlack
 
 class RegisteredHandler(Handler):
     TYPES = ['PHISHING', 'MALWARE', 'CHILD_ABUSE']
+    HOSTED = 'HOSTED'
     REGISTERED = 'REGISTERED'
     DOMAIN = 'Domain'
 
@@ -420,7 +421,9 @@ class RegisteredHandler(Handler):
         # hosted_status for Phishstory and hostedStatus for Kelvin
         hosted_status = data.get('hosted_status', data.get('hostedStatus'))
 
-        if hosted_status != self.REGISTERED:
+        # Because we now have the capability to suspend the domain after suspending the hosing product, we need
+        #  to expand on our understanding of valid hosting status, which should now include HOSTING
+        if hosted_status not in [self.REGISTERED, self.HOSTED]:
             self.slack.invalid_hosted_status(ticket_id)
         elif data.get('type') not in self.TYPES:
             self.slack.invalid_abuse_type(ticket_id)
