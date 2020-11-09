@@ -9,8 +9,7 @@ from zeus.utils.functions import (get_domain_create_date_from_dict,
                                   get_shopper_create_date_from_dict,
                                   get_shopper_id_from_dict,
                                   get_ssl_subscriptions_from_dict,
-                                  get_sucuri_product_from_dict,
-                                  sanitize_url)
+                                  get_sucuri_product_from_dict, sanitize_url)
 
 
 class TestFunctions:
