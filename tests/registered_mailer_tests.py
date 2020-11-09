@@ -28,7 +28,7 @@ class TestRegisteredMailer:
 
     ''' Registrant Warning Tests '''
 
-    @patch('zeus.events.email.registered_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.registered_mailer.send_mail')
     @patch('zeus.events.email.registered_mailer.generate_event', return_value={})
     def test_send_user_gen_complaint(self, generate_event, send_mail):
         assert_true(self._mailer.send_user_gen_complaint('test-ticket', 'test-subdomain', 'test-domain-id', ['test-id'],
@@ -42,7 +42,7 @@ class TestRegisteredMailer:
     def test_send_user_gen_complaint_exception(self, generate_event, send_mail):
         assert_false(self._mailer.send_user_gen_complaint(None, None, None, ['test-id'], None))
 
-    @patch('zeus.events.email.registered_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.registered_mailer.send_mail')
     def test_send_registrant_warning(self, send_mail):
         assert_true(self._mailer.send_registrant_warning('test-ticket', 'test-domain', 'test-domain-id', ['test-id'],
                                                          'test-source'))
@@ -54,9 +54,21 @@ class TestRegisteredMailer:
     def test_send_registrant_warning_exception(self, send_mail):
         assert_false(self._mailer.send_registrant_warning(None, None, None, ['test-id'], None))
 
+    @patch('zeus.events.email.registered_mailer.send_mail')
+    def test_send_sucuri_reg_warning(self, send_mail):
+        assert_true(self._mailer.send_sucuri_reg_warning('test-ticket', 'test-domain', 'test-domain-id', ['test-id'],
+                                                         'test-source'))
+
+    def test_send_send_sucuri_reg_warning_no_shoppers(self):
+        assert_false(self._mailer.send_sucuri_reg_warning(None, None, None, [], None))
+
+    @patch('hermes.messenger.send_mail', side_effect=OCMException())
+    def test_send_sucuri_reg_warning_exception(self, send_mail):
+        assert_false(self._mailer.send_sucuri_reg_warning(None, None, None, ['test-id'], None))
+
     ''' Shopper Suspension Tests '''
 
-    @patch('zeus.events.email.registered_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.registered_mailer.send_mail')
     def test_send_shopper_suspension(self, send_mail):
         actual = self._mailer.send_shopper_suspension('test-id', 'test-domain', 'test-domain-id', ['test-id'],
                                                       'test-source', 'PHISHING')
@@ -71,14 +83,14 @@ class TestRegisteredMailer:
 
     ''' CSAM Shopper Suspension test '''
 
-    @patch('zeus.events.email.registered_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.registered_mailer.send_mail')
     def test_send_csam_shopper_suspension(self, send_mail):
         actual = self._mailer.send_csam_shopper_suspension('test-id', 'test-domain', 'test-shopperid', ['test-id'])
         assert_true(actual)
 
     ''' Shopper Intentional Suspension Tests '''
 
-    @patch('zeus.events.email.registered_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.registered_mailer.send_mail')
     def test_send_shopper_intentional_suspension(self, send_mail):
         assert_true(self._mailer.send_shopper_intentional_suspension(None, None, None, ['test-id'], 'PHISHING'))
 
@@ -91,7 +103,7 @@ class TestRegisteredMailer:
 
     ''' Shopper Compromise Suspension Tests '''
 
-    @patch('zeus.events.email.registered_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.registered_mailer.send_mail')
     def test_send_shopper_compromise_suspension(self, send_mail):
         assert_true(self._mailer.send_shopper_compromise_suspension(None, None, None, ['test-id']))
 
@@ -104,7 +116,7 @@ class TestRegisteredMailer:
 
     ''' Repeat Offender Suspension Tests '''
 
-    @patch('zeus.events.email.registered_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.registered_mailer.send_mail')
     @patch('zeus.events.email.registered_mailer.generate_event', return_value=None)
     def test_send_repeat_offender_suspension(self, generate_event, send_mail):
         assert_true(self._mailer.send_repeat_offender_suspension('test-ticket-id', 'domain', 'test-domain-id',

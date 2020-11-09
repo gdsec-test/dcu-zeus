@@ -140,3 +140,11 @@ def get_kelvin_domain_id_from_dict(dict_to_search):
     if isinstance(dict_to_search, dict):
         return dict_to_search.get('domain', {}).get('domainId')
     return None
+
+
+def get_sucuri_product_from_dict(dict_to_search):
+    #  The sucuriProduct field currently appears in...
+    #    1: data->domainQuery->securitySubscription->sucuriProduct
+    if isinstance(dict_to_search, dict):
+        return _get_domain_query(dict_to_search).get('securitySubscription', {}).get('sucuriProduct', [])
+    return []

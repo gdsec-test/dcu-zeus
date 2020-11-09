@@ -96,6 +96,46 @@ class RegisteredMailer(Mailer):
             return False
         return True
 
+    def send_sucuri_reg_warning(self, ticket_id, domain, domain_id, shopper_ids, source):
+        """
+        Sends a notification to the shopper account and administrative contact email address(es) found for the domain
+        success_message = 'reg-only_sucuri_shopper_warning_email_sent', 'template': 6041
+        :param ticket_id:
+        :param domain:
+        :param domain_id:
+        :param shopper_ids:
+        :param source:
+        :return:
+        """
+        if not shopper_ids:
+            return False
+
+        template = 'registered.sucuri_warning'
+        message_type = 'reg-only_sucuri_72hr_warning'
+        exception_type = 'reg-only_sucuri_warning_email_exception'
+
+        kwargs = self.generate_kwargs_for_hermes()
+
+        try:
+            if self._throttle.can_shopper_email_be_sent(domain) or self._CAN_FLOOD:
+
+                # If the domain is associated with a parent/child API reseller
+                #  account, then email both the parent and child account
+                for shopper_id in shopper_ids:
+                    substitution_values = {'ACCOUNT_NUMBER': shopper_id,
+                                           'DOMAIN': domain,
+                                           'SANITIZED_URL': sanitize_url(source)}
+
+                    kwargs[self.DOMAIN_ID] = domain_id
+                    send_mail(template, substitution_values, **kwargs)
+            else:
+                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
+        except Exception as e:
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
+            generate_event(ticket_id, exception_type, type=message_type)
+            return False
+        return True
+
     def send_repeat_offender_suspension(self, ticket_id, domain, domain_id, shopper_ids, source):
         """
         Sends a notification to the shopper account and administrative contact email address(es) found for the domain

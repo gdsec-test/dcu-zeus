@@ -28,7 +28,7 @@ class TestRegisteredMailer:
 
     ''' Hosted Warning Tests '''
 
-    @patch('zeus.events.email.hosted_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.hosted_mailer.send_mail')
     def test_send_hosted_warning(self, send_mail):
         assert_true(self._mailer.send_hosted_warning(None, None, 'test-id', 'source'))
 
@@ -36,9 +36,17 @@ class TestRegisteredMailer:
     def test_send_hosted_warning_exception(self, send_mail):
         assert_false(self._mailer.send_hosted_warning(None, None, 'test-id', None))
 
+    @patch('zeus.events.email.hosted_mailer.send_mail')
+    def test_send_sucuri_hosted_warning(self, send_mail):
+        assert_true(self._mailer.send_sucuri_hosted_warning(None, None, 'test-id', 'source'))
+
+    @patch('zeus.events.email.hosted_mailer.send_mail', side_effect=OCMException())
+    def test_send_sucuri_hosted_warning_exception(self, send_mail):
+        assert_false(self._mailer.send_sucuri_hosted_warning(None, None, 'test-id', None))
+
     ''' Content Removed Tests '''
 
-    @patch('zeus.events.email.hosted_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.hosted_mailer.send_mail')
     def test_send_content_removed(self, send_mail):
         assert_true(self._mailer.send_content_removed('test-ticket', 'test-domain', 'test-id'))
 
@@ -48,7 +56,7 @@ class TestRegisteredMailer:
 
     ''' Hosted Suspension Tests '''
 
-    @patch('zeus.events.email.hosted_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.hosted_mailer.send_mail')
     def test_send_shopper_hosted_suspension(self, send_mail):
         assert_true(self._mailer.send_shopper_hosted_suspension(None, None, 'test-id', 'source'))
 
@@ -58,13 +66,13 @@ class TestRegisteredMailer:
 
     ''' CSAM Hosted Suspension Tests '''
 
-    @patch('zeus.events.email.hosted_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.hosted_mailer.send_mail')
     def test_send_csam_hosted_suspension(self, send_mail):
         assert_true(self._mailer.send_csam_hosted_suspension(None, None, 'test-id'))
 
     ''' Intentional Hosted Suspension Tests '''
 
-    @patch('zeus.events.email.hosted_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.hosted_mailer.send_mail')
     def test_send_shopper_hosted_intentional_suspension(self, send_mail):
         assert_true(self._mailer.send_shopper_hosted_intentional_suspension(None, None, 'test-id', None))
 
@@ -74,7 +82,7 @@ class TestRegisteredMailer:
 
     ''' Shopper Compromise Hosted Suspension Tests '''
 
-    @patch('zeus.events.email.hosted_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.hosted_mailer.send_mail')
     def test_send_shopper_compromise_hosted_suspension(self, send_mail):
         assert_true(self._mailer.send_shopper_compromise_hosted_suspension(None, None, 'test-id'))
 
@@ -84,7 +92,7 @@ class TestRegisteredMailer:
 
     ''' Shopper Extensive Compromise Hosted Suspension Tests '''
 
-    @patch('zeus.events.email.hosted_mailer.send_mail', return_value={})
+    @patch('zeus.events.email.hosted_mailer.send_mail')
     def test_send_extensive_compromise_suspension(self, send_mail):
         assert_true(self._mailer.send_extensive_compromise(None, None, 'test-id'))
 

@@ -9,10 +9,13 @@ from zeus.utils.functions import (get_domain_create_date_from_dict,
                                   get_shopper_create_date_from_dict,
                                   get_shopper_id_from_dict,
                                   get_ssl_subscriptions_from_dict,
+                                  get_sucuri_product_from_dict,
                                   sanitize_url)
 
 
 class TestFunctions:
+    sucuri_malware_remover_product = 'Website Security Deluxe'
+
     def test_get_shopper_id_from_dict_none(self):
         actual = get_shopper_id_from_dict(None)
         assert_is_none(actual)
@@ -124,6 +127,12 @@ class TestFunctions:
         data = {'domain': {'brand': 'BRAND'}}
         actual = get_kelvin_domain_id_from_dict(data)
         assert_is_none(actual)
+
+    def test_get_sucuri_product_from_dict(self):
+        data = {'data': {'domainQuery': {'securitySubscription': {'sucuriProduct':
+                                                                  [self.sucuri_malware_remover_product]}}}}
+        actual = get_sucuri_product_from_dict(data)
+        assert_equal(actual, [self.sucuri_malware_remover_product])
 
     def test_sanitize_url(self, url='https://someurl.com/path/to/bad/'):
         sanitized = sanitize_url(url)

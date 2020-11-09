@@ -47,6 +47,38 @@ class HostedMailer(Mailer):
             return False
         return True
 
+    def send_sucuri_hosted_warning(self, ticket_id, domain, shopper_id, source):
+        """
+        Sends a notification to the shopper account email address found for the hosted domain
+        success_message = 'hosted_sucuri_shopper_warning_email_sent', 'template': 6041
+        :param ticket_id:
+        :param domain:
+        :param shopper_id:
+        :param source:
+        :return:
+        """
+
+        template = 'hosted.sucuri_warning'
+        message_type = 'hosted_sucuri_72hr_warning'
+        exception_type = 'hosted_sucuri_warning_email_exception'
+
+        redis_key = '{}_sucuri_warning_email'.format(domain)
+
+        try:
+            if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
+                substitution_values = {'ACCOUNT_NUMBER': shopper_id,
+                                       'DOMAIN': domain,
+                                       'SANITIZED_URL': sanitize_url(source)}
+
+                send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
+            else:
+                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
+        except Exception as e:
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
+            generate_event(ticket_id, exception_type, type=message_type)
+            return False
+        return True
+
     def send_content_removed(self, ticket_id, domain, shopper_id):
         """
         Sends a notification to the shopper account email address found for the hosted domain regarding

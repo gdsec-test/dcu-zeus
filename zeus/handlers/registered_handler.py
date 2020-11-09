@@ -11,7 +11,7 @@ from zeus.events.support_tools.constants import alert_mappings, note_mappings
 from zeus.events.support_tools.crm import ThrottledCRM
 from zeus.events.suspension.domains import ThrottledDomainService
 from zeus.handlers.interface import Handler
-from zeus.reviews.reviews import BasicReview
+from zeus.reviews.reviews import BasicReview, SucuriReview
 from zeus.utils.crmalert import CRMAlert
 from zeus.utils.functions import (get_domain_id_from_dict,
                                   get_host_abuse_email_from_dict,
@@ -21,7 +21,8 @@ from zeus.utils.functions import (get_domain_id_from_dict,
                                   get_list_of_ids_to_notify,
                                   get_parent_child_shopper_ids_from_dict,
                                   get_shopper_id_from_dict,
-                                  get_ssl_subscriptions_from_dict)
+                                  get_ssl_subscriptions_from_dict,
+                                  get_sucuri_product_from_dict)
 from zeus.utils.journal import EventTypes, Journal
 from zeus.utils.mimir import InfractionTypes, Mimir
 from zeus.utils.shoplocked import Shoplocked
@@ -50,7 +51,10 @@ class RegisteredHandler(Handler):
         self.mimir = Mimir(app_settings)
 
         self.basic_review = BasicReview(app_settings)
+        self.sucuri_review = SucuriReview(app_settings)
         self.HOLD_TIME = app_settings.HOLD_TIME
+        self.SUCURI_HOLD_TIME = app_settings.SUCURI_HOLD_TIME
+        self.SUCURI_PRODUCT_LIST = app_settings.SUCURI_PRODUCT_LIST
         self.ENTERED_BY = app_settings.ENTERED_BY
         self.PROTECTED_DOMAINS = app_settings.PROTECTED_DOMAINS
         self.FRAUD_REVIEW_TIME = app_settings.FRAUD_REVIEW_TIME
@@ -82,6 +86,7 @@ class RegisteredHandler(Handler):
         report_type = data.get('type')
         shopper_id = get_shopper_id_from_dict(data)
         shopper_id_list = get_list_of_ids_to_notify(data)
+        sucuri_product = get_sucuri_product_from_dict(data)
         source = data.get('source')
         ticket_id = data.get('ticketId')
 
@@ -91,8 +96,26 @@ class RegisteredHandler(Handler):
         if not self._validate_required_args(data):
             return False
 
-        self.basic_review.place_in_review(ticket_id, datetime.utcnow() + timedelta(seconds=self.HOLD_TIME),
-                                          '24hr_notice_sent')
+        sucuri_warning = any(sucuri_malware_remover in self.SUCURI_PRODUCT_LIST for sucuri_malware_remover in
+                             sucuri_product)
+        if sucuri_warning:
+            self.sucuri_review.place_in_review(ticket_id, datetime.utcnow() + timedelta(seconds=self.SUCURI_HOLD_TIME),
+                                               '72hr_notice_sent')
+
+            if not self.registered_mailer.send_sucuri_reg_warning(ticket_id, domain, domain_id, shopper_id_list,
+                                                                  source):
+                self.slack.failed_sending_email(domain)
+                return False
+
+        else:
+            self.basic_review.place_in_review(ticket_id, datetime.utcnow() + timedelta(seconds=self.HOLD_TIME),
+                                              '24hr_notice_sent')
+
+            if not self.registered_mailer.send_registrant_warning(ticket_id, domain, domain_id, shopper_id_list,
+                                                                  source):
+                self.slack.failed_sending_email(domain)
+                return False
+
         self.foreign_mailer.send_foreign_hosting_notice(ticket_id, domain, source, hosted_brand, recipients, ip)
 
         note = note_mappings['registered']['customerWarning']['crm'].format(domain=domain,
@@ -110,9 +133,6 @@ class RegisteredHandler(Handler):
                          shopper_number=shopper_id,
                          ticket_number=ticket_id)
 
-        if not self.registered_mailer.send_registrant_warning(ticket_id, domain, domain_id, shopper_id_list, source):
-            self.slack.failed_sending_email(domain)
-            return False
         return True
 
     def forward_user_gen_complaint(self, data):

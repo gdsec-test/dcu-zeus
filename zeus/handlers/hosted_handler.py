@@ -9,12 +9,13 @@ from zeus.events.email.ssl_mailer import SSLMailer
 from zeus.events.support_tools.constants import alert_mappings, note_mappings
 from zeus.events.suspension.hosting_service import ThrottledHostingService
 from zeus.handlers.interface import Handler
-from zeus.reviews.reviews import BasicReview
+from zeus.reviews.reviews import BasicReview, SucuriReview
 from zeus.utils.crmalert import CRMAlert
 from zeus.utils.functions import (get_host_info_from_dict,
                                   get_host_shopper_id_from_dict,
                                   get_parent_child_shopper_ids_from_dict,
-                                  get_ssl_subscriptions_from_dict)
+                                  get_ssl_subscriptions_from_dict,
+                                  get_sucuri_product_from_dict)
 from zeus.utils.journal import EventTypes, Journal
 from zeus.utils.mimir import InfractionTypes, Mimir
 from zeus.utils.scribe import HostedScribe
@@ -40,7 +41,10 @@ class HostedHandler(Handler):
         self.crmalert = CRMAlert(app_settings)
 
         self.basic_review = BasicReview(app_settings)
+        self.sucuri_review = SucuriReview(app_settings)
         self.HOLD_TIME = app_settings.HOLD_TIME
+        self.SUCURI_HOLD_TIME = app_settings.SUCURI_HOLD_TIME
+        self.SUCURI_PRODUCT_LIST = app_settings.SUCURI_PRODUCT_LIST
         self.FRAUD_REVIEW_TIME = app_settings.FRAUD_REVIEW_TIME
 
         self._db = PhishstoryMongo(app_settings)
@@ -68,19 +72,34 @@ class HostedHandler(Handler):
         product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
         ticket_id = data.get('ticketId')
-
-        self.basic_review.place_in_review(ticket_id, datetime.utcnow() + timedelta(seconds=self.HOLD_TIME),
-                                          '24hr_notice_sent')
+        sucuri_product = get_sucuri_product_from_dict(data)
 
         report_type, guid, shopper_id = self._validate_required_args(data)
 
         if not shopper_id:
+            self.slack.failed_to_determine_shoppers(shopper_id)
             return False
 
-        # Since we have a shopper_id, try to send the warning email, even if guid or report_type was not found
-        if not self.hosted_mailer.send_hosted_warning(ticket_id, domain, shopper_id, source):
-            self.slack.failed_sending_email(domain)
-            return False
+        sucuri_warning = any(sucuri_malware_remover in self.SUCURI_PRODUCT_LIST for sucuri_malware_remover in
+                             sucuri_product)
+
+        if sucuri_warning:
+            self.sucuri_review.place_in_review(ticket_id, datetime.utcnow() + timedelta(seconds=self.SUCURI_HOLD_TIME),
+                                               '72hr_notice_sent')
+
+            # Since we have a shopper_id, try to send the sucuri warning email, even if guid or report_type was not
+            # found
+            if not self.hosted_mailer.send_sucuri_hosted_warning(ticket_id, domain, shopper_id, source):
+                self.slack.failed_sending_email(domain)
+                return False
+        else:
+            self.basic_review.place_in_review(ticket_id, datetime.utcnow() + timedelta(seconds=self.HOLD_TIME),
+                                              '24hr_notice_sent')
+
+            # Since we have a shopper_id, try to send the warning email, even if guid or report_type was not found
+            if not self.hosted_mailer.send_hosted_warning(ticket_id, domain, shopper_id, source):
+                self.slack.failed_sending_email(domain)
+                return False
 
         if not guid or not report_type:
             return False
