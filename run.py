@@ -125,7 +125,7 @@ def intentionally_malicious(ticket_id, investigator_id):
     data = get_database_handle().get_incident(ticket_id)
     # Add investigator user id to data so its available in _notify_fraud and ssl subscription check
     data['investigator_user_id'] = investigator_id
-    return route_request(data, 'intentionally_malicious', True) if data else None
+    return route_request(data, 'intentionally_malicious', dual_suspension=True) if data else None
 
 
 @celery.task()
@@ -177,4 +177,4 @@ def submitted_to_ncmec(ticket_id):
 @celery.task()
 def suspend_csam(ticket_id):
     data = get_kelvin_database_handle().get_incident(ticket_id)
-    return route_request(data, 'suspend_csam', True) if data else None
+    return route_request(data, 'suspend_csam', dual_suspension=True) if data else None
