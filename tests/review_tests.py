@@ -1,15 +1,19 @@
-from datetime import datetime, timedelta
-
 import mongomock
 from dcdatabase.phishstorymongo import PhishstoryMongo
-from nose.tools import assert_true
+from nose.tools import assert_equal, assert_is_none, assert_is_not_none
 
 from settings import TestingConfig
 from zeus.reviews.reviews import BasicReview, FraudReview, SucuriReview
 
 
 class TestReview:
-    sucuri_hold_reason = '72hr_notice_sent'
+    HOLD_REASON = 'New Account'
+    HOLD_TIME = 'Hold Time'
+    KEY_FRAUD_HOLD_REASON = 'fraud_hold_reason'
+    KEY_FRAUD_HOLD_UNTIL = 'fraud_hold_until'
+    KEY_HOLD_REASON = 'hold_reason'
+    KEY_HOLD_UNTIL = 'hold_until'
+    SUCURI_HOLD_REASON = '72hr_notice_sent'
 
     @classmethod
     def setup(cls):
@@ -31,32 +35,43 @@ class TestReview:
         cls._sucuri._db = cls._db  # Replace db with mock
 
     def test_basic_hold(self):
-        doc = self._basic.place_in_review(1236, datetime.utcnow() + timedelta(seconds=self._config.HOLD_TIME))
-        assert_true(doc['hold_until'])
+        doc = self._basic.place_in_review(1236, self.HOLD_TIME)
+        assert_is_not_none(doc.get(self.KEY_HOLD_UNTIL))
+        assert_is_none(doc.get(self.KEY_HOLD_REASON))
+        assert_equal(doc.get(self.KEY_HOLD_UNTIL), self.HOLD_TIME)
 
     def test_basic_hold_with_reason(self):
-        doc = self._basic.place_in_review(1236, datetime.utcnow() + timedelta(seconds=self._config.HOLD_TIME),
-                                          'New Account')
-        assert_true(doc['hold_until'])
-        assert_true(doc['hold_reason'])
+        doc = self._basic.place_in_review(1236, self.HOLD_TIME, self.HOLD_REASON)
+        assert_is_not_none(doc.get(self.KEY_HOLD_UNTIL))
+        assert_is_not_none(doc.get(self.KEY_HOLD_REASON))
+        assert_equal(doc.get(self.KEY_HOLD_UNTIL), self.HOLD_TIME)
+        assert_equal(doc.get(self.KEY_HOLD_REASON), self.HOLD_REASON)
 
     def test_fraud_hold_with_reason(self):
-        doc = self._fraud.place_in_review(1237, datetime.utcnow() + timedelta(seconds=self._config.HOLD_TIME),
-                                          'New Account')
-        assert_true(doc['fraud_hold_until'])
-        assert_true(doc['fraud_hold_reason'])
+        doc = self._fraud.place_in_review(1237, self.HOLD_TIME, self.HOLD_REASON)
+        assert_is_not_none(doc.get(self.KEY_FRAUD_HOLD_UNTIL))
+        assert_is_not_none(doc.get(self.KEY_FRAUD_HOLD_REASON))
+        assert_equal(doc.get(self.KEY_FRAUD_HOLD_UNTIL), self.HOLD_TIME)
+        assert_equal(doc.get(self.KEY_FRAUD_HOLD_REASON), self.HOLD_REASON)
 
     def test_fraud_hold(self):
-        doc = self._fraud.place_in_review(1237, datetime.utcnow() + timedelta(seconds=self._config.HOLD_TIME))
-        assert_true(doc['fraud_hold_until'])
+        doc = self._fraud.place_in_review(1237, self.HOLD_TIME)
+        assert_is_not_none(doc.get(self.KEY_FRAUD_HOLD_UNTIL))
+        assert_is_none(doc.get(self.KEY_FRAUD_HOLD_REASON))
+        assert_equal(doc.get(self.KEY_FRAUD_HOLD_UNTIL), self.HOLD_TIME)
 
     def test_sucuri_hold(self):
-        doc = self._sucuri.place_in_review(1238, datetime.utcnow() + timedelta(seconds=self._config.SUCURI_HOLD_TIME))
-        assert_true(doc['sucuri_hold_until'])
+        doc = self._sucuri.place_in_review(1238, self.HOLD_TIME)
+        assert_is_not_none(doc.get(self.KEY_HOLD_UNTIL))
+        assert_is_none(doc.get(self.KEY_HOLD_REASON))
+        assert_equal(doc.get(self.KEY_HOLD_UNTIL), self.HOLD_TIME)
 
     def test_sucuri_hold_with_reason(self):
-        doc = self._sucuri.place_in_review(1238, datetime.utcnow() + timedelta(seconds=self._config.SUCURI_HOLD_TIME),
-                                           self.sucuri_hold_reason)
-        assert_true(doc['sucuri_hold_until'])
-        assert_true(doc['sucuri_hold_reason'])
-        assert_true(doc.get('sucuri_hold_reason', self.sucuri_hold_reason))
+        """
+        Sucuri holds use the same 'hold_until' and 'hold_reason' fields
+        """
+        doc = self._sucuri.place_in_review(1238, self.HOLD_TIME, self.SUCURI_HOLD_REASON)
+        assert_is_not_none(doc.get(self.KEY_HOLD_UNTIL))
+        assert_is_not_none(doc.get(self.KEY_HOLD_REASON))
+        assert_equal(doc.get(self.KEY_HOLD_UNTIL), self.HOLD_TIME)
+        assert_equal(doc.get(self.KEY_HOLD_REASON), self.SUCURI_HOLD_REASON)

@@ -8,9 +8,9 @@ class BasicReview(Review):
         self._logger = logging.getLogger(__name__)
         super(BasicReview, self).__init__(settings)
 
-    def place_in_review(self, ticket, hold_time, reason=None):
-        self._logger.info("Placing {} in review until {} for {}".format(ticket, hold_time, reason))
-        return self._review_until(ticket, 'hold_until', hold_time, 'hold_reason', reason)
+    def place_in_review(self, _ticket, _hold_time, _reason=None):
+        self._logger.info("Placing {} in review until {} for {}".format(_ticket, _hold_time, _reason))
+        return self._review_until(_ticket, 'hold_until', _hold_time, 'hold_reason', _reason)
 
 
 class SucuriReview(Review):
@@ -18,9 +18,13 @@ class SucuriReview(Review):
         self._logger = logging.getLogger(__name__)
         super(SucuriReview, self).__init__(settings)
 
-    def place_in_review(self, ticket, sucuri_hold_time, reason=None):
-        self._logger.info("Placing {} in Sucuri review until {} for {}".format(ticket, sucuri_hold_time, reason))
-        return self._review_until(ticket, 'sucuri_hold_until', sucuri_hold_time, 'sucuri_hold_reason', reason)
+    def place_in_review(self, _ticket, _hold_time, _reason=None):
+        """
+        In order to avoid having another condition in each of the phishstory report bootcards,
+         the field used will be "hold_until", which the current bootcard conditions check for
+        """
+        self._logger.info("Placing {} in Sucuri review until {} for {}".format(_ticket, _hold_time, _reason))
+        return self._review_until(_ticket, 'hold_until', _hold_time, 'hold_reason', _reason)
 
 
 class FraudReview(Review):
@@ -28,6 +32,6 @@ class FraudReview(Review):
         self._logger = logging.getLogger(__name__)
         super(FraudReview, self).__init__(settings)
 
-    def place_in_review(self, ticket, hold_time, reason=None):
-        self._logger.info("Placing {} in fraud review until {} for {}".format(ticket, hold_time, reason))
-        return self._review_until(ticket, 'fraud_hold_until', hold_time, 'fraud_hold_reason', reason)
+    def place_in_review(self, _ticket, _hold_time, _reason=None):
+        self._logger.info("Placing {} in fraud review until {} for {}".format(_ticket, _hold_time, _reason))
+        return self._review_until(_ticket, 'fraud_hold_until', _hold_time, 'fraud_hold_reason', _reason)

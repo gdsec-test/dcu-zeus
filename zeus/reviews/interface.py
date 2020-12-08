@@ -20,17 +20,17 @@ class Review(object):
         :return:
         """
 
-    def _review_until(self, ticket, field, date, reason_field, reason):
+    def _review_until(self, _ticket, _field, _date, _reason_field, _reason):
         """
         Place the specified ticket on hold until the specified date, using the given field
-        :param ticket:
-        :param field:
-        :param date:
-        :param reason_field:
-        :param reason:
+        :param _ticket:
+        :param _field:
+        :param _date:
+        :param _reason_field:
+        :param _reason:
         :return:
         """
-        data = {field: date}
-        if reason is not None:
-            data[reason_field] = reason
-        return self._db.update_incident(ticket, data)
+        data = {_field: _date}
+        if _reason:
+            data[_reason_field] = _reason
+        return self._db.update_incident(_ticket, data)
