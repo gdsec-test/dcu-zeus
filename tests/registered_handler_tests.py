@@ -32,33 +32,58 @@ class TestRegisteredHandler:
     domainId = '1234'
     ticketID = '4321'
     JWT = 'JWT_STRING'
+    HOSTED = 'HOSTED'
+    KEY_DATA = 'data'
+    KEY_DOMAIN = 'sourceDomainOrIp'
+    KEY_DOMAIN_DATE = 'domainCreateDate'
+    KEY_DOMAIN_ID = 'domainId'
+    KEY_DOMAIN_QUERY = 'domainQuery'
+    KEY_HOST = 'host'
+    KEY_HOSTED_STATUS = 'hosted_status'
+    KEY_REGISTRAR = 'registrar'
+    KEY_SHOPPER_ID = 'shopperId'
+    KEY_SHOPPER_INFO = 'shopperInfo'
+    KEY_SSL_SUB = 'sslSubscriptions'
+    KEY_TYPE = 'type'
 
     current_test_date = datetime(2020, 05, 07, 14, 57)  # +7 hours because of UTC
     oldest_valid_fraud_review_test_date = current_test_date - timedelta(days=TestingConfig.FRAUD_REVIEW_TIME)
-    ticket_invalid_type = {'hosted_status': reg}
-    ticket_no_shopper = {'hosted_status': reg, 'type': phishing}
-    ticket_valid = {'hosted_status': reg, 'type': phishing, 'sourceDomainOrIp': domain,
-                    'data': {'domainQuery': {'shopperInfo': {'shopperId': sid}, 'sslSubscriptions': ssl_subscription,
-                                             'registrar': {'domainId': did}}}}
-    ticket_fraud_hold = {'fraud_hold_reason': 'test', 'hosted_status': reg, 'type': phishing,
-                         'sourceDomainOrIp': domain, 'data': {'domainQuery': {'shopperInfo': {'shopperId': sid},
-                                                                              'sslSubscriptions': ssl_subscription}}}
-    ticket_protected_domain = {'hosted_status': reg, 'type': phishing, 'sourceDomainOrIp': protected_domain,
-                               'data': {'domainQuery': {'shopperInfo': {'shopperId': sid},
-                                                        'sslSubscriptions': ssl_subscription}}}
-    ticket_valid_api_reseller = {'hosted_status': reg, 'type': phishing, 'sourceDomainOrIp': domain,
-                                 'data': {'domainQuery': {'apiReseller': {'parent': '1234567', 'child': '7654321'},
-                                                          'registrar': {
-                                                              'domainCreateDate': oldest_valid_fraud_review_test_date},
-                                                          'sslSubscriptions': ssl_subscription}}}
-    ticket_no_hold_or_reseller = {'hosted_status': reg, 'type': phishing, 'sourceDomainOrIp': domain,
-                                  'data': {'domainQuery': {'shopperInfo': {'shopperId': sid},
-                                           'registrar': {'domainCreateDate': oldest_valid_fraud_review_test_date}}}}
-    ticket_valid_child_abuse = {'hosted_status': reg, 'type': childabuse, 'sourceDomainOrIP': domain, 'ticketID': ticketID,
-                                'domain': {'domainId': domainId},
-                                'data': {'domainQuery': {'shopperInfo': {'shopperId': sid},
-                                                         'sslSubscriptions': ssl_subscription,
-                                                         'registrar': {'domainId': did}}}}
+    ticket_invalid_type = {KEY_HOSTED_STATUS: reg}
+    ticket_no_shopper = {KEY_HOSTED_STATUS: reg, KEY_TYPE: phishing}
+    ticket_valid = {KEY_HOSTED_STATUS: reg, KEY_TYPE: phishing, KEY_DOMAIN: domain,
+                    KEY_DATA: {
+                        KEY_DOMAIN_QUERY: {KEY_SHOPPER_INFO: {KEY_SHOPPER_ID: sid}, KEY_SSL_SUB: ssl_subscription,
+                                           KEY_REGISTRAR: {KEY_DOMAIN_ID: did}}}}
+    ticket_fraud_hold = {'fraud_hold_reason': 'test', KEY_HOSTED_STATUS: reg, KEY_TYPE: phishing,
+                         KEY_DOMAIN: domain, KEY_DATA: {KEY_DOMAIN_QUERY: {KEY_SHOPPER_INFO: {KEY_SHOPPER_ID: sid},
+                                                                           KEY_SSL_SUB: ssl_subscription}}}
+    ticket_protected_domain = {KEY_HOSTED_STATUS: reg, KEY_TYPE: phishing, KEY_DOMAIN: protected_domain,
+                               KEY_DATA: {KEY_DOMAIN_QUERY: {KEY_SHOPPER_INFO: {KEY_SHOPPER_ID: sid},
+                                                             KEY_SSL_SUB: ssl_subscription}}}
+    ticket_valid_api_reseller = {KEY_HOSTED_STATUS: reg, KEY_TYPE: phishing, KEY_DOMAIN: domain,
+                                 KEY_DATA: {KEY_DOMAIN_QUERY: {'apiReseller': {'parent': '1234567', 'child': '7654321'},
+                                                               KEY_REGISTRAR: {
+                                                                   KEY_DOMAIN_DATE: oldest_valid_fraud_review_test_date},
+                                                               KEY_SSL_SUB: ssl_subscription}}}
+    ticket_no_hold_or_reseller = {KEY_HOSTED_STATUS: reg, KEY_TYPE: phishing, KEY_DOMAIN: domain,
+                                  KEY_DATA: {KEY_DOMAIN_QUERY: {KEY_SHOPPER_INFO: {KEY_SHOPPER_ID: sid},
+                                                                KEY_REGISTRAR: {
+                                                                    KEY_DOMAIN_DATE: oldest_valid_fraud_review_test_date}}}}
+    ticket_valid_child_abuse = {KEY_HOSTED_STATUS: reg, KEY_TYPE: childabuse, KEY_DOMAIN: domain, 'ticketID': ticketID,
+                                'domain': {KEY_DOMAIN_ID: domainId},
+                                KEY_DATA: {KEY_DOMAIN_QUERY: {KEY_SHOPPER_INFO: {KEY_SHOPPER_ID: sid},
+                                                              KEY_SSL_SUB: ssl_subscription,
+                                                              KEY_REGISTRAR: {KEY_DOMAIN_ID: did}}}}
+    ticket_hosted_same_account = {KEY_TYPE: phishing, KEY_DOMAIN: domain, KEY_HOSTED_STATUS: HOSTED,
+                                  KEY_DATA: {
+                                      KEY_DOMAIN_QUERY: {KEY_HOST: {KEY_SHOPPER_ID: '1357'},
+                                                         KEY_SHOPPER_INFO: {KEY_SHOPPER_ID: '1357'},
+                                                         KEY_SSL_SUB: ssl_subscription}}}
+    ticket_hosted_different_account = {KEY_TYPE: phishing, KEY_DOMAIN: domain, KEY_HOSTED_STATUS: HOSTED,
+                                       KEY_DATA: {
+                                           KEY_DOMAIN_QUERY: {KEY_HOST: {KEY_SHOPPER_ID: 'different_shopper'},
+                                                              KEY_SHOPPER_INFO: {KEY_SHOPPER_ID: '1234'},
+                                                              KEY_SSL_SUB: ssl_subscription}}}
 
     @classmethod
     def setup(cls):
@@ -212,6 +237,44 @@ class TestRegisteredHandler:
         mock_date.utcnow = Mock(return_value=self.current_test_date)
         self._registered.intentionally_malicious(self.ticket_no_hold_or_reseller)
         fraud.assert_called()
+
+    @patch.object(RegisteredHandler, 'suspend', return_value=True)
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(CRMAlert, 'create_alert', return_value=None)
+    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(RegisteredHandler, '_suspend_domain', return_value=True)
+    @patch.object(RegisteredMailer, 'send_shopper_intentional_suspension', return_value=True)
+    @patch.object(FraudMailer, 'send_malicious_domain_notification', return_value=None)
+    @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
+    @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
+    @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
+    @patch('zeus.handlers.registered_handler.datetime')
+    def test_intentionally_malicious_hosted_same_shopper(self, mock_date, ssl_mailer, service, crm, fraud,
+                                                         registered, handler, journal, shoplocked, crmalert,
+                                                         mimir, mock_db, suspend):
+        self._registered.intentionally_malicious(self.ticket_hosted_same_account)
+        suspend.assert_not_called()
+
+    @patch.object(RegisteredHandler, 'suspend', return_value=True)
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(CRMAlert, 'create_alert', return_value=None)
+    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(RegisteredHandler, '_suspend_domain', return_value=True)
+    @patch.object(RegisteredMailer, 'send_shopper_intentional_suspension', return_value=True)
+    @patch.object(FraudMailer, 'send_malicious_domain_notification', return_value=None)
+    @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
+    @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
+    @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
+    @patch('zeus.handlers.registered_handler.datetime')
+    def test_intentionally_malicious_hosted_different_shopper(self, mock_date, ssl_mailer, service, crm, fraud,
+                                                              registered, handler, journal, shoplocked, crmalert,
+                                                              mimir, mock_db, suspend):
+        self._registered.intentionally_malicious(self.ticket_hosted_different_account)
+        suspend.assert_called()
 
     @patch.object(SlackFailures, 'invalid_hosted_status', return_value=None)
     def test_repeat_offender_none(self, invalid_hosted_status):

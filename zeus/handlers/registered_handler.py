@@ -17,6 +17,7 @@ from zeus.utils.functions import (get_domain_id_from_dict,
                                   get_host_abuse_email_from_dict,
                                   get_host_brand_from_dict,
                                   get_host_info_from_dict,
+                                  get_host_shopper_id_from_dict,
                                   get_kelvin_domain_id_from_dict,
                                   get_list_of_ids_to_notify,
                                   get_parent_child_shopper_ids_from_dict,
@@ -162,6 +163,14 @@ class RegisteredHandler(Handler):
         source = data.get('source')
         target = data.get('target')
         ticket_id = data.get('ticketId')
+
+        '''When we have a HOSTED IntMal resolution, Zeus will also suspend the domain name in addition to the host.
+        This section accounts for the domain and hosting being in different accounts so we do not take all actions of
+        intentionally malicious automation on an account we have not actually put eyes on'''
+        if hosted_status == self.HOSTED:
+            host_shopper = get_host_shopper_id_from_dict(data)
+            if host_shopper and host_shopper != shopper_id:
+                return self.suspend(data)
 
         if self._is_domain_protected(domain, action='intentionally_malicious'):
             return False
