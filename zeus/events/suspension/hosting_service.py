@@ -1,5 +1,6 @@
 from zeus.events.suspension.angelo import Angelo
 from zeus.events.suspension.diablo import Diablo
+from zeus.events.suspension.gocentral import GoCentral
 from zeus.events.suspension.interface import Product
 from zeus.events.suspension.mwp_one import MWPOne
 from zeus.events.suspension.vertigo import Vertigo
@@ -28,7 +29,8 @@ class HostingService(Product):
                           'vertigo': Vertigo(app_settings),
                           'mwp 1.0': MWPOne(app_settings),
                           'plesk': Angelo(app_settings),
-                          'vps4': VPS4(app_settings)}
+                          'vps4': VPS4(app_settings),
+                          'gocentral': GoCentral(app_settings)}
 
     def suspend(self, product, identifier, data):
         product = product.lower() if product else None

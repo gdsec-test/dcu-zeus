@@ -36,6 +36,8 @@ spec:
             value: 'THIS_STRING_IS_REPLACED_DURING_BUILD'
           - name: sysenv
             value: prod
+          - name: GOCENTRAL_URL
+              value: 'https://services.orion.prod.secureserver.net/account/accountoperations.asmx'
           - name: BROKER_PASS
             valueFrom:
               secretKeyRef:
@@ -119,6 +121,10 @@ spec:
             value: /ecomm_certs/tls.crt
           - name: ORION_SSL_KEY
             value: /ecomm_certs/tls.key
+          - name: GOCENTRAL_SSL_CERT
+            value: /gocentral_certs/tls.crt
+          - name: GOCENTRAL_SSL_KEY
+            value: /gocentral_certs/tls.key
 
           volumeMounts:
           - name: tls-ocm-files
@@ -132,6 +138,9 @@ spec:
             readOnly: true
           - name: tls-ecomm-files
             mountPath: /ecomm_certs
+            readOnly: true
+          - name: tls-gocentral-files
+            mountPath: /gocentral_certs
             readOnly: true
 
         -
@@ -159,3 +168,6 @@ spec:
         - name: tls-ecomm-files
           secret:
             secretName: tls-ecomm
+        - name: tls-gocentral-files
+          secret:
+            secretName: tls-gocentral

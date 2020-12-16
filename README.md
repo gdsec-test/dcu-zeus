@@ -64,6 +64,9 @@ If you would like to run Zeus locally you will need to specify the following env
 * `DIABLOUSER` & `DIABLOPASS` (Account credentials to access the diablo API)
 * `PLESKUSER` & `PLESKPASS` (Account credentials to access the plesk API)
 * `VPS4USER` & `VPS4PASS` (Account credentials to access the vps4 API)
+* `GOCENTRAL_URL` SOAP URL for adding Orion event for suspending GoCentral guid
+* `GOCENTRAL_SSL_CERT` (The path to the SSL Cert white-listed for Orion Web Service `dcu.ecomm.dev.authclient.int.godaddy.com` dev/test use dev, prod uses prod)
+* `GOCENTRAL_SSL_KEY` (The path to the SSL Key white-listed for Orion Web Service `dcu.ecomm.dev.authclient.int.godaddy.com` dev/test use dev, prod uses prod)
 * `CMAP_PROXY_CERT` Path to certificate file (for connecting to CMAP Proxy `proxyuser.cmap.int.godaddy.com` prod only)
 * `CMAP_PROXY_KEY` Path to key file(for connecting to CMAP Proxy `proxyuser.cmap.int.godaddy.com`  prod only)
 * `CMAP_PROXY_USER` (User for CMAP Proxy)
