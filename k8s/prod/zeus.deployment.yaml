@@ -37,7 +37,7 @@ spec:
           - name: sysenv
             value: prod
           - name: GOCENTRAL_URL
-              value: 'https://services.orion.prod.secureserver.net/account/accountoperations.asmx'
+            value: 'https://services.orion.prod.secureserver.net/account/accountoperations.asmx'
           - name: BROKER_PASS
             valueFrom:
               secretKeyRef:
