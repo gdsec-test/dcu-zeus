@@ -65,6 +65,7 @@ class GoCentral(Product):
             if r.status_code not in [200]:
                 self._logger.error('Bad status code {} in suspend response'.format(r.status_code))
                 return False
+            self._logger.info('Suspended GoCentral ticket {}'.format(ticket_id))
             return True
         except Exception as e:
             self._logger.error('Unable to suspend GoCentral product: {}'.format(e.message))
