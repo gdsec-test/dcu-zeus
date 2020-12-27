@@ -22,7 +22,7 @@ note_mappings = {
             'crm': "Hosting {{guid}} suspended. {{type}} content still present at {{location}} {}".format(support_doc),
             'csam': {
                 'mimir': "Hosted domain {domain} suspended",
-                'crm': "Hosting {{guid}} suspended. {{type}} content still present {}".format(support_doc)
+                'crm': "Hosting {{guid}} suspended. Child Abuse material found, do not reinstate any products or account. Any questions and or comments regarding this action reach out to childabuse@"
             }
         },
         'intentionallyMalicious': {
@@ -48,7 +48,7 @@ note_mappings = {
         'suspension': {
             'crm': "{{domain}} suspended. {{type}} content still present at {{location}} {}".format(support_doc),
             'csam': {
-                'crm': "{{domain}} suspended. {{type}} content still present {}".format(support_doc)
+                'crm': "{{domain}} suspended. Child Abuse material found, do not reinstate any products or account. Any questions and or comments regarding this action reach out to childabuse@"
             }
         },
         'repeatOffender': {
