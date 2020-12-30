@@ -20,7 +20,10 @@ class ThrottledDomainService:
 
 
 class DomainService:
-    VALID_STATES = ['ACTIVE']
+    VALID_STATES = {'ACTIVE',
+                    'AWAITING_VERIFICATION_ICANN',
+                    'AWAITING_VERIFICATION_ICANN_MANUAL'
+                    }
 
     def __init__(self, endpoint):
         self._logger = logging.getLogger(__name__)

@@ -11,6 +11,12 @@ class TestDomainService:
     domain_name = 'fake.domain'
     entered_by = 'fake_user'
     reason = 'test'
+    DOMAIN_ID = '1234'
+    KEY_DOMAIN_ID = 'domainId'
+    KEY_DOMAIN_IDS = 'domainids'
+    KEY_NOTE = 'note'
+    KEY_STATUS = 'status'
+    KEY_USER = 'user'
 
     @classmethod
     def setup(cls):
@@ -33,21 +39,23 @@ class TestDomainService:
 
     @patch('zeus.events.suspension.domains.requests.post')
     def test_200_no_domain_id(self, post):
-        post.return_value = MagicMock(status_code=200, text=json.dumps({'domainId': False}))
+        post.return_value = MagicMock(status_code=200, text=json.dumps({self.KEY_DOMAIN_ID: False}))
 
         actual = self._domain_service.suspend_domain(self.domain_name, self.entered_by, self.reason)
         assert_false(actual)
 
     @patch('zeus.events.suspension.domains.requests.post')
     def test_200_no_status(self, post):
-        post.return_value = MagicMock(status_code=200, text=json.dumps({'domainId': '1234', 'status': False}))
+        post.return_value = MagicMock(status_code=200, text=json.dumps({self.KEY_DOMAIN_ID: self.DOMAIN_ID,
+                                                                        self.KEY_STATUS: False}))
 
         actual = self._domain_service.suspend_domain(self.domain_name, self.entered_by, self.reason)
         assert_false(actual)
 
     @patch('zeus.events.suspension.domains.requests.post')
     def test_200_invalid_state(self, post):
-        post.return_value = MagicMock(status_code=200, text=json.dumps({'domainId': '1234', 'status': 'SUSPENDED'}))
+        post.return_value = MagicMock(status_code=200, text=json.dumps({self.KEY_DOMAIN_ID: self.DOMAIN_ID,
+                                                                        self.KEY_STATUS: 'SUSPENDED'}))
 
         actual = self._domain_service.suspend_domain(self.domain_name, self.entered_by, self.reason)
         assert_false(actual)
@@ -55,7 +63,8 @@ class TestDomainService:
     @patch.object(DomainService, '_suspend', return_value=False)
     @patch('zeus.events.suspension.domains.requests.post')
     def test_200_valid_state_failed_suspension(self, post, suspend):
-        post.return_value = MagicMock(status_code=200, text=json.dumps({'domainId': '1234', 'status': 'ACTIVE'}))
+        post.return_value = MagicMock(status_code=200, text=json.dumps({self.KEY_DOMAIN_ID: self.DOMAIN_ID,
+                                                                        self.KEY_STATUS: 'AWAITING_VERIFICATION_ICANN'}))
 
         actual = self._domain_service.suspend_domain(self.domain_name, self.entered_by, self.reason)
         assert_false(actual)
@@ -63,21 +72,22 @@ class TestDomainService:
     @patch.object(DomainService, '_suspend', return_value=1)
     @patch('zeus.events.suspension.domains.requests.post')
     def test_200_valid_state(self, post, suspend):
-        post.return_value = MagicMock(status_code=200, text=json.dumps({'domainId': '1234', 'status': 'ACTIVE'}))
+        post.return_value = MagicMock(status_code=200, text=json.dumps({self.KEY_DOMAIN_ID: self.DOMAIN_ID,
+                                                                        self.KEY_STATUS: 'ACTIVE'}))
 
         actual = self._domain_service.suspend_domain(self.domain_name, self.entered_by, self.reason)
         assert_equal(actual, 1)
 
     @patch('zeus.events.suspension.domains.requests.post', return_value=MagicMock(text=json.dumps({'count': '1'})))
     def test_suspend(self, post):
-        payload = {'domainids': ['1234'], 'user': self.entered_by, 'note': self.reason}
+        payload = {self.KEY_DOMAIN_IDS: [self.DOMAIN_ID], self.KEY_USER: self.entered_by, self.KEY_NOTE: self.reason}
 
         actual = self._domain_service._suspend(payload)
         assert_equal(actual, 1)
 
     @patch('zeus.events.suspension.domains.requests.post', return_value=None)
     def test_suspend_failed(self, post):
-        payload = {'domainids': ['1234'], 'user': self.entered_by, 'note': self.reason}
+        payload = {self.KEY_DOMAIN_IDS: [self.DOMAIN_ID], self.KEY_USER: self.entered_by, self.KEY_NOTE: self.reason}
 
         actual = self._domain_service._suspend(payload)
         assert_false(actual)
