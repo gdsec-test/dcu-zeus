@@ -364,6 +364,9 @@ class RegisteredHandler(Handler):
         domain_id = get_kelvin_domain_id_from_dict(data)
         report_type = data.get('type')
 
+        if self._is_domain_protected(domain, action='suspend_csam'):
+            return False
+
         if not self._validate_required_args(data):
             return False
 
