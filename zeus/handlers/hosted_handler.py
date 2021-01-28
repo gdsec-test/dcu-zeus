@@ -17,7 +17,7 @@ from zeus.utils.functions import (get_host_info_from_dict,
                                   get_ssl_subscriptions_from_dict,
                                   get_sucuri_product_from_dict)
 from zeus.utils.journal import EventTypes, Journal
-from zeus.utils.mimir import InfractionTypes, Mimir
+from zeus.utils.mimir import InfractionTypes, Mimir, RecordTypes
 from zeus.utils.scribe import HostedScribe
 from zeus.utils.shoplocked import Shoplocked
 from zeus.utils.slack import SlackFailures, ThrottledSlack
@@ -113,6 +113,7 @@ class HostedHandler(Handler):
                          guid=guid,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.customer_warning,
+                         record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
                          ticket_number=ticket_id)
         self.scribe.customer_warning(ticket_id, guid, source, report_type, shopper_id)
@@ -144,6 +145,7 @@ class HostedHandler(Handler):
                          guid=guid,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.content_removed,
+                         record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
                          ticket_number=ticket_id)
         self.scribe.content_removed(ticket_id, guid, source, report_type, shopper_id)
@@ -178,6 +180,7 @@ class HostedHandler(Handler):
                          guid=guid,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.intentionally_malicious,
+                         record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
                          ticket_number=ticket_id)
 
@@ -228,6 +231,7 @@ class HostedHandler(Handler):
                          guid=guid,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.shopper_compromise,
+                         record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
                          ticket_number=ticket_id)
 
@@ -271,6 +275,7 @@ class HostedHandler(Handler):
                          guid=guid,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.repeat_offender,
+                         record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
                          ticket_number=ticket_id)
 
@@ -308,6 +313,7 @@ class HostedHandler(Handler):
                          guid=guid,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.suspended,
+                         record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
                          ticket_number=ticket_id)
 
@@ -346,6 +352,7 @@ class HostedHandler(Handler):
                          guid=guid,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.extensive_compromise,
+                         record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
                          ticket_number=ticket_id)
 
@@ -378,6 +385,7 @@ class HostedHandler(Handler):
                          infraction_type=InfractionTypes.ncmec_report_submitted,
                          ncmec_report_id=ncmecreport_id,
                          note=note,
+                         record_type=RecordTypes.ncmec_report,
                          shopper_number=shopper_id,
                          ticket_number=ticket_id)
 
@@ -404,6 +412,7 @@ class HostedHandler(Handler):
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.suspended_csam,
                          note=note,
+                         record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
                          ticket_number=ticket_id)
 

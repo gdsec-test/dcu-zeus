@@ -25,7 +25,7 @@ from zeus.utils.functions import (get_domain_id_from_dict,
                                   get_ssl_subscriptions_from_dict,
                                   get_sucuri_product_from_dict)
 from zeus.utils.journal import EventTypes, Journal
-from zeus.utils.mimir import InfractionTypes, Mimir
+from zeus.utils.mimir import InfractionTypes, Mimir, RecordTypes
 from zeus.utils.shoplocked import Shoplocked
 from zeus.utils.slack import SlackFailures, ThrottledSlack
 
@@ -132,6 +132,7 @@ class RegisteredHandler(Handler):
                          domain_id=domain_id,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.customer_warning,
+                         record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
                          ticket_number=ticket_id)
 
@@ -194,6 +195,7 @@ class RegisteredHandler(Handler):
                          domain_id=domain_id,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.intentionally_malicious,
+                         record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
                          ticket_number=ticket_id)
 
@@ -249,6 +251,7 @@ class RegisteredHandler(Handler):
                          domain_id=domain_id,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.shopper_compromise,
+                         record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
                          ticket_number=ticket_id)
 
@@ -298,6 +301,7 @@ class RegisteredHandler(Handler):
                          domain_id=domain_id,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.repeat_offender,
+                         record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
                          ticket_number=ticket_id)
 
@@ -343,6 +347,7 @@ class RegisteredHandler(Handler):
                          domain_id=domain_id,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.suspended,
+                         record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
                          ticket_number=ticket_id)
 
@@ -383,6 +388,7 @@ class RegisteredHandler(Handler):
                          domain_id=domain_id,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.suspended_csam,
+                         record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
                          ticket_number=ticket_id)
 

@@ -19,13 +19,20 @@ class InfractionTypes(Enum):
     suspended_csam = 'SUSPENDED_CSAM'
 
 
+class RecordTypes(Enum):
+    infraction = 'INFRACTION'
+    note = 'NOTE'
+    ncmec_report = 'NCMEC_REPORT'
+
+
 class Mimir:
     _headers = {'Accept': 'application/json'}
 
     def __init__(self, app_settings):
         self._logger = logging.getLogger(__name__)
         self._sso_endpoint = app_settings.SSO_URL + '/v1/secure/api/token'
-        self._mimir_endpoint = app_settings.MIMIR_URL + '/v1/infractions'
+        self._mimir_infraction_endpoint = app_settings.MIMIR_URL + '/v1/infractions'
+        self._mimir_non_infraction_endpoint = app_settings.MIMIR_URL + '/v1/non-infraction'
         self.slack = SlackFailures(ThrottledSlack(app_settings))
         cert = (app_settings.ZEUS_SSL_CERT, app_settings.ZEUS_SSL_KEY)
         self._headers.update({'Authorization': self._get_jwt(cert)})
@@ -45,6 +52,7 @@ class Mimir:
               infraction_type,
               shopper_number,
               ticket_number,
+              record_type,
               domain_id=None,
               guid=None,
               ncmec_report_id=None,
@@ -58,6 +66,7 @@ class Mimir:
             REPEAT_OFFENDER, SHOPPER_COMPROMISE or SUSPENDED
         :param shopper_number: Shopper account number
         :param ticket_number: DCU SNOW ticket number
+        :param record_type: One of INFRACTION, NOTE, or NCMEC_REPORT
         :param domain_id: Optional: The domain identifier
         :param guid: Optional: Guid of hosting account
         :param ncmec_report_id: Optional: NCMEC Report ID from NCMEC report submissions for CSAM infractions
@@ -69,6 +78,14 @@ class Mimir:
         if not isinstance(infraction_type, basestring):
             infraction_type = infraction_type.value
 
+        if not isinstance(record_type, basestring):
+            record_type = record_type.value
+
+        if record_type == RecordTypes.infraction:
+            mimir_endpoint = self._mimir_infraction_endpoint
+        else:
+            mimir_endpoint = self._mimir_non_infraction_endpoint
+
         body = {'abuseType': abuse_type,
                 'domainId': domain_id,
                 'hostedStatus': hosted_status,
@@ -76,6 +93,7 @@ class Mimir:
                 'infractionType': infraction_type,
                 'ncmecReportID': ncmec_report_id,
                 'note': note,
+                'recordType': record_type,
                 'shopperId': shopper_number,
                 'sourceDomainOrIp': domain,
                 'ticketId': ticket_number
@@ -83,7 +101,7 @@ class Mimir:
         body = Mimir._clean_dict_for_mimir(body)
 
         try:
-            response = requests.post(self._mimir_endpoint, json=body, headers=self._headers)
+            response = requests.post(mimir_endpoint, json=body, headers=self._headers)
 
             if response.status_code not in {200, 201}:
                 self.slack.failed_infraction_creation(guid, ticket_number, response.reason)
