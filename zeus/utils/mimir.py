@@ -30,9 +30,9 @@ class Mimir:
 
     def __init__(self, app_settings):
         self._logger = logging.getLogger(__name__)
-        self._sso_endpoint = app_settings.SSO_URL + '/v1/secure/api/token'
-        self._mimir_infraction_endpoint = app_settings.MIMIR_URL + '/v1/infractions'
-        self._mimir_non_infraction_endpoint = app_settings.MIMIR_URL + '/v1/non-infraction'
+        self._sso_endpoint = '{}/v1/secure/api/token'.format(app_settings.SSO_URL)
+        self._mimir_infraction_endpoint = '{}/v1/infractions'.format(app_settings.MIMIR_URL)
+        self._mimir_non_infraction_endpoint = '{}/v1/non-infraction'.format(app_settings.MIMIR_URL)
         self.slack = SlackFailures(ThrottledSlack(app_settings))
         cert = (app_settings.ZEUS_SSL_CERT, app_settings.ZEUS_SSL_KEY)
         self._headers.update({'Authorization': self._get_jwt(cert)})
@@ -104,16 +104,18 @@ class Mimir:
             response = requests.post(mimir_endpoint, json=body, headers=self._headers)
 
             if response.status_code not in {200, 201}:
+                self._logger.error('{}: {}: {}: {}'.format(mimir_endpoint, response.status_code, response.reason, body))
                 self.slack.failed_infraction_creation(guid, ticket_number, response.reason)
 
         except Exception as e:
+            self._logger.error('{}: {}: {}'.format(mimir_endpoint, e.message, body))
             self.slack.failed_infraction_creation(guid, ticket_number, e.message)
 
     def _get_jwt(self, cert):
         """
         Attempt to retrieve the JWT associated with the cert/key pair from SSO
-        :param cert:
-        :return:
+        :param cert: tuple of cert, key
+        :return: JWT string or None
         """
         try:
             response = requests.post(self._sso_endpoint, data={'realm': 'cert'}, cert=cert)
@@ -123,4 +125,3 @@ class Mimir:
             return body.get('data')  # {'type': 'signed-jwt', 'id': 'XXX', 'code': 1, 'message': 'Success', 'data': JWT}
         except Exception as e:
             self._logger.error(e.message)
-        return None
