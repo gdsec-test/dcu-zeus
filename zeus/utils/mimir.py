@@ -81,7 +81,7 @@ class Mimir:
         if not isinstance(record_type, basestring):
             record_type = record_type.value
 
-        if record_type == RecordTypes.infraction:
+        if record_type == RecordTypes.infraction.value:
             mimir_endpoint = self._mimir_infraction_endpoint
         else:
             mimir_endpoint = self._mimir_non_infraction_endpoint
