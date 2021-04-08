@@ -53,6 +53,7 @@ class Mimir:
               shopper_number,
               ticket_number,
               record_type,
+              subdomain=None,
               domain_id=None,
               guid=None,
               ncmec_report_id=None,
@@ -67,6 +68,7 @@ class Mimir:
         :param shopper_number: Shopper account number
         :param ticket_number: DCU SNOW ticket number
         :param record_type: One of INFRACTION, NOTE, or NCMEC_REPORT
+        :param subdomain: Optional: Subdomain name
         :param domain_id: Optional: The domain identifier
         :param guid: Optional: Guid of hosting account
         :param ncmec_report_id: Optional: NCMEC Report ID from NCMEC report submissions for CSAM infractions
@@ -96,6 +98,7 @@ class Mimir:
                 'recordType': record_type,
                 'shopperId': shopper_number,
                 'sourceDomainOrIp': domain,
+                'sourceSubDomain': subdomain,
                 'ticketId': ticket_number
                 }
         body = Mimir._clean_dict_for_mimir(body)

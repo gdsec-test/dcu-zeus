@@ -68,6 +68,7 @@ class HostedHandler(Handler):
 
     def customer_warning(self, data):
         domain = data.get('sourceDomainOrIp')
+        subdomain = data.get('sourceSubDomain')
         hosted_status = data.get('hosted_status')
         product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
@@ -110,6 +111,7 @@ class HostedHandler(Handler):
         abuse_type = data.get('type', '').upper()
         self.mimir.write(abuse_type=abuse_type,
                          domain=domain,
+                         subdomain=subdomain,
                          guid=guid,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.customer_warning,
@@ -122,6 +124,7 @@ class HostedHandler(Handler):
 
     def content_removed(self, data):
         domain = data.get('sourceDomainOrIp')
+        subdomain = data.get('sourceSubDomain')
         hosted_status = data.get('hosted_status')
         source = data.get('source')
         ticket_id = data.get('ticketId')
@@ -142,6 +145,7 @@ class HostedHandler(Handler):
         abuse_type = data.get('type', '').upper()
         self.mimir.write(abuse_type=abuse_type,
                          domain=domain,
+                         subdomain=subdomain,
                          guid=guid,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.content_removed,
@@ -157,6 +161,7 @@ class HostedHandler(Handler):
 
     def intentionally_malicious(self, data):
         domain = data.get('sourceDomainOrIp')
+        subdomain = data.get('sourceSubDomain')
         hosted_status = data.get('hosted_status')
         product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
@@ -177,6 +182,7 @@ class HostedHandler(Handler):
         abuse_type = data.get('type', '').upper()
         self.mimir.write(abuse_type=abuse_type,
                          domain=domain,
+                         subdomain=subdomain,
                          guid=guid,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.intentionally_malicious,
@@ -212,6 +218,7 @@ class HostedHandler(Handler):
 
     def shopper_compromise(self, data):
         domain = data.get('sourceDomainOrIp')
+        subdomain = data.get('sourceSubDomain')
         hosted_status = data.get('hosted_status')
         product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
@@ -228,6 +235,7 @@ class HostedHandler(Handler):
         abuse_type = data.get('type', '').upper()
         self.mimir.write(abuse_type=abuse_type,
                          domain=domain,
+                         subdomain=subdomain,
                          guid=guid,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.shopper_compromise,
@@ -253,6 +261,7 @@ class HostedHandler(Handler):
 
     def repeat_offender(self, data):
         domain = data.get('sourceDomainOrIp')
+        subdomain = data.get('sourceSubDomain')
         hosted_status = data.get('hosted_status')
         product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
@@ -272,6 +281,7 @@ class HostedHandler(Handler):
         abuse_type = data.get('type', '').upper()
         self.mimir.write(abuse_type=abuse_type,
                          domain=domain,
+                         subdomain=subdomain,
                          guid=guid,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.repeat_offender,
@@ -291,6 +301,7 @@ class HostedHandler(Handler):
 
     def suspend(self, data):
         domain = data.get('sourceDomainOrIp')
+        subdomain = data.get('sourceSubDomain')
         hosted_status = data.get('hosted_status')
         product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
@@ -310,6 +321,7 @@ class HostedHandler(Handler):
         abuse_type = data.get('type', '').upper()
         self.mimir.write(abuse_type=abuse_type,
                          domain=domain,
+                         subdomain=subdomain,
                          guid=guid,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.suspended,
@@ -330,6 +342,7 @@ class HostedHandler(Handler):
 
     def extensive_compromise(self, data):
         domain = data.get('sourceDomainOrIp')
+        subdomain = data.get('sourceSubDomain')
         hosted_status = data.get('hosted_status')
         product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
@@ -349,6 +362,7 @@ class HostedHandler(Handler):
         abuse_type = data.get('type', '').upper()
         self.mimir.write(abuse_type=abuse_type,
                          domain=domain,
+                         subdomain=subdomain,
                          guid=guid,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.extensive_compromise,
@@ -368,6 +382,7 @@ class HostedHandler(Handler):
 
     def ncmec_submitted(self, data):
         domain = data.get('sourceDomainOrIP')
+        subdomain = data.get('sourceSubDomain')
         hosted_status = data.get('hosted_status')
         ncmecreport_id = data.get('ncmecReportID')
         ticket_id = data.get('ticketID')
@@ -380,6 +395,7 @@ class HostedHandler(Handler):
         abuse_type = data.get('type', '').upper()
         self.mimir.write(abuse_type=abuse_type,
                          domain=domain,
+                         subdomain=subdomain,
                          guid=guid,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.ncmec_report_submitted,
@@ -393,6 +409,7 @@ class HostedHandler(Handler):
 
     def suspend_csam(self, data):
         domain = data.get('sourceDomainOrIP')
+        subdomain = data.get('sourceSubDomain')
         source = data.get('source')
         hosted_status = data.get('hostedStatus')
         ticket_id = data.get('ticketID')
@@ -409,6 +426,7 @@ class HostedHandler(Handler):
         note = note_mappings['hosted']['suspension']['csam']['mimir'].format(domain=domain)
         self.mimir.write(abuse_type=report_type,
                          domain=domain,
+                         subdomain=subdomain,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.suspended_csam,
                          note=note,

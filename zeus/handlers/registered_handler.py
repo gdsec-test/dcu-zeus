@@ -80,6 +80,7 @@ class RegisteredHandler(Handler):
 
     def customer_warning(self, data):
         domain = data.get('sourceDomainOrIp')
+        subdomain = data.get('sourceSubDomain')
         domain_id = get_domain_id_from_dict(data)
         hosted_brand = get_host_brand_from_dict(data)
         hosted_status = data.get('hosted_status')
@@ -129,6 +130,7 @@ class RegisteredHandler(Handler):
 
         self.mimir.write(abuse_type=report_type,
                          domain=domain,
+                         subdomain=subdomain,
                          domain_id=domain_id,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.customer_warning,
@@ -156,6 +158,7 @@ class RegisteredHandler(Handler):
 
     def intentionally_malicious(self, data):
         domain = data.get('sourceDomainOrIp')
+        subdomain = data.get('sourceSubDomain')
         domain_id = get_domain_id_from_dict(data)
         hosted_status = data.get('hosted_status')
         report_type = data.get('type')
@@ -192,6 +195,7 @@ class RegisteredHandler(Handler):
 
         self.mimir.write(abuse_type=report_type,
                          domain=domain,
+                         subdomain=subdomain,
                          domain_id=domain_id,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.intentionally_malicious,
@@ -225,6 +229,7 @@ class RegisteredHandler(Handler):
 
     def shopper_compromise(self, data):
         domain = data.get('sourceDomainOrIp')
+        subdomain = data.get('sourceSubDomain')
         domain_id = get_domain_id_from_dict(data)
         hosted_status = data.get('hosted_status')
         report_type = data.get('type')
@@ -248,6 +253,7 @@ class RegisteredHandler(Handler):
 
         self.mimir.write(abuse_type=report_type,
                          domain=domain,
+                         subdomain=subdomain,
                          domain_id=domain_id,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.shopper_compromise,
@@ -271,6 +277,7 @@ class RegisteredHandler(Handler):
 
     def repeat_offender(self, data):
         domain = data.get('sourceDomainOrIp')
+        subdomain = data.get('sourceSubDomain')
         domain_id = get_domain_id_from_dict(data)
         hosted_status = data.get('hosted_status')
         report_type = data.get('type')
@@ -298,6 +305,7 @@ class RegisteredHandler(Handler):
 
         self.mimir.write(abuse_type=report_type,
                          domain=domain,
+                         subdomain=subdomain,
                          domain_id=domain_id,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.repeat_offender,
@@ -317,6 +325,7 @@ class RegisteredHandler(Handler):
 
     def suspend(self, data):
         domain = data.get('sourceDomainOrIp')
+        subdomain = data.get('sourceSubDomain')
         domain_id = get_domain_id_from_dict(data)
         hosted_status = data.get('hosted_status')
         report_type = data.get('type')
@@ -344,6 +353,7 @@ class RegisteredHandler(Handler):
 
         self.mimir.write(abuse_type=report_type,
                          domain=domain,
+                         subdomain=subdomain,
                          domain_id=domain_id,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.suspended,
@@ -366,6 +376,7 @@ class RegisteredHandler(Handler):
         ticket_id = data.get('ticketID')
         hosted_status = data.get('hostedStatus')
         domain = data.get('sourceDomainOrIP')
+        subdomain = data.get('sourceSubDomain')
         domain_id = get_kelvin_domain_id_from_dict(data)
         report_type = data.get('type')
 
@@ -385,6 +396,7 @@ class RegisteredHandler(Handler):
 
         self.mimir.write(abuse_type=report_type,
                          domain=domain,
+                         subdomain=subdomain,
                          domain_id=domain_id,
                          hosted_status=hosted_status,
                          infraction_type=InfractionTypes.suspended_csam,

@@ -15,6 +15,7 @@ class TestMimir:
                  'recordType': 'INFRACTION',
                  'shopperId': '0001',
                  'sourceDomainOrIp': 'example.com',
+                 'sourceSubDomain': 'www.example.com',
                  'ticketId': 'DCU0001'
                  }
         _clean_dict = Mimir._clean_dict_for_mimir(_dict)
@@ -30,6 +31,7 @@ class TestMimir:
                  'recordType': 'NOTE',
                  'shopperId': '0001',
                  'sourceDomainOrIp': 'example.com',
+                 'sourceSubDomain': 'www.example.com',
                  'ticketId': 'DCU0001'
                  }
         _clean_dict = Mimir._clean_dict_for_mimir(_dict)
