@@ -32,7 +32,7 @@ class SlackUtil(object):
                                                                              response.headers,
                                                                              response.json()))
         except Exception as e:
-            self._logger.error("Error posting message to slack {}".format(e.message))
+            self._logger.error(f'Error posting message to slack {e}')
 
 
 class ThrottledSlack(object):
@@ -52,74 +52,74 @@ class SlackFailures:
         self._slack = slack
 
     def failed_hosting_suspension(self, guid, info=''):
-        key = '{}_suspend_failed'.format(guid)
-        message = 'Suspension Failed for Hosting: {}. {}'.format(guid, info)
+        key = f'{guid}_suspend_failed'
+        message = f'Suspension Failed for Hosting: {guid}. {info}'
         self._logger.error(message)
         self._slack.send_message(key, message)
 
     def failed_domain_suspension(self, domain):
-        key = '{}_suspend_failed'.format(domain)
-        message = 'Suspension Failed for Domain: {}'.format(domain)
+        key = f'{domain}_suspend_failed'
+        message = f'Suspension Failed for Domain: {domain}'
         self._logger.error(message)
         self._slack.send_message(key, message)
 
     def failed_protected_domain_action(self, domain, action):
-        key = '{}_{}_action_failed'.format(domain, action)
-        message = '{} Action failed for a Protected Domain: {}'.format(action, domain)
+        key = f'{domain}_{action}_action_failed'
+        message = f'{action} Action failed for a Protected Domain: {domain}'
         self._logger.error(message)
         self._slack.send_message(key, message)
 
     def invalid_abuse_type(self, ticket_id):
-        key = '{}_not_valid_hold'.format(ticket_id)
-        message = '{} not placed on hold - not a valid ticket type'.format(ticket_id)
+        key = f'{ticket_id}_not_valid_hold'
+        message = f'{ticket_id} not placed on hold - not a valid ticket type'
         self._logger.error(message)
         self._slack.send_message(key, message)
 
     def invalid_hosted_status(self, ticket_id):
-        key = '{}_no action taken'.format(ticket_id)
-        message = '{} no action taken - not a valid hosted status'.format(ticket_id)
+        key = f'{ticket_id}_no action taken'
+        message = f'{ticket_id} no action taken - not a valid hosted status'
         self._logger.error(message)
         self._slack.send_message(key, message)
 
     def failed_to_determine_shoppers(self, ticket_id):
-        key = '{}_suspend_failed_no_shopper'.format(ticket_id)
-        message = 'No action taken for {} - unable to determine shopper'.format(ticket_id)
+        key = f'{ticket_id}_suspend_failed_no_shopper'
+        message = f'No action taken for {ticket_id} - unable to determine shopper'
         self._logger.error(message)
         self._slack.send_message(key, message)
 
     def failed_to_send_foreign_hosting_notice(self, domain):
-        key = '{}_failed_foreign_notice'.format(domain)
-        message = 'No foreign notice sent for {}'.format(domain)
+        key = f'{domain}_failed_foreign_notice'
+        message = f'No foreign notice sent for {domain}'
         self._logger.error(message)
         self._slack.send_message(key, message)
 
     def failed_to_determine_guid(self, ticket_id):
-        key = '{}_suspend_failed_no_guid'.format(ticket_id)
-        message = 'No action taken for {} - no GUID could be found'.format(ticket_id)
+        key = f'{ticket_id}_suspend_failed_no_guid'
+        message = f'No action taken for {ticket_id} - no GUID could be found'
         self._logger.error(message)
         self._slack.send_message(key, message)
 
     # Identifier will be ticketId in case of CHILD_ABUSE tickets,
     # domain for other abuse types.
     def failed_sending_email(self, identifier):
-        key = '{}_email_failed_to_send'.format(identifier)
-        message = 'Email failed to send for {}'.format(identifier)
+        key = f'{identifier}_email_failed_to_send'
+        message = f'Email failed to send for {identifier}'
         self._logger.error(message)
         self._slack.send_message(key, message)
 
     def failed_infraction_creation(self, guid, ticket_number, exception_message):
-        key = '{}/{}_create_infraction_failed'.format(guid, ticket_number)
-        message = 'Unable to create Mimir infraction for {}/{}: {}'.format(guid, ticket_number, exception_message)
+        key = f'{guid}/{ticket_number}_create_infraction_failed'
+        message = f'Unable to create Mimir infraction for {guid}/{ticket_number}: {exception_message}'
         self._slack.send_message(key, message)
 
     def failed_to_create_alert(self, domain, shopper_id):
-        key = '{}_failed_to_create_alert'.format(domain)
-        message = 'Failed to create alert for domain: {} shopperId: {}'.format(domain, shopper_id)
+        key = f'{domain}_failed_to_create_alert'
+        message = f'Failed to create alert for domain: {domain} shopperId: {shopper_id}'
         self._slack.send_message(key, message)
 
     def failed_sending_revocation_email(self, ticket_id, domain, shopper_id, ssl_subscription):
-        key = '{}_ssl_email_failed_to_send'.format(domain)
-        message = 'SSL revocation email failed to send for ticketId: {} shopperId: {} domain: {} ssl: {}'.format(
-            ticket_id, shopper_id, domain, ssl_subscription)
+        key = f'{domain}_ssl_email_failed_to_send'
+        message = f'SSL revocation email failed to send for ticketId: {ticket_id}' \
+                  f' shopperId: {shopper_id} domain: {domain} ssl: {ssl_subscription}'
         self._logger.error(message)
         self._slack.send_message(key, message)

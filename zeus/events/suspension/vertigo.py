@@ -28,7 +28,7 @@ class Vertigo(Product):
             return response.status_code == 202
 
         except Exception as e:
-            self._logger.error("Failed to suspend GUID: {}. {}".format(guid, e.message))
+            self._logger.error(f'Failed to suspend GUID: {guid}. {e}')
         return False
 
     def reinstate(self):

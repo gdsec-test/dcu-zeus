@@ -2,8 +2,7 @@ import abc
 from datetime import datetime
 
 
-class Handler(object):
-    __metaclass__ = abc.ABCMeta
+class Handler(object, metaclass=abc.ABCMeta):
     EPOCH = datetime(1970, 1, 1)
 
     @abc.abstractmethod

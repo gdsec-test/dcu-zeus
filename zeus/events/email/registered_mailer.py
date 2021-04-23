@@ -32,7 +32,7 @@ class RegisteredMailer(Mailer):
         :return:
         """
         if not shopper_id:
-            self._logger.info('User Generated Notice was not sent for {}: No Shopper ID found'.format(ticket_id))
+            self._logger.info(f'User Generated Notice was not sent for {ticket_id}: No Shopper ID found')
             return False
 
         template = 'registered.forwarding_complaint'
@@ -49,9 +49,9 @@ class RegisteredMailer(Mailer):
                 kwargs[self.DOMAIN_ID] = domain_id
                 send_mail(template, substitution_values, **kwargs)
             else:
-                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, subdomain))
+                self._logger.warning(f'Cannot send {template} for {subdomain}... still within 24hr window')
         except Exception as e:
-            self._logger.error('Unable to send {} for {}: {}'.format(template, subdomain, e.message))
+            self._logger.error(f'Unable to send {template} for {subdomain}: {e}')
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -89,9 +89,9 @@ class RegisteredMailer(Mailer):
                     kwargs[self.DOMAIN_ID] = domain_id
                     send_mail(template, substitution_values, **kwargs)
             else:
-                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
+                self._logger.warning(f'Cannot send {template} for {domain}... still within 24hr window')
         except Exception as e:
-            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
+            self._logger.error(f'Unable to send {template} for {domain}: {e}')
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -129,9 +129,9 @@ class RegisteredMailer(Mailer):
                     kwargs[self.DOMAIN_ID] = domain_id
                     send_mail(template, substitution_values, **kwargs)
             else:
-                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
+                self._logger.warning(f'Cannot send {template} for {domain}... still within 24hr window')
         except Exception as e:
-            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
+            self._logger.error(f'Unable to send {template} for {domain}: {e}')
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -169,9 +169,9 @@ class RegisteredMailer(Mailer):
                     kwargs['domain_id'] = domain_id
                     send_mail(template, substitution_values, **kwargs)
             else:
-                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
+                self._logger.warning(f'Cannot send {template} for {domain}... still within 24hr window')
         except Exception as e:
-            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
+            self._logger.error(f'Unable to send {template} for {domain}: {e}')
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -212,9 +212,9 @@ class RegisteredMailer(Mailer):
                     kwargs[self.DOMAIN_ID] = domain_id
                     send_mail(template, substitution_values, **kwargs)
             else:
-                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
+                self._logger.warning(f'Cannot send {template} for {domain}... still within 24hr window')
         except Exception as e:
-            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
+            self._logger.error(f'Unable to send {template} for {domain}: {e}')
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -252,9 +252,9 @@ class RegisteredMailer(Mailer):
                     kwargs[self.DOMAIN_ID] = domain_id
                     send_mail(template, substitution_values, **kwargs)
             else:
-                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
+                self._logger.warning(f'Cannot send {template} for {domain}... still within 24hr window')
         except Exception as e:
-            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
+            self._logger.error(f'Unable to send {template} for {domain}: {e}')
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -289,9 +289,9 @@ class RegisteredMailer(Mailer):
                     kwargs[self.DOMAIN_ID] = domain_id
                     send_mail(template, substitution_values, **kwargs)
             else:
-                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
+                self._logger.warning(f'Cannot send {template} for {domain}... still within 24hr window')
         except Exception as e:
-            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
+            self._logger.error(f'Unable to send {template} for {domain}: {e}')
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -316,7 +316,7 @@ class RegisteredMailer(Mailer):
 
         kwargs = self.generate_kwargs_for_hermes()
 
-        redis_key = '{}_suspended_email'.format(domain)
+        redis_key = f'{domain}_suspended_email'
 
         try:
             if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
@@ -326,9 +326,9 @@ class RegisteredMailer(Mailer):
                 kwargs[self.DOMAIN_ID] = domain_id
                 send_mail(template, substitution_values, **kwargs)
             else:
-                self._logger.warning('Cannot send {} for {}... still within 24hr window'.format(template, domain))
+                self._logger.warning(f'Cannot send {template} for {domain}... still within 24hr window')
         except Exception as e:
-            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
+            self._logger.error(f'Unable to send {template} for {domain}: {e}')
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True

@@ -1,4 +1,4 @@
-git+ssh://git@github.secureserver.net/digital-crimes/dcdatabase.git@ff1ddc9bd07a380769bf54c0f5aa59793a5975c0
-git+ssh://git@github.secureserver.net/digital-crimes/crm_notate.git@1484e87291bb31e2d6c8473af71a95f1e88e18b4
-git+ssh://git@github.secureserver.net/digital-crimes/hermes.git@76bc94452321463ea5cf55e19ef4ef7c950839f3
+git+ssh://git@github.secureserver.net/digital-crimes/dcdatabase.git
+git+ssh://git@github.secureserver.net/digital-crimes/crm_notate.git
+git+ssh://git@github.secureserver.net/digital-crimes/hermes.git
 git+ssh://git@github.secureserver.net/auth-contrib/PyAuth.git

@@ -30,7 +30,8 @@ class CRMAlert:
 
         :param shopper_id: Shopper account ID
         :param message: message to be added to CRM alert stating the reason for creating the alert
-        :param abuse_type: Abuse types to be one amongst PHISHING, MALWARE, NETWORK_ABUSE, SPAM, CHILD_ABUSE, FRAUD_WIRE, CONTENT
+        :param abuse_type: Abuse types to be one amongst PHISHING, MALWARE, NETWORK_ABUSE, SPAM, CHILD_ABUSE,
+         FRAUD_WIRE,CONTENT
         :param severity: Severity to be one amongst LOW, HIGH
         :param source: domain where the content resides
         :param resolution: Resolution steps for this account
@@ -49,10 +50,11 @@ class CRMAlert:
                     shopper_id, source, response.json().get('_id')))
                 return response.json().get('_id')
 
-            self._logger.error('Failed to create CRM alert for ShopperID {} Source {} with error {}'.format(
-                shopper_id, source, response.reason))
+            self._logger.error(f'Failed to create CRM alert for ShopperID {shopper_id}'
+                               f' Source {source} with error {response.reason}')
         except Exception as e:
-            self._logger.error('Failed to create CRM alert for ShopperID {} Source {} with exception: {}'.format(shopper_id, source, e.message))
+            self._logger.error(f'Failed to create CRM alert for ShopperID {shopper_id}'
+                               f' Source {source} with exception: {e}')
         self.slack.failed_to_create_alert(source, shopper_id)
         return None
 
@@ -69,5 +71,5 @@ class CRMAlert:
             body = json.loads(response.text)
             return body.get('data')  # {'type': 'signed-jwt', 'id': 'XXX', 'code': 1, 'message': 'Success', 'data': JWT}
         except Exception as e:
-            self._logger.error(e.message)
+            self._logger.error(e)
         return None
