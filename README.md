@@ -14,9 +14,7 @@ To clone the repository via SSH perform the following
 git clone git@github.secureserver.net:digital-crimes/zeus.git
 ```
 
-It is recommended that you clone this project into a pyvirtualenv or equivalent virtual environment. For this project,
-be sure to create a virtual environment with Python 3.
-This is achievable via `mkproject --python=$(asdf where python)/bin/python zeus`
+It is recommended that you clone this project into a pyvirtualenv or equivalent virtual environment.
 
 ## Installing Dependencies
 To install all dependencies for development and testing simply run `make`.
@@ -58,33 +56,10 @@ The following certs are required to run this project, must include proper ENV do
  3. `Ecomm/Orion Web Service`: dcu.ecomm.
  
 ## Running Locally
-### Docker-compose, local docker images zeus redis, and rabbitmq, with dev mongo
-
-Environment variables for docker-compose.yml file:
-1. `DB_PASS` (Password for dev MongoDB)
-2. `BROKER_PASS` (Broker Password)
-3. `DIABLOUSER` & `DIABLOPASS` (Account credentials to access the diablo API)
-4. `MWPONEUSER` & `MWPONEPASS` (Account credentials to access the managed wordpress API)
-5. `PLESKUSER` & `PLESKPASS` (Account credentials to access the plesk API)
-6. `VPS4USER` & `VPS4PASS` (Account credentials to access the vps4 API)
-7. `CMAP_PROXY_PASS` & `CMAP_PROXY_PASS` (Account credentials to access theCMAP Proxy)
-8. `EMAIL_RECIPIENT` (The email address you want `non-shopper` emails sent to while testing, instead of emailing fraud. e.g. user@example.com)  *** *ONLY WORKS WITH TEMPLATES THAT SEND TO NON-SHOPPERS* ***
-
-Changes to docker-compose.yml file:
-* Run `docker-compose up -d` to run zeus, rabbitmq and redis locally in a docker container.
-* Run `docker logs -f <Zeus docker name>` to view the run logs for auto_abuse_id
-* Run `docker logs -f <Redis docker name>` to view the run logs for dcu-classifier
-* Run `docker logs -f <RabbitMq docker name>` to view the run logs for rabbitmq
-* Run `redis-cli` to interact with your local REDIS instance
-* Browse to `127.0.0.1:15672` with creds `guest:guest` to view the management console for your local RabbitMQ
-* Run `tests/integration_script.py` to publish different tasks to the local RabbitMQ devzeus queue
-
-If you would like to run Zeus locally you will need to specify the following environment variables in an IDE like Pycharm
+If you would like to run Zeus locally you will need to specify the following environment variables
 * `sysenv` (dev, ote, prod)
-* `DISABLESSL` (True)
 * `DB_PASS` (MongoDB password for Phishstory database)
 * `BROKER_PASS` (The Broker Pass for the RabbitMQ server to connect to)
-* `BROKER_URL` (amqp://guest@localhost:5672//)
 * `MWPONEUSER` & `MWPONEPASS` (Account credentials to access the managed wordpress API)
 * `DIABLOUSER` & `DIABLOPASS` (Account credentials to access the diablo API)
 * `PLESKUSER` & `PLESKPASS` (Account credentials to access the plesk API)
@@ -103,9 +78,6 @@ If you would like to run Zeus locally you will need to specify the following env
 * `ZEUS_SSL_CERT` (The path to the SSL Cert for communicating with DCU Journal `proxyuser.cmap.int.godaddy.com` prod only)
 * `ZEUS_SSL_KEY` (The path to the SSL Key for communicating with DCU Journal `proxyuser.cmap.int.godaddy.com` prod only)
 * `EMAIL_RECIPIENT` (The email address you want `non-shopper` emails sent to while testing, instead of emailing fraud. e.g. user@example.com)  *** *ONLY WORKS WITH TEMPLATES THAT SEND TO NON-SHOPPERS* ***
-* Run `docker-compose up -d rabbitmq redis` to run rabbitmq and redis locally in a docker container.
-* PyCharm script path will need to be set to: `/PATH_TO_ZEUS_ENVS/bin/celery`.
-* PyCharm parameters will need to be set to: `-A run worker -l debug -P solo`
  
 ## Handling failures to create Mimir Infractions in Production.
 1. Create dictionary of required infraction fields. Data will come from mongo record for the ticket. Majority of data in `data>domainQuery>host`

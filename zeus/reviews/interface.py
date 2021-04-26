@@ -3,7 +3,9 @@ import abc
 from dcdatabase.phishstorymongo import PhishstoryMongo
 
 
-class Review(object, metaclass=abc.ABCMeta):
+class Review(object):
+    __metaclass__ = abc.ABCMeta
+
     def __init__(self, settings):
         self._db = PhishstoryMongo(settings)
 

@@ -43,11 +43,11 @@ class Shoplocked:
                 json_data = json.loads(response.text)
 
                 if json_data.get('failed'):
-                    self._logger.warning(f'Failed to admin lock shopper ID: {shopper_id}')
+                    self._logger.warning('Failed to admin lock shopper ID: {}'.format(shopper_id))
                 elif json_data.get('success'):
-                    self._logger.info(f'Successfully admin locked shopper ID: {shopper_id}')
+                    self._logger.info('Successfully admin locked shopper ID: {}'.format(shopper_id))
         except Exception as e:
-            self._logger.error(f'Failed to admin lock shopper ID with exception: {e}')
+            self._logger.error('Failed to admin lock shopper ID with exception: {}'.format(e.message))
 
     def _get_jwt(self, cert):
         """
@@ -62,5 +62,5 @@ class Shoplocked:
             body = json.loads(response.text)
             return body.get('data')  # {'type': 'signed-jwt', 'id': 'XXX', 'code': 1, 'message': 'Success', 'data': JWT}
         except Exception as e:
-            self._logger.error(e)
+            self._logger.error(e.message)
         return None

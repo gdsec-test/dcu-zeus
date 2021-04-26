@@ -25,13 +25,13 @@ class MWPOne(Product):
             response = requests.post(url, auth=self.mwponeauth, headers=self.headers, verify=False)
             if response.status_code == 200:
                 if response.text == 'true':
-                    self._logger.info(f'Managed Wordpress 1.0 account {guid} has been suspended')
+                    self._logger.info('Managed Wordpress 1.0 account {} has been suspended'.format(guid))
                     return True
             else:
-                self._logger.error(f'Failed to suspend account {guid}: {response.reason}')
+                self._logger.error('Failed to suspend account {}: {}'.format(guid, response.reason))
 
         except Exception as e:
-            self._logger.error(f'Failed to suspend account {guid}. {e}')
+            self._logger.error("Failed to suspend account {}. {}".format(guid, e.message))
         return False
 
     def reinstate(self, guid, **kwargs):
@@ -41,13 +41,13 @@ class MWPOne(Product):
             response = requests.post(url, auth=self.mwponeauth, headers=self.headers, verify=False)
             if response.status_code == 200:
                 if response.text == 'true':
-                    self._logger.info(f'Managed Wordpress 1.0 account {guid} has been reinstated')
+                    self._logger.info('Managed Wordpress 1.0 account {} has been reinstated'.format(guid))
                     return True
             else:
-                self._logger.error(f'Failed to reinstate account {guid}: {response.reason}')
+                self._logger.error('Failed to reinstate account {}: {}'.format(guid, response.reason))
 
         except Exception as e:
-            self._logger.error(f'Failed to reinstate account {guid}. {e}')
+            self._logger.error("Failed to reinstate account {}. {}".format(guid, e.message))
         return False
 
     def cancel(self):

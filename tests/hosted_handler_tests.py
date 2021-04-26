@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from dcdatabase.phishstorymongo import PhishstoryMongo
-from mock import patch
+from mock import Mock, patch
 from nose.tools import assert_equal, assert_false, assert_true
 
 from settings import TestingConfig
@@ -27,8 +27,8 @@ class TestHostedHandler:
     ssl_subscription = '1234'
     domain = 'domain'
     ncmecReportID = '5678'
-    current_test_date = datetime.utcnow()
-    oldest_valid_fraud_review_test_date = current_test_date - timedelta(days=TestingConfig.FRAUD_REVIEW_TIME - 1)
+    current_test_date = datetime(2020, 05, 07, 14, 57)  # +7 hours because of UTC
+    oldest_valid_fraud_review_test_date = current_test_date - timedelta(days=TestingConfig.FRAUD_REVIEW_TIME)
     ticket_no_guid = {'type': phishing}
     ticket_no_shopper = {'type': phishing, 'data': {'domainQuery': {'host': {'guid': guid}}}}
     ticket_valid = {'type': phishing, 'sourceDomainOrIp': domain, 'hosted_status': 'HOSTED',
@@ -43,7 +43,7 @@ class TestHostedHandler:
                                                                    'guid': guid, 'shopperId': sid},
                                                           'sslSubscriptions': ssl_subscription}}}
     ticket_no_hold_or_reseller = {'type': phishing, 'sourceDomainOrIp': domain,
-                                  'data': {'domainQuery': {'host': {'createdDate': current_test_date,
+                                  'data': {'domainQuery': {'host': {'createdDate': oldest_valid_fraud_review_test_date,
                                                                     'guid': guid, 'shopperId': sid},
                                                            'sslSubscriptions': ssl_subscription}}}
     ticket_valid_child_abuse = {'type': child_abuse, 'sourceDomainOrIP': domain, 'ncmecReportID': ncmecReportID,
@@ -207,9 +207,11 @@ class TestHostedHandler:
     @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    def test_intentionally_malicious_success_fraud_email(self, ssl_mailer, can_suspend, scribe,
+    @patch('zeus.handlers.hosted_handler.datetime')
+    def test_intentionally_malicious_success_fraud_email(self, mock_date, ssl_mailer, can_suspend, scribe,
                                                          mailer, suspend, journal, mimir, shoplocked, crmalert,
                                                          fraud, mock_db):
+        mock_date.utcnow = Mock(return_value=self.current_test_date)
         self._hosted.intentionally_malicious(self.ticket_no_hold_or_reseller)
         fraud.assert_called()
 
@@ -280,8 +282,10 @@ class TestHostedHandler:
     @patch.object(HostedScribe, 'shopper_compromise', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    def test_shopper_compromise_success_fraud_email(self, ssl_mailer, can_suspend, scribe, mailer,
+    @patch('zeus.handlers.hosted_handler.datetime')
+    def test_shopper_compromise_success_fraud_email(self, mock_date, ssl_mailer, can_suspend, scribe, mailer,
                                                     suspend, journal, mimir, shoplocked, fraud, mock_db):
+        mock_date.utcnow = Mock(return_value=self.current_test_date)
         self._hosted.shopper_compromise(self.ticket_no_hold_or_reseller)
         fraud.assert_called()
 

@@ -27,9 +27,9 @@ class DomainService:
 
     def __init__(self, endpoint):
         self._logger = logging.getLogger(__name__)
-        domain_uri = f'http://{endpoint}/v1/domains'
-        self._query_domain_endpoint = f'{domain_uri}/domaininfo'
-        self._suspend_domain_endpoint = f'{domain_uri}/suspenddomain'
+        domain_uri = 'http://{}/v1/domains'.format(endpoint)
+        self._query_domain_endpoint = '{}/domaininfo'.format(domain_uri)
+        self._suspend_domain_endpoint = '{}/suspenddomain'.format(domain_uri)
 
     def suspend_domain(self, domain_name, entered_by, reason):
         """
@@ -55,16 +55,18 @@ class DomainService:
             #  404: u'Not Found\n'
             #  500: u'{"error":"No Active shoppers for this Domain Name","code":13}'
             if resp.status_code not in [200, 404]:
-                self._logger.error(f'Domain lookup failed for {domain_name} with status code {resp.status_code} : {resp.text}')
+                self._logger.error("Domain lookup failed for {} with status code {} : {}".format(domain_name,
+                                                                                                 resp.status_code,
+                                                                                                 resp.text))
             elif resp.status_code == 404:
-                self._logger.error(f'URL not found : {resp.text}')
+                self._logger.error("URL not found : {}".format(resp.text))
 
             elif resp.status_code == 200:
                 #  Example resp: {"domain":"XXX", "shopperId":"XXX", "domainId":###, "createDate":"XXX", "status":"XXX"}
                 if not resp_dict.get('domainId'):
-                    self._logger.error(f'No domain id returned from domainservice query on {domain_name}')
+                    self._logger.error("No domain id returned from domainservice query on {}".format(domain_name))
                 elif not resp_dict.get('status'):
-                    self._logger.error(f'No status returned from domainservice query on {domain_name}')
+                    self._logger.error("No status returned from domainservice query on {}".format(domain_name))
                 else:
                     status = resp_dict.get('status')
                     if status in self.VALID_STATES:
@@ -72,12 +74,13 @@ class DomainService:
 
                         return_value = self._suspend(payload)
                         if not return_value:
-                            self._logger.error(f'Domain suspension failed for {domain_name}: {status}')
+                            self._logger.error("Domain suspension failed for {}: {}".format(domain_name, status))
 
                     else:
-                        self._logger.error(f'Unable to suspend domain {domain_name}. Currently in state {status}')
+                        self._logger.error("Unable to suspend domain {}. Currently in state {}".format(domain_name,
+                                                                                                       status))
         except Exception as e:
-            self._logger.error(e)
+            self._logger.error(e.message)
         return return_value
 
     def _suspend(self, payload):
@@ -91,5 +94,5 @@ class DomainService:
                 self._logger.info("{} domains affected".format(resp_text.get('count')))
                 return_value = int(resp_text.get('count')) > 0
         except Exception as e:
-            self._logger.error(e)
+            self._logger.error(e.message)
         return return_value

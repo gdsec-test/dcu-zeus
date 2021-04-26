@@ -66,5 +66,5 @@ class Angelo(Product):
             return response.status_code == 200
 
         except Exception as e:
-            self._logger.error("Failed to {} GUID {}. {}".format(flag[1:], guid, e))
+            self._logger.error("Failed to {} GUID {}. {}".format(flag[1:], guid, e.message))
         return False

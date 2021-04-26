@@ -20,4 +20,4 @@ def generate_event(ticket, reason, **kwargs):
     try:
         logger.uevent(reason, extra=data)
     except Exception as e:
-        logger.error(f'Unable to log event for ticket {ticket} & reason {reason}: {e}')
+        logger.error('Unable to log event for ticket {} & reason {}: {}'.format(ticket, reason, e.message))

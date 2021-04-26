@@ -6,9 +6,9 @@ BUILD_BRANCH=origin/master
 SHELL=/bin/bash
 
 # libraries we need to stage for pip to install inside Docker build
-PRIVATE_PIPS="git@github.secureserver.net:digital-crimes/dcdatabase.git" \
-"git@github.secureserver.net:digital-crimes/crm_notate.git" \
-"git@github.secureserver.net:digital-crimes/hermes.git" \
+PRIVATE_PIPS="git@github.secureserver.net:digital-crimes/dcdatabase.git;ff1ddc9bd07a380769bf54c0f5aa59793a5975c0" \
+"git@github.secureserver.net:digital-crimes/crm_notate.git;1484e87291bb31e2d6c8473af71a95f1e88e18b4" \
+"git@github.secureserver.net:digital-crimes/hermes.git;76bc94452321463ea5cf55e19ef4ef7c950839f3" \
 git@github.secureserver.net:auth-contrib/PyAuth.git
 
 all: env
@@ -26,7 +26,7 @@ flake8:
 .PHONY: isort
 isort:
 	@echo "----- Optimizing imports -----"
-	isort --atomic .
+	isort -rc --atomic .
 
 .PHONY: tools
 tools: flake8 isort

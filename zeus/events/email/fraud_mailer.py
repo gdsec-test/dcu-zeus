@@ -49,7 +49,7 @@ class FraudMailer(Mailer):
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
                 send_mail(template, substitution_values, **kwargs)
         except Exception as e:
-            self._logger.error(f'Unable to send {template} for {domain}: {e}')
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -86,7 +86,7 @@ class FraudMailer(Mailer):
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
                 send_mail(template, substitution_values, **kwargs)
         except Exception as e:
-            self._logger.error(f'Unable to send {template} for {domain}: {e}')
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -120,7 +120,7 @@ class FraudMailer(Mailer):
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
                 send_mail(template, substitution_values, **kwargs)
         except Exception as e:
-            self._logger.error(f'Unable to send {template} for {domain}: {e}')
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -155,7 +155,7 @@ class FraudMailer(Mailer):
                 send_mail(template, substitution_values, **kwargs)
                 generate_event(ticket_id, success_message)
         except Exception as e:
-            self._logger.error(f'Unable to send {template} for {domain}: {e}')
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -193,7 +193,7 @@ class FraudMailer(Mailer):
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
                 send_mail(template, substitution_values, **kwargs)
         except Exception as e:
-            self._logger.error(f'Unable to send {template} for {domain}: {e}')
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -229,7 +229,7 @@ class FraudMailer(Mailer):
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
                 send_mail(template, substitution_values, **kwargs)
         except Exception as e:
-            self._logger.error(f'Unable to send {template} for {domain}: {e}')
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True
@@ -265,7 +265,7 @@ class FraudMailer(Mailer):
                 kwargs[self.RECIPIENTS] = self.testing_email_address or self.fraud_email
                 send_mail(template, substitution_values, **kwargs)
         except Exception as e:
-            self._logger.error(f'Unable to send {template} for {domain}: {e}')
+            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True

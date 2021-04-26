@@ -18,7 +18,7 @@ class VPS4(Product):
 
         self._sso_endpoint = app_settings.SSO_URL + '/v1/api/token'
 
-        self._headers['Authorization'] = f'sso-jwt {self._get_jwt()}'
+        self._headers['Authorization'] = 'sso-jwt {}'.format(self._get_jwt())
 
     def _require_jwt_refresh(self, response):
         """
@@ -44,11 +44,12 @@ class VPS4(Product):
             credits_data = response.json() if response.status_code == 200 else None
 
         except Exception as e:
-            self._logger.error(f'Failed to retrieve credits data from server : {vps4_url} for guid : {guid}. Details: {e}')
+            self._logger.error("Failed to retrieve credits data from server : {} for guid : {}. Details: {}"
+                               .format(vps4_url, guid, e.message))
         return credits_data
 
     def suspend(self, guid, data, **kwargs):
-        self._logger.info(f'VPS4 suspend called for {guid}')
+        self._logger.info("VPS4 suspend called for {}".format(guid))
 
         if not guid:
             return False
@@ -59,11 +60,11 @@ class VPS4(Product):
                 return True
 
         # Fall back and try all data center urls.
-        for dc_key, dc_url in list(self._vps4_urls.items()):
+        for dc_key, dc_url in self._vps4_urls.items():
             if dc_key != dc and self._suspend(dc_url, guid):
                 return True
 
-        self._logger.error(f'Unable to suspend guid : {guid} using all 3 VPS4 urls')
+        self._logger.error("Unable to suspend guid : {} using all 3 VPS4 urls".format(guid))
         return False
 
     def _suspend(self, url, guid):
@@ -71,10 +72,10 @@ class VPS4(Product):
         credits_data = self._retrieve_credits(url, guid)
 
         if credits_data:
-            self._logger.info(f'Credits retrieved for {guid} and url {url}')
+            self._logger.info("Credits retrieved for {} and url {}".format(guid, url))
 
             vm_id = credits_data.get('productId')
-            abuse_url = url + f'/api/vms/{vm_id}/abuseSuspend'
+            abuse_url = url + '/api/vms/{}/abuseSuspend'.format(vm_id)
 
             try:
                 response = requests.post(abuse_url, headers=self._headers)
@@ -84,16 +85,17 @@ class VPS4(Product):
 
                 while max_retries > 0 and response.status_code == 200:
                     credits_data = self._retrieve_credits(url, guid)
-                    self._logger.info(f'Credits retrieved after suspension for {guid} and url {url}')
+                    self._logger.info("Credits retrieved after suspension for {} and url {}".format(guid, url))
 
                     if credits_data.get('abuseSuspendedFlagSet'):
-                        self._logger.info(f'Successfully suspended VPS4 guid {guid} on server {url}')
+                        self._logger.info("Successfully suspended VPS4 guid {} on server {}".format(guid, url))
                         return True
 
                     max_retries -= 1
 
             except Exception as e:
-                self._logger.error(f'Unable to suspend guid : {guid} using url : {url}. Details: {e}')
+                self._logger.error(
+                    "Unable to suspend guid : {} using url : {}. Details: {}".format(guid, url, e.message))
 
         return False
 

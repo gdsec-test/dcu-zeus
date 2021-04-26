@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-STATUS=$(celery -A run status | grep $(hostname) | awk '{print $3}')
+STATUS=$(celery -A run status | grep $(hostname) | awk '{print $2}')
 
 if [ "${STATUS}" = "OK" ]; then
     exit 0

@@ -20,7 +20,7 @@ class ThrottledCRM:
         if self._throttle.can_crm_be_notated(shopper_id_for_throttle):
             self._decorated.notate_crm_accounts(shopper_id_list, ticket_id, note)
         else:
-            self._logger.info(f'CRM for {shopper_id_for_throttle} already notated for 24hr hold')
+            self._logger.info("CRM for {} already notated for 24hr hold".format(shopper_id_for_throttle))
 
 
 class CRM:
@@ -52,4 +52,4 @@ class CRM:
                 if messages.add_note(shopper_id, notation, self.author):
                     self._logger.info(self.SHOPPER_NOTE_SUCCESS.format(shopper_id, ticket_id))
         except Exception as e:
-            self._logger.error(self.SHOPPER_NOTE_FAILURE.format(shopper_id_list, ticket_id, e))
+            self._logger.error(self.SHOPPER_NOTE_FAILURE.format(shopper_id_list, ticket_id, e.message))

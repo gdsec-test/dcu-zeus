@@ -78,7 +78,7 @@ def get_host_abuse_email_from_dict(dict_to_search):
                 # If no address containing 'abuse' was found, then just grab the first address
                 if not host_abuse_email and hosting_abuse_list:
                     host_abuse_email.append(hosting_abuse_list[0])
-            elif isinstance(hosting_abuse_list, str):
+            elif isinstance(hosting_abuse_list, basestring):
                 host_abuse_email.append(hosting_abuse_list)
     return host_abuse_email
 

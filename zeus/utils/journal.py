@@ -37,10 +37,10 @@ class Journal:
         cert = (app_settings.ZEUS_SSL_CERT, app_settings.ZEUS_SSL_KEY)
         self._headers.update({'Authorization': self._get_jwt(cert)})
 
-    def write(self, event_type, product_family, domain, reason, notes, assets=None):
+    def write(self, type, product_family, domain, reason, notes, assets=None):
         """
         Create an abuse event entry in DCU Journal to be consumed by Hosting Product Teams, et. al
-        :param event_type: ENUM value associated with EventTypes
+        :param type: ENUM value associated with EventTypes
         :param product_family: The product family e.g. Domain, GoCentral, Diablo, etc.
         :param domain: The domain this report is for
         :param reason: The type of report this is e.g. PHISHING, MALWARE, etc.
@@ -50,16 +50,16 @@ class Journal:
         """
 
         # Check if we received the str representation or the ENUM representation of these fields and convert as needed
-        if not isinstance(event_type, str):
-            event_type = event_type.value
-        if not isinstance(reason, str):
+        if not isinstance(type, basestring):
+            type = type.value
+        if not isinstance(reason, basestring):
             reason = reason.value
 
-        if event_type not in self._types or reason not in self._reasons:
-            self._logger.warning(f'Unable to write to journal. Unsupported type {event_type} or reason {reason}')
+        if type not in self._types or reason not in self._reasons:
+            self._logger.warning("Unable to write to journal. Unsupported type {} or reason {}".format(type, reason))
             return False
 
-        body = {'type': event_type, 'productFamily': product_family, 'domain': domain, 'reason': reason, 'notes': notes}
+        body = {'type': type, 'productFamily': product_family, 'domain': domain, 'reason': reason, 'notes': notes}
         if assets:  # assets are optionally per the model but we will likely always provide them
             body.update({'assets': assets})
 
@@ -67,7 +67,7 @@ class Journal:
             response = requests.post(self._journal_endpoint, json=body, headers=self._headers)
             response.raise_for_status()
         except Exception as e:
-            self._logger.error(e)
+            self._logger.error(e.message)
 
     def _get_jwt(self, cert):
         """
@@ -82,5 +82,5 @@ class Journal:
             body = json.loads(response.text)
             return body.get('data')  # {'type': 'signed-jwt', 'id': 'XXX', 'code': 1, 'message': 'Success', 'data': JWT}
         except Exception as e:
-            self._logger.error(e)
+            self._logger.error(e.message)
         return None

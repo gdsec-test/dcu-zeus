@@ -30,9 +30,9 @@ class Mimir:
 
     def __init__(self, app_settings):
         self._logger = logging.getLogger(__name__)
-        self._sso_endpoint = f'{app_settings.SSO_URL}/v1/secure/api/token'
-        self._mimir_infraction_endpoint = f'{app_settings.MIMIR_URL}/v1/infractions'
-        self._mimir_non_infraction_endpoint = f'{app_settings.MIMIR_URL}/v1/non-infraction'
+        self._sso_endpoint = '{}/v1/secure/api/token'.format(app_settings.SSO_URL)
+        self._mimir_infraction_endpoint = '{}/v1/infractions'.format(app_settings.MIMIR_URL)
+        self._mimir_non_infraction_endpoint = '{}/v1/non-infraction'.format(app_settings.MIMIR_URL)
         self.slack = SlackFailures(ThrottledSlack(app_settings))
         cert = (app_settings.ZEUS_SSL_CERT, app_settings.ZEUS_SSL_KEY)
         self._headers.update({'Authorization': self._get_jwt(cert)})
@@ -43,7 +43,7 @@ class Mimir:
         Remove any keys which have an empty or None value
         :param query_dict: dictionary of Mimir query parameters
         """
-        return {k: v for k, v in list(query_dict.items()) if v}
+        return {k: v for k, v in query_dict.items() if v}
 
     def write(self,
               abuse_type,
@@ -77,10 +77,10 @@ class Mimir:
         """
 
         # Check if we received the str representation or the ENUM representation of these fields and convert as needed
-        if not isinstance(infraction_type, str):
+        if not isinstance(infraction_type, basestring):
             infraction_type = infraction_type.value
 
-        if not isinstance(record_type, str):
+        if not isinstance(record_type, basestring):
             record_type = record_type.value
 
         if record_type == RecordTypes.infraction.value:
@@ -107,12 +107,12 @@ class Mimir:
             response = requests.post(mimir_endpoint, json=body, headers=self._headers)
 
             if response.status_code not in {200, 201}:
-                self._logger.error(f'{mimir_endpoint}: {response.status_code}: {response.reason}: {body}')
+                self._logger.error('{}: {}: {}: {}'.format(mimir_endpoint, response.status_code, response.reason, body))
                 self.slack.failed_infraction_creation(guid, ticket_number, response.reason)
 
         except Exception as e:
-            self._logger.error(f'{mimir_endpoint}: {e}: {body}')
-            self.slack.failed_infraction_creation(guid, ticket_number, e)
+            self._logger.error('{}: {}: {}'.format(mimir_endpoint, e.message, body))
+            self.slack.failed_infraction_creation(guid, ticket_number, e.message)
 
     def _get_jwt(self, cert):
         """
@@ -127,4 +127,4 @@ class Mimir:
             body = json.loads(response.text)
             return body.get('data')  # {'type': 'signed-jwt', 'id': 'XXX', 'code': 1, 'message': 'Success', 'data': JWT}
         except Exception as e:
-            self._logger.error(e)
+            self._logger.error(e.message)
