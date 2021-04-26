@@ -26,6 +26,7 @@ RUN mkdir -p /app
 COPY *.py logging.yaml *.sh /app/
 RUN /bin/sh -c "cat certs/* >> `python -c 'import certifi; print(certifi.where())'`"
 RUN chown -R dcu:dcu /app && update-ca-certificates
+RUN sed -i 's#MinProtocol = TLSv1.2#MinProtocol = TLSv1.0#g' /etc/ssl/openssl.cnf
 
 # cleanup
 RUN rm -rf /tmp
