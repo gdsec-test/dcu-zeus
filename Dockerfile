@@ -1,15 +1,9 @@
-FROM alpine:3.9
-MAINTAINER DCU ENG <DCUEng@godaddy.com>
+# Zeus
 
-RUN addgroup -S dcu && adduser -H -S -G dcu dcu
-# apt-get installs
-RUN apk update && \
-    apk add --no-cache build-base \
-    ca-certificates \
-    python-dev \
-    openssl-dev \
-    libffi-dev \
-    py-pip
+FROM python:3.7.10-slim
+LABEL MAINTAINER=dcueng@godaddy.com
+
+RUN addgroup dcu && adduser --disabled-password --disabled-login --no-create-home --ingroup dcu --system dcu
 
 WORKDIR /tmp
 
@@ -17,10 +11,11 @@ WORKDIR /tmp
 ADD . /tmp
 
 # pip install private pips staged by Makefile
-RUN for entry in dcdatabase crm_notate hermes PyAuth; \
-    do \
-    pip install --compile "/tmp/private_pips/$entry"; \
-    done
+RUN pip install --compile /tmp/private_pips/dcdatabase
+RUN pip install --compile /tmp/private_pips/crm_notate
+RUN pip install --compile /tmp/private_pips/hermes
+RUN pip install --compile /tmp/private_pips/PyAuth
+RUN pip install --compile /tmp
 
 COPY certs/* /usr/local/share/ca-certificates/
 RUN pip install --compile certifi
@@ -31,6 +26,7 @@ RUN mkdir -p /app
 COPY *.py logging.yaml *.sh /app/
 RUN /bin/sh -c "cat certs/* >> `python -c 'import certifi; print(certifi.where())'`"
 RUN chown -R dcu:dcu /app && update-ca-certificates
+RUN sed -i 's#MinProtocol = TLSv1.2#MinProtocol = TLSv1.0#g' /etc/ssl/openssl.cnf
 
 # cleanup
 RUN rm -rf /tmp

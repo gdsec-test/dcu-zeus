@@ -49,12 +49,9 @@ class GoCentral(Product):
             ticket_id = ticket.get(self.KEY_TICKET_ID_P, ticket.get(self.KEY_TICKET_ID_K))
             host_dict = get_host_info_from_dict(ticket)
             host_shopper = host_dict.get(self.KEY_SHOPPER_ID_P, host_dict.get(self.KEY_SHOPPER_ID_K))
-            self._logger.debug('Calling {} to suspend {}:{} with cert: {}'.format(self._url,
-                                                                                  guid,
-                                                                                  host_shopper,
-                                                                                  self._cert))
+            self._logger.debug(f'Calling {self._url} to suspend {guid}:{host_shopper} with cert: {self._cert}')
             if not guid or not host_shopper:
-                raise Exception('Missing guid or hosting shopper for {}'.format(ticket_id))
+                raise Exception(f'Missing guid or hosting shopper for {ticket_id}')
 
             xml_body = GoCentral._get_xml_body_suspend().format(guid=guid, shopperid=host_shopper)
             r = requests.post(self._url,
@@ -63,20 +60,18 @@ class GoCentral(Product):
                               cert=self._cert,
                               verify=False)
             if r.status_code not in [200]:
-                self._logger.error('Bad status code {} in suspend response'.format(r.status_code))
+                self._logger.error(f'Bad status code {r.status_code} in suspend response')
                 return False
-            self._logger.info('Suspended GoCentral ticket {}'.format(ticket_id))
+            self._logger.info(f'Suspended GoCentral ticket {ticket_id}')
             return True
         except Exception as e:
-            self._logger.error('Unable to suspend GoCentral product: {}'.format(e.message))
+            self._logger.error(f'Unable to suspend GoCentral product: {e}')
             return False
 
     def reinstate(self, guid, **kwargs):
         host_dict = get_host_info_from_dict(kwargs.get(self.KEY_DATA, {}))
         host_shopper = host_dict.get(self.KEY_SHOPPER_ID_P, host_dict.get(self.KEY_SHOPPER_ID_K))
-        self._logger.debug('Calling endpoint to reinstate {}:{} with cert: {}'.format(guid,
-                                                                                      host_shopper,
-                                                                                      self._cert))
+        self._logger.debug(f'Calling endpoint to reinstate {guid}:{host_shopper} with cert: {self._cert}')
         return False
 
     def cancel(self):

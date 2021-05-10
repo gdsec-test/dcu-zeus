@@ -31,7 +31,7 @@ class Diablo(Product):
             return response.status_code == 200
 
         except Exception as e:
-            self._logger.error("Failed to suspend GUID: {}. {}".format(guid, e.message))
+            self._logger.error(f'Failed to suspend GUID: {guid}. {e}')
         return False
 
     def reinstate(self, guid, **kwargs):
@@ -50,7 +50,7 @@ class Diablo(Product):
             return response.status_code == 200
 
         except Exception as e:
-            self._logger.error("Failed to reinstate GUID: {}. {}".format(guid, e.message))
+            self._logger.error(f'Failed to reinstate GUID: {guid}. {e}')
         return False
 
     def cancel(self):

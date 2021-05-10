@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from dcdatabase.phishstorymongo import PhishstoryMongo
-from mock import Mock, patch
+from mock import patch
 from nose.tools import assert_false, assert_true
 
 from settings import TestingConfig
@@ -21,18 +21,21 @@ from zeus.utils.slack import SlackFailures
 
 
 class TestRegisteredHandler:
-    phishing = 'PHISHING'
     childabuse = 'CHILD_ABUSE'
-    sid = 'test-id'
+    current_test_date = datetime.utcnow()
     did = 'test-domain-id'
-    ssl_subscription = '1234'
     domain = 'domain'
+    domainId = '1234'
+    oldest_valid_review_test_date = current_test_date - timedelta(days=TestingConfig.FRAUD_REVIEW_TIME - 1)
+    phishing = 'PHISHING'
     protected_domain = 'myftpupload.com'
     reg = 'REGISTERED'
-    domainId = '1234'
+    sid = 'test-id'
+    ssl_subscription = '1234'
     ticketID = '4321'
-    JWT = 'JWT_STRING'
     HOSTED = 'HOSTED'
+    JWT = 'JWT_STRING'
+    KEY_CREATE_DATE = ''
     KEY_DATA = 'data'
     KEY_DOMAIN = 'sourceDomainOrIp'
     KEY_DOMAIN_DATE = 'domainCreateDate'
@@ -46,14 +49,12 @@ class TestRegisteredHandler:
     KEY_SSL_SUB = 'sslSubscriptions'
     KEY_TYPE = 'type'
 
-    current_test_date = datetime(2020, 05, 07, 14, 57)  # +7 hours because of UTC
-    oldest_valid_fraud_review_test_date = current_test_date - timedelta(days=TestingConfig.FRAUD_REVIEW_TIME)
     ticket_invalid_type = {KEY_HOSTED_STATUS: reg}
     ticket_no_shopper = {KEY_HOSTED_STATUS: reg, KEY_TYPE: phishing}
     ticket_valid = {KEY_HOSTED_STATUS: reg, KEY_TYPE: phishing, KEY_DOMAIN: domain,
                     KEY_DATA: {
                         KEY_DOMAIN_QUERY: {KEY_SHOPPER_INFO: {KEY_SHOPPER_ID: sid}, KEY_SSL_SUB: ssl_subscription,
-                                           KEY_REGISTRAR: {KEY_DOMAIN_ID: did}}}}
+                                           KEY_REGISTRAR: {KEY_DOMAIN_ID: did, KEY_DOMAIN_DATE: current_test_date}}}}
     ticket_fraud_hold = {'fraud_hold_reason': 'test', KEY_HOSTED_STATUS: reg, KEY_TYPE: phishing,
                          KEY_DOMAIN: domain, KEY_DATA: {KEY_DOMAIN_QUERY: {KEY_SHOPPER_INFO: {KEY_SHOPPER_ID: sid},
                                                                            KEY_SSL_SUB: ssl_subscription}}}
@@ -63,12 +64,12 @@ class TestRegisteredHandler:
     ticket_valid_api_reseller = {KEY_HOSTED_STATUS: reg, KEY_TYPE: phishing, KEY_DOMAIN: domain,
                                  KEY_DATA: {KEY_DOMAIN_QUERY: {'apiReseller': {'parent': '1234567', 'child': '7654321'},
                                                                KEY_REGISTRAR: {
-                                                                   KEY_DOMAIN_DATE: oldest_valid_fraud_review_test_date},
+                                                                   KEY_DOMAIN_DATE: current_test_date},
                                                                KEY_SSL_SUB: ssl_subscription}}}
     ticket_no_hold_or_reseller = {KEY_HOSTED_STATUS: reg, KEY_TYPE: phishing, KEY_DOMAIN: domain,
                                   KEY_DATA: {KEY_DOMAIN_QUERY: {KEY_SHOPPER_INFO: {KEY_SHOPPER_ID: sid},
                                                                 KEY_REGISTRAR: {
-                                                                    KEY_DOMAIN_DATE: oldest_valid_fraud_review_test_date}}}}
+                                                                    KEY_DOMAIN_DATE: oldest_valid_review_test_date}}}}
     ticket_valid_child_abuse = {KEY_HOSTED_STATUS: reg, KEY_TYPE: childabuse, KEY_DOMAIN: domain, 'ticketID': ticketID,
                                 'domain': {KEY_DOMAIN_ID: domainId},
                                 KEY_DATA: {KEY_DOMAIN_QUERY: {KEY_SHOPPER_INFO: {KEY_SHOPPER_ID: sid},
@@ -78,6 +79,7 @@ class TestRegisteredHandler:
                                   KEY_DATA: {
                                       KEY_DOMAIN_QUERY: {KEY_HOST: {KEY_SHOPPER_ID: '1357'},
                                                          KEY_SHOPPER_INFO: {KEY_SHOPPER_ID: '1357'},
+                                                         KEY_REGISTRAR: {KEY_DOMAIN_DATE: current_test_date},
                                                          KEY_SSL_SUB: ssl_subscription}}}
     ticket_hosted_different_account = {KEY_TYPE: phishing, KEY_DOMAIN: domain, KEY_HOSTED_STATUS: HOSTED,
                                        KEY_DATA: {
@@ -230,11 +232,9 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    @patch('zeus.handlers.registered_handler.datetime')
-    def test_intentionally_malicious_success_fraud_email(self, mock_date, ssl_mailer, service, crm, fraud,
+    def test_intentionally_malicious_success_fraud_email(self, ssl_mailer, service, crm, fraud,
                                                          registered, handler, journal, shoplocked, crmalert,
                                                          mimir, mock_db):
-        mock_date.utcnow = Mock(return_value=self.current_test_date)
         self._registered.intentionally_malicious(self.ticket_no_hold_or_reseller)
         fraud.assert_called()
 
@@ -250,8 +250,7 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    @patch('zeus.handlers.registered_handler.datetime')
-    def test_intentionally_malicious_hosted_same_shopper(self, mock_date, ssl_mailer, service, crm, fraud,
+    def test_intentionally_malicious_hosted_same_shopper(self, ssl_mailer, service, crm, fraud,
                                                          registered, handler, journal, shoplocked, crmalert,
                                                          mimir, mock_db, suspend):
         self._registered.intentionally_malicious(self.ticket_hosted_same_account)
@@ -390,10 +389,8 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    @patch('zeus.handlers.registered_handler.datetime')
-    def test_shopper_compromise_success_fraud_email(self, mock_date, ssl_mailer, service, crm, fraud, registered,
+    def test_shopper_compromise_success_fraud_email(self, ssl_mailer, service, crm, fraud, registered,
                                                     handler, journal, shoplocked, mimir, mock_db):
-        mock_date.utcnow = Mock(return_value=self.current_test_date)
         self._registered.shopper_compromise(self.ticket_no_hold_or_reseller)
         fraud.assert_called()
 

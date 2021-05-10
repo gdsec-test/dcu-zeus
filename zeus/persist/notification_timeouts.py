@@ -14,7 +14,7 @@ class Throttle(object):
             self.redis = Redis(redis_host)
             self.ttl = lock_time
         except Exception as e:
-            raise RuntimeError("No Redis connection: {}".format(e.message))
+            raise RuntimeError(f'No Redis connection: {e}')
 
     @timeout()
     def _get_anti_spam_key(self, key):
@@ -26,7 +26,7 @@ class Throttle(object):
         try:
             return self.redis.get(key)
         except Exception as e:
-            raise RuntimeError("No Redis connection to get key: {}".format(e.message))
+            raise RuntimeError(f'No Redis connection to get key: {e}')
 
     @timeout()
     def _set_anti_spam_key(self, key):
@@ -34,7 +34,7 @@ class Throttle(object):
             self.redis.set(key, 1)
             self.redis.expire(key, self.ttl)
         except Exception as e:
-            raise RuntimeError("No Redis connection to set key: {}".format(e.message))
+            raise RuntimeError(f'No Redis connection to set key: {e}')
 
     def key_exists(self, domain):
         return self._get_anti_spam_key(domain)
@@ -45,7 +45,7 @@ class Throttle(object):
     ''' Domain specific time outs '''
 
     def can_fraud_email_be_sent(self, domain):
-        fraud_key = 'fraud_hold_{}'.format(domain)
+        fraud_key = f'fraud_hold_{domain}'
         if not self._get_anti_spam_key(fraud_key):
             self._set_anti_spam_key(fraud_key)
             return True
@@ -58,14 +58,14 @@ class Throttle(object):
         return False
 
     def can_ssl_revocation_email_be_sent(self, domain):
-        ssl_cert_key = 'ssl_revocation_{}'.format(domain)
+        ssl_cert_key = f'ssl_revocation_{domain}'
         if not self._get_anti_spam_key(ssl_cert_key):
             self._set_anti_spam_key(ssl_cert_key)
             return True
         return False
 
     def can_suspend_domain(self, domain):
-        domain_key = '{}_domain_suspended'.format(domain)
+        domain_key = f'{domain}_domain_suspended'
         if not self._get_anti_spam_key(domain_key):
             self._set_anti_spam_key(domain_key)
             return True
@@ -74,7 +74,7 @@ class Throttle(object):
     ''' GUID specific time outs '''
 
     def can_suspend_hosting_product(self, guid):
-        hosting_key = '{}_hosting_suspended'.format(guid)
+        hosting_key = f'{guid}_hosting_suspended'
         if not self._get_anti_spam_key(hosting_key):
             self._set_anti_spam_key(hosting_key)
             return True
@@ -91,7 +91,7 @@ class Throttle(object):
     ''' Shopper ID specific time outs '''
 
     def can_crm_be_notated(self, shopper_id):
-        crm_key = '{}_notated_24hr_hold'.format(shopper_id)
+        crm_key = f'{shopper_id}_notated_24hr_hold'
         if not self._get_anti_spam_key(crm_key):
             self._set_anti_spam_key(crm_key)
             return True
@@ -100,7 +100,7 @@ class Throttle(object):
     ''' Non shopper specific time outs '''
 
     def can_reporter_acknowledge_email_be_sent(self, reporter_email):
-        crm_key = '{}_acknowledge_email'.format(reporter_email)
+        crm_key = f'{reporter_email}_acknowledge_email'
         if not self._get_anti_spam_key(crm_key):
             self._set_anti_spam_key(crm_key)
             return True

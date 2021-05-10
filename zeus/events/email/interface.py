@@ -2,9 +2,7 @@ import abc
 import os
 
 
-class Mailer(object):
-    __metaclass__ = abc.ABCMeta
-
+class Mailer(object, metaclass=abc.ABCMeta):
     def __init__(self, app_settings):
         self.env = os.getenv('sysenv', 'dev')
         self.cert = app_settings.OCM_SSL_CERT

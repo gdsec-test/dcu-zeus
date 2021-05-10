@@ -46,7 +46,7 @@ class SSLMailer(Mailer):
                 kwargs[self.RECIPIENTS] = self.testing_email_address
                 send_mail(template, substitution_values, **kwargs)
         except Exception as e:
-            self._logger.error('Unable to send {} for {}: {}'.format(template, domain, e.message))
+            self._logger.error(f'Unable to send {template} for {domain}: {e}')
             generate_event(ticket_id, exception_type, type=message_type)
             return False
         return True

@@ -1,9 +1,7 @@
 import abc
 
 
-class Product(object):
-    __metaclass__ = abc.ABCMeta
-
+class Product(object, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def suspend(self, **kwargs):
         pass

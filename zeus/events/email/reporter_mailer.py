@@ -37,8 +37,8 @@ class ReporterMailer(Mailer):
                 generate_event(source, success_message, **resp)
                 return True
             else:
-                self._logger.warning("Cannot send {} for {}... still within 24hr window".format(template, source))
+                self._logger.warning(f'Cannot send {template} for {source}... still within 24hr window')
         except Exception as e:
-            self._logger.error("Unable to send {} for {}: {}".format(template, source, e.message))
+            self._logger.error(f'Unable to send {template} for {source}: {e}')
             generate_event(source, exception_type, type=message_type)
         return False
