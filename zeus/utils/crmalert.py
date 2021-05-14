@@ -14,7 +14,7 @@ class CRMAlert:
     _resolution = "http://x.co/dcuwhat2do"
 
     def __init__(self, app_settings):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
         self._crmalert_url = app_settings.CRMALERT_URL
         self._sso_endpoint = app_settings.SSO_URL + '/v1/secure/api/token'
 

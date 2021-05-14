@@ -9,6 +9,7 @@ SHELL=/bin/bash
 PRIVATE_PIPS="git@github.secureserver.net:digital-crimes/dcdatabase.git" \
 "git@github.secureserver.net:digital-crimes/crm_notate.git" \
 "git@github.secureserver.net:digital-crimes/hermes.git" \
+"git@github.com:gdcorp-infosec/dcu-structured-logging-celery.git" \
 git@github.secureserver.net:auth-contrib/PyAuth.git
 
 all: env

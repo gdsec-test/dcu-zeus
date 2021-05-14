@@ -12,7 +12,7 @@ class SSLMailer(Mailer):
 
     def __init__(self, app_settings):
         super(SSLMailer, self).__init__(app_settings)
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
         self._throttle = Throttle(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)
         self.testing_email_address = [app_settings.NON_PROD_EMAIL_ADDRESS] if self.env != 'prod' else []
 

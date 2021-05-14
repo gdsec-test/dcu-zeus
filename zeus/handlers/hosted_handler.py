@@ -27,7 +27,7 @@ class HostedHandler(Handler):
     supported_types = ['PHISHING', 'MALWARE', 'CHILD_ABUSE']
 
     def __init__(self, app_settings):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
         self.hosted_mailer = HostedMailer(app_settings)
         self.fraud_mailer = FraudMailer(app_settings)
 

@@ -10,7 +10,7 @@ class SlackUtil(object):
     SLACK_USERNAME = 'Zeus'
 
     def __init__(self, url, channel):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
         self._url = url
         self._channel = channel
 
@@ -37,7 +37,7 @@ class SlackUtil(object):
 
 class ThrottledSlack(object):
     def __init__(self, app_settings):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
         self._decorated = SlackUtil(app_settings.SLACK_URL, app_settings.SLACK_CHANNEL)
         self._throttle = Throttle(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)
 
@@ -48,7 +48,7 @@ class ThrottledSlack(object):
 
 class SlackFailures:
     def __init__(self, slack):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
         self._slack = slack
 
     def failed_hosting_suspension(self, guid, info=''):

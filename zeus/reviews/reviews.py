@@ -5,7 +5,7 @@ from zeus.reviews.interface import Review
 
 class BasicReview(Review):
     def __init__(self, settings):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
         super(BasicReview, self).__init__(settings)
 
     def place_in_review(self, _ticket, _hold_time, _reason=None):
@@ -15,7 +15,7 @@ class BasicReview(Review):
 
 class SucuriReview(Review):
     def __init__(self, settings):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
         super(SucuriReview, self).__init__(settings)
 
     def place_in_review(self, _ticket, _hold_time, _reason=None):
@@ -29,7 +29,7 @@ class SucuriReview(Review):
 
 class FraudReview(Review):
     def __init__(self, settings):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
         super(FraudReview, self).__init__(settings)
 
     def place_in_review(self, _ticket, _hold_time, _reason=None):

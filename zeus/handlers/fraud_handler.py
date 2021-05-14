@@ -10,7 +10,7 @@ from zeus.utils.functions import (get_domain_create_date_from_dict,
 
 class FraudHandler:
     def __init__(self, app_settings):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
         self.mailer = FraudMailer(app_settings)
 
     def new_domain(self, data):

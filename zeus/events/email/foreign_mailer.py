@@ -11,7 +11,7 @@ from zeus.utils.functions import sanitize_url
 class ForeignMailer(Mailer):
     def __init__(self, app_settings):
         super(ForeignMailer, self).__init__(app_settings)
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
         self.testing_email_address = [
             {'email': config_by_name[self.env].NON_PROD_EMAIL_ADDRESS}] if self.env != 'prod' else []
 

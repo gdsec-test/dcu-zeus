@@ -31,6 +31,11 @@ loggers:
         level: INFO
         handlers: [console, mongo_log_handler]
         propagate: no
+
+    celery.tasks:
+        level: NOTSET
+        handlers: [console]
+        propagate: no
 # The logger for the root level directory, which is 'zeus'
 root:
     level: INFO

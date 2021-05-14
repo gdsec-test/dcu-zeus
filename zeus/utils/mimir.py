@@ -29,7 +29,7 @@ class Mimir:
     _headers = {'Accept': 'application/json'}
 
     def __init__(self, app_settings):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
         self._sso_endpoint = f'{app_settings.SSO_URL}/v1/secure/api/token'
         self._mimir_infraction_endpoint = f'{app_settings.MIMIR_URL}/v1/infractions'
         self._mimir_non_infraction_endpoint = f'{app_settings.MIMIR_URL}/v1/non-infraction'

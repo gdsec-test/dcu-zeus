@@ -26,7 +26,7 @@ class DomainService:
                     }
 
     def __init__(self, endpoint):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
         domain_uri = f'http://{endpoint}/v1/domains'
         self._query_domain_endpoint = f'{domain_uri}/domaininfo'
         self._suspend_domain_endpoint = f'{domain_uri}/suspenddomain'

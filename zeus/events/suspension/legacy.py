@@ -5,7 +5,7 @@ from zeus.events.suspension.interface import Product
 
 class Legacy(Product):
     def __init__(self):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
 
     def suspend(self):
         pass

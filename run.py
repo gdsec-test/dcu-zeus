@@ -3,9 +3,9 @@ import os
 
 import yaml
 from celery import Celery
-from celery.utils.log import get_task_logger
 from dcdatabase.kelvinmongo import KelvinMongo
 from dcdatabase.phishstorymongo import PhishstoryMongo
+from dcustructuredlogging import celerylogger  # noqa: F401
 
 from celeryconfig import CeleryConfig
 from settings import config_by_name
@@ -15,24 +15,38 @@ from zeus.handlers.fraud_handler import FraudHandler
 from zeus.handlers.hosted_handler import HostedHandler
 from zeus.handlers.registered_handler import RegisteredHandler
 
-# setup logging
-path = 'logging.yaml'
-value = os.getenv('LOG_CFG', None)
-if value:
-    path = value
-if os.path.exists(path):
-    with open(path, 'rt') as fraud:
-        lconfig = yaml.safe_load(fraud.read())
-    logging.config.dictConfig(lconfig)
-else:
-    logging.basicConfig(level=logging.INFO)
-
 env = os.getenv('sysenv', 'dev')
 config = config_by_name[env]()
 
 celery = Celery()
 celery.config_from_object(CeleryConfig(config))
-_logger = get_task_logger(__name__)
+
+log_level = os.getenv('LOG_LEVEL', 'INFO')
+
+
+def replace_dict(dict_to_replace):
+    """
+    Replace empty logging levels in logging.yaml with environment appropriate levels
+    :param dict_to_replace: logging.yaml is read into a dict which is passed in
+    :return:
+    """
+    for k, v in dict_to_replace.items():
+        if type(v) is dict:
+            replace_dict(dict_to_replace[k])
+        else:
+            if v == 'NOTSET':
+                dict_to_replace[k] = log_level
+
+
+# setup logging
+path = 'logging.yaml'
+if os.path.exists(path):
+    with open(path, 'rt') as f:
+        lconfig = yaml.safe_load(f.read())
+    replace_dict(lconfig)
+    logging.config.dictConfig(lconfig)
+else:
+    logging.basicConfig(level=logging.INFO)
 
 fraud = FraudHandler(config)
 hosted = HostedHandler(config)

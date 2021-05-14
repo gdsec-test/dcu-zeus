@@ -37,7 +37,7 @@ class RegisteredHandler(Handler):
     DOMAIN = 'Domain'
 
     def __init__(self, app_settings):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
 
         self.registered_mailer = RegisteredMailer(app_settings)
         self.fraud_mailer = FraudMailer(app_settings)

@@ -7,7 +7,7 @@ from zeus.utils.slack import SlackFailures, ThrottledSlack
 
 class HostedScribe:
     def __init__(self, app_settings):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
         self.crm = ThrottledCRM(app_settings)
         self.slack = SlackFailures(ThrottledSlack(app_settings))
 

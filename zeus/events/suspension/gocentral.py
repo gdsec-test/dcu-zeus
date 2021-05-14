@@ -24,7 +24,7 @@ class GoCentral(Product):
                 'SOAPAction': 'http://schemas.orion.starfieldtech.com/account/Suspend'}
 
     def __init__(self, app_settings):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
         self._url = app_settings.GOCENTRAL_URL
         self._cert = GoCentral._set_certs(app_settings)
 

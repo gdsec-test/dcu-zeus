@@ -10,7 +10,7 @@ class Vertigo(Product):
     headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
 
     def __init__(self, app_settings):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
         self.url = app_settings.VERT_URL
         self._auth = (app_settings.CMAP_PROXY_USER, app_settings.CMAP_PROXY_PASS)
         self._cert = (app_settings.CMAP_PROXY_CERT, app_settings.CMAP_PROXY_KEY)

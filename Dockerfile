@@ -15,6 +15,7 @@ RUN pip install --compile /tmp/private_pips/dcdatabase
 RUN pip install --compile /tmp/private_pips/crm_notate
 RUN pip install --compile /tmp/private_pips/hermes
 RUN pip install --compile /tmp/private_pips/PyAuth
+RUN pip install --compile /tmp/private_pips/dcu-structured-logging-celery
 RUN pip install --compile /tmp
 
 COPY certs/* /usr/local/share/ca-certificates/

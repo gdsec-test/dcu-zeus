@@ -30,7 +30,7 @@ class Journal:
     _headers = {'Accept': 'application/json'}
 
     def __init__(self, app_settings):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
         self._sso_endpoint = app_settings.SSO_URL + '/v1/secure/api/token'
         self._journal_endpoint = app_settings.JOURNAL_URL + '/v1/requests'
 

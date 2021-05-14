@@ -16,7 +16,7 @@ class Angelo(Product):
     headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
 
     def __init__(self, app_settings):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
         self.auth = (app_settings.PLESKUSER, app_settings.PLESKPASS)
         self.url = app_settings.PLESK_URL
 

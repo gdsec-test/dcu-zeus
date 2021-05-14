@@ -10,7 +10,7 @@ def generate_event(ticket, reason, **kwargs):
     :param kwargs:
     :return:
     """
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger('celery.tasks')
 
     data = dict(ticket=ticket)
 

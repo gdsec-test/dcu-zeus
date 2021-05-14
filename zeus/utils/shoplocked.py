@@ -8,7 +8,7 @@ class Shoplocked:
     _headers = {'Content-Type': 'application/json'}
 
     def __init__(self, app_settings):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger('celery.tasks')
         self._shoplocked_url = app_settings.SHOPLOCKED_URL
         self._sso_endpoint = app_settings.SSO_URL + '/v1/secure/api/token'
 
