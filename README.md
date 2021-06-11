@@ -100,8 +100,8 @@ If you would like to run Zeus locally you will need to specify the following env
 * `OCM_SSL_KEY` (The path to the SSL Key white-listed for OCM API `phishstory.int.`)
 * `ORION_SSL_CERT` (The path to the SSL Cert white-listed for Orion Web Service `dcu.ecomm.dev.authclient.int.godaddy.com` prod only)
 * `ORION_SSL_KEY` (The path to the SSL Key white-listed for Orion Web Service `dcu.ecomm.dev.authclient.int.godaddy.com` prod only)
-* `ZEUS_SSL_CERT` (The path to the SSL Cert for communicating with DCU Journal `proxyuser.cmap.int.godaddy.com` prod only)
-* `ZEUS_SSL_KEY` (The path to the SSL Key for communicating with DCU Journal `proxyuser.cmap.int.godaddy.com` prod only)
+* `ZEUS_SSL_CERT` (The path to the SSL Cert for communicating with CRM Alert, DCU Journal, Mimir and Shoplocked `dcu.zeus.int`)
+* `ZEUS_SSL_KEY` (The path to the SSL Key for communicating with CRM Alert, DCU Journal, Mimir and Shoplocked `dcu.zeus.int`)
 * `EMAIL_RECIPIENT` (The email address you want `non-shopper` emails sent to while testing, instead of emailing fraud. e.g. user@example.com)  *** *ONLY WORKS WITH TEMPLATES THAT SEND TO NON-SHOPPERS* ***
 * Run `docker-compose up -d rabbitmq redis` to run rabbitmq and redis locally in a docker container.
 * PyCharm script path will need to be set to: `/PATH_TO_ZEUS_ENVS/bin/celery`.
