@@ -25,6 +25,7 @@ from zeus.utils.slack import SlackFailures, ThrottledSlack
 
 class HostedHandler(Handler):
     supported_types = ['PHISHING', 'MALWARE', 'CHILD_ABUSE']
+    HOSTED = 'HOSTED'
 
     def __init__(self, app_settings):
         self._logger = logging.getLogger('celery.tasks')
@@ -69,7 +70,6 @@ class HostedHandler(Handler):
     def customer_warning(self, data):
         domain = data.get('sourceDomainOrIp')
         subdomain = data.get('sourceSubDomain')
-        hosted_status = data.get('hosted_status')
         product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
         ticket_id = data.get('ticketId')
@@ -113,7 +113,7 @@ class HostedHandler(Handler):
                          domain=domain,
                          subdomain=subdomain,
                          guid=guid,
-                         hosted_status=hosted_status,
+                         hosted_status=self.HOSTED,
                          infraction_type=InfractionTypes.customer_warning,
                          record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
@@ -125,7 +125,6 @@ class HostedHandler(Handler):
     def content_removed(self, data):
         domain = data.get('sourceDomainOrIp')
         subdomain = data.get('sourceSubDomain')
-        hosted_status = data.get('hosted_status')
         source = data.get('source')
         ticket_id = data.get('ticketId')
 
@@ -147,7 +146,7 @@ class HostedHandler(Handler):
                          domain=domain,
                          subdomain=subdomain,
                          guid=guid,
-                         hosted_status=hosted_status,
+                         hosted_status=self.HOSTED,
                          infraction_type=InfractionTypes.content_removed,
                          record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
@@ -162,7 +161,6 @@ class HostedHandler(Handler):
     def intentionally_malicious(self, data):
         domain = data.get('sourceDomainOrIp')
         subdomain = data.get('sourceSubDomain')
-        hosted_status = data.get('hosted_status')
         product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
         target = data.get('target')
@@ -184,7 +182,7 @@ class HostedHandler(Handler):
                          domain=domain,
                          subdomain=subdomain,
                          guid=guid,
-                         hosted_status=hosted_status,
+                         hosted_status=self.HOSTED,
                          infraction_type=InfractionTypes.intentionally_malicious,
                          record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
@@ -219,7 +217,6 @@ class HostedHandler(Handler):
     def shopper_compromise(self, data):
         domain = data.get('sourceDomainOrIp')
         subdomain = data.get('sourceSubDomain')
-        hosted_status = data.get('hosted_status')
         product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
         target = data.get('target')
@@ -237,7 +234,7 @@ class HostedHandler(Handler):
                          domain=domain,
                          subdomain=subdomain,
                          guid=guid,
-                         hosted_status=hosted_status,
+                         hosted_status=self.HOSTED,
                          infraction_type=InfractionTypes.shopper_compromise,
                          record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
@@ -262,7 +259,6 @@ class HostedHandler(Handler):
     def repeat_offender(self, data):
         domain = data.get('sourceDomainOrIp')
         subdomain = data.get('sourceSubDomain')
-        hosted_status = data.get('hosted_status')
         product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
         ticket_id = data.get('ticketId')
@@ -283,7 +279,7 @@ class HostedHandler(Handler):
                          domain=domain,
                          subdomain=subdomain,
                          guid=guid,
-                         hosted_status=hosted_status,
+                         hosted_status=self.HOSTED,
                          infraction_type=InfractionTypes.repeat_offender,
                          record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
@@ -302,7 +298,6 @@ class HostedHandler(Handler):
     def suspend(self, data):
         domain = data.get('sourceDomainOrIp')
         subdomain = data.get('sourceSubDomain')
-        hosted_status = data.get('hosted_status')
         product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
         ticket_id = data.get('ticketId')
@@ -323,7 +318,7 @@ class HostedHandler(Handler):
                          domain=domain,
                          subdomain=subdomain,
                          guid=guid,
-                         hosted_status=hosted_status,
+                         hosted_status=self.HOSTED,
                          infraction_type=InfractionTypes.suspended,
                          record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
@@ -343,7 +338,6 @@ class HostedHandler(Handler):
     def extensive_compromise(self, data):
         domain = data.get('sourceDomainOrIp')
         subdomain = data.get('sourceSubDomain')
-        hosted_status = data.get('hosted_status')
         product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
         ticket_id = data.get('ticketId')
@@ -364,7 +358,7 @@ class HostedHandler(Handler):
                          domain=domain,
                          subdomain=subdomain,
                          guid=guid,
-                         hosted_status=hosted_status,
+                         hosted_status=self.HOSTED,
                          infraction_type=InfractionTypes.extensive_compromise,
                          record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
@@ -383,7 +377,6 @@ class HostedHandler(Handler):
     def ncmec_submitted(self, data):
         domain = data.get('sourceDomainOrIP')
         subdomain = data.get('sourceSubDomain')
-        hosted_status = data.get('hosted_status')
         ncmecreport_id = data.get('ncmecReportID')
         ticket_id = data.get('ticketID')
 
@@ -397,7 +390,7 @@ class HostedHandler(Handler):
                          domain=domain,
                          subdomain=subdomain,
                          guid=guid,
-                         hosted_status=hosted_status,
+                         hosted_status=self.HOSTED,
                          infraction_type=InfractionTypes.ncmec_report_submitted,
                          ncmec_report_id=ncmecreport_id,
                          note=note,
@@ -411,7 +404,6 @@ class HostedHandler(Handler):
         domain = data.get('sourceDomainOrIP')
         subdomain = data.get('sourceSubDomain')
         source = data.get('source')
-        hosted_status = data.get('hostedStatus')
         ticket_id = data.get('ticketID')
         product = get_host_info_from_dict(data).get('product')
 
@@ -427,7 +419,7 @@ class HostedHandler(Handler):
         self.mimir.write(abuse_type=report_type,
                          domain=domain,
                          subdomain=subdomain,
-                         hosted_status=hosted_status,
+                         hosted_status=self.HOSTED,
                          infraction_type=InfractionTypes.suspended_csam,
                          note=note,
                          record_type=RecordTypes.infraction,

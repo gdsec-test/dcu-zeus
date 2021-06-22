@@ -83,7 +83,6 @@ class RegisteredHandler(Handler):
         subdomain = data.get('sourceSubDomain')
         domain_id = get_domain_id_from_dict(data)
         hosted_brand = get_host_brand_from_dict(data)
-        hosted_status = data.get('hosted_status')
         ip = get_host_info_from_dict(data).get('ip')
         recipients = get_host_abuse_email_from_dict(data)
         report_type = data.get('type')
@@ -132,7 +131,7 @@ class RegisteredHandler(Handler):
                          domain=domain,
                          subdomain=subdomain,
                          domain_id=domain_id,
-                         hosted_status=hosted_status,
+                         hosted_status=self.REGISTERED,
                          infraction_type=InfractionTypes.customer_warning,
                          record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
@@ -197,7 +196,7 @@ class RegisteredHandler(Handler):
                          domain=domain,
                          subdomain=subdomain,
                          domain_id=domain_id,
-                         hosted_status=hosted_status,
+                         hosted_status=self.REGISTERED,
                          infraction_type=InfractionTypes.intentionally_malicious,
                          record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
@@ -231,7 +230,6 @@ class RegisteredHandler(Handler):
         domain = data.get('sourceDomainOrIp')
         subdomain = data.get('sourceSubDomain')
         domain_id = get_domain_id_from_dict(data)
-        hosted_status = data.get('hosted_status')
         report_type = data.get('type')
         shopper_id = get_shopper_id_from_dict(data)
         shopper_id_list = get_list_of_ids_to_notify(data)
@@ -255,7 +253,7 @@ class RegisteredHandler(Handler):
                          domain=domain,
                          subdomain=subdomain,
                          domain_id=domain_id,
-                         hosted_status=hosted_status,
+                         hosted_status=self.REGISTERED,
                          infraction_type=InfractionTypes.shopper_compromise,
                          record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
@@ -279,7 +277,6 @@ class RegisteredHandler(Handler):
         domain = data.get('sourceDomainOrIp')
         subdomain = data.get('sourceSubDomain')
         domain_id = get_domain_id_from_dict(data)
-        hosted_status = data.get('hosted_status')
         report_type = data.get('type')
         shopper_id = get_shopper_id_from_dict(data)
         shopper_id_list = get_list_of_ids_to_notify(data)
@@ -307,7 +304,7 @@ class RegisteredHandler(Handler):
                          domain=domain,
                          subdomain=subdomain,
                          domain_id=domain_id,
-                         hosted_status=hosted_status,
+                         hosted_status=self.REGISTERED,
                          infraction_type=InfractionTypes.repeat_offender,
                          record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
@@ -327,7 +324,6 @@ class RegisteredHandler(Handler):
         domain = data.get('sourceDomainOrIp')
         subdomain = data.get('sourceSubDomain')
         domain_id = get_domain_id_from_dict(data)
-        hosted_status = data.get('hosted_status')
         report_type = data.get('type')
         shopper_id = get_shopper_id_from_dict(data)
         shopper_id_list = get_list_of_ids_to_notify(data)
@@ -355,7 +351,7 @@ class RegisteredHandler(Handler):
                          domain=domain,
                          subdomain=subdomain,
                          domain_id=domain_id,
-                         hosted_status=hosted_status,
+                         hosted_status=self.REGISTERED,
                          infraction_type=InfractionTypes.suspended,
                          record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
@@ -374,7 +370,6 @@ class RegisteredHandler(Handler):
     def suspend_csam(self, data):
         shopper_id = get_shopper_id_from_dict(data)
         ticket_id = data.get('ticketID')
-        hosted_status = data.get('hostedStatus')
         domain = data.get('sourceDomainOrIP')
         subdomain = data.get('sourceSubDomain')
         domain_id = get_kelvin_domain_id_from_dict(data)
@@ -398,7 +393,7 @@ class RegisteredHandler(Handler):
                          domain=domain,
                          subdomain=subdomain,
                          domain_id=domain_id,
-                         hosted_status=hosted_status,
+                         hosted_status=self.REGISTERED,
                          infraction_type=InfractionTypes.suspended_csam,
                          record_type=RecordTypes.infraction,
                          shopper_number=shopper_id,
