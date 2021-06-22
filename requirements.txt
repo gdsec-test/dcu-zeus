@@ -13,7 +13,7 @@ cryptography==3.4.7
 dcdatabase==1.3
 dcu-structured-logging-celery==1.0
 enum34==1.1.10
-hermes==1.0
+hermes==1.0.1
 idna==2.10
 importlib-metadata==3.10.1
 kombu==5.0.2
