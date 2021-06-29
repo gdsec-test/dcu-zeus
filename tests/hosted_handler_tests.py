@@ -75,9 +75,10 @@ class TestHostedHandler:
     def test_validate_required_csam(self):
         assert_equal((self.child_abuse, self.guid, self.sid), self._hosted._validate_required_args(self.ticket_valid_child_abuse))
 
+    @patch.object(SlackFailures, 'failed_to_determine_shoppers', return_value=None)
     @patch.object(BasicReview, 'place_in_review', return_value=None)
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
-    def test_customer_warning_none(self, invalid_abuse_type, review):
+    def test_customer_warning_none(self, invalid_abuse_type, review, slack_infractions):
         assert_false(self._hosted.customer_warning({}))
 
     @patch.object(HostedMailer, 'send_hosted_warning', return_value=False)

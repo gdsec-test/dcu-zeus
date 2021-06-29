@@ -303,13 +303,14 @@ class TestRegisteredHandler:
     def test_repeat_offender_failed_shopper_email(self, service, crm, registered, slack, journal, mimir):
         assert_false(self._registered.repeat_offender(self.ticket_valid))
 
+    @patch.object(SlackFailures, 'failed_to_create_alert', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(Journal, 'write', return_value=None)
     @patch.object(RegisteredHandler, '_suspend_domain', return_value=True)
     @patch.object(RegisteredMailer, 'send_repeat_offender_suspension', return_value=True)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
-    def test_repeat_offender_success(self, service, crm, registered, handler, journal, mimir):
+    def test_repeat_offender_success(self, service, crm, registered, handler, journal, mimir, slack_infractions):
         assert_true(self._registered.repeat_offender(self.ticket_valid))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
@@ -470,8 +471,9 @@ class TestRegisteredHandler:
 
     @patch.object(Journal, 'write', return_value=None)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
+    @patch.object(SlackFailures, 'failed_infraction_creation', return_value=None)
     @patch.object(RegisteredMailer, 'send_csam_shopper_suspension', return_value=False)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
-    def test_suspend_csam_failed_shopper_email(self, service, crm, mailer, slack, journal):
+    def test_suspend_csam_failed_shopper_email(self, service, crm, mailer, slack_infraction, slack, journal):
         assert_false(self._registered.suspend_csam(self.ticket_valid_child_abuse))
