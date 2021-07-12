@@ -20,8 +20,8 @@ class CRMAlert:
 
         self.slack = SlackFailures(ThrottledSlack(app_settings))
 
-        cert = (app_settings.ZEUS_SSL_CERT, app_settings.ZEUS_SSL_KEY)
-        self._headers.update({'Authorization': 'sso-jwt {}'.format(self._get_jwt(cert))})
+        self._cert = (app_settings.ZEUS_SSL_CERT, app_settings.ZEUS_SSL_KEY)
+        self._headers.update({'Authorization': f'sso-jwt {self._get_jwt(self._cert)}'})
 
     def create_alert(self, shopper_id, message, abuse_type, severity, source, resolution=_resolution):
         """
@@ -44,6 +44,9 @@ class CRMAlert:
 
         try:
             response = requests.post(endpoint, json=body, headers=self._headers)
+            if response.status_code in [401, 403]:
+                self._headers.update({'Authorization': f'sso-jwt {self._get_jwt(self._cert)}'})
+                response = requests.post(endpoint, json=body, headers=self._headers)
 
             if response.status_code in [200, 201]:
                 self._logger.info('Successfully created CRM alert for ShopperID {} Source {} with UUID: {}'.format(

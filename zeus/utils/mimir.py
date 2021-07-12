@@ -34,8 +34,8 @@ class Mimir:
         self._mimir_infraction_endpoint = f'{app_settings.MIMIR_URL}/v1/infractions'
         self._mimir_non_infraction_endpoint = f'{app_settings.MIMIR_URL}/v1/non-infraction'
         self.slack = SlackFailures(ThrottledSlack(app_settings))
-        cert = (app_settings.ZEUS_SSL_CERT, app_settings.ZEUS_SSL_KEY)
-        self._headers.update({'Authorization': self._get_jwt(cert)})
+        self._cert = (app_settings.ZEUS_SSL_CERT, app_settings.ZEUS_SSL_KEY)
+        self._headers.update({'Authorization': self._get_jwt(self._cert)})
 
     @staticmethod
     def _clean_dict_for_mimir(query_dict):
@@ -105,6 +105,9 @@ class Mimir:
 
         try:
             response = requests.post(mimir_endpoint, json=body, headers=self._headers)
+            if response.status_code in [401, 403]:
+                self._headers.update({'Authorization': f'sso-jwt {self._get_jwt(self._cert)}'})
+                response = requests.post(mimir_endpoint, json=body, headers=self._headers)
 
             if response.status_code not in {200, 201}:
                 self._logger.error(f'{mimir_endpoint}: {response.status_code}: {response.reason}: {body}')

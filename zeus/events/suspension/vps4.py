@@ -26,8 +26,8 @@ class VPS4(Product):
         :param response:
         :return:
         """
-        if response and response.status_code == 403 and response.json().get('id') == 'MISSING_AUTHENTICATION':
-            self._headers['Authorization'] = "sso-jwt " + self._get_jwt()
+        if response and response.status_code in [401, 403]:
+            self._headers['Authorization'] = f'sso-jwt {self._get_jwt()}'
             return True
         return False
 

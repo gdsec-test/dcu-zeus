@@ -12,8 +12,8 @@ class Shoplocked:
         self._shoplocked_url = app_settings.SHOPLOCKED_URL
         self._sso_endpoint = app_settings.SSO_URL + '/v1/secure/api/token'
 
-        cert = (app_settings.ZEUS_SSL_CERT, app_settings.ZEUS_SSL_KEY)
-        self._headers.update({'Authorization': 'sso-jwt {}'.format(self._get_jwt(cert))})
+        self._cert = (app_settings.ZEUS_SSL_CERT, app_settings.ZEUS_SSL_KEY)
+        self._headers.update({'Authorization': f'sso-jwt {self._get_jwt(self._cert)}'})
 
     def adminlock(self, shopper_id, note):
         """
@@ -34,6 +34,9 @@ class Shoplocked:
 
         try:
             response = requests.post(endpoint, json=body, headers=self._headers, verify=False)
+            if response.status_code in [401, 403]:
+                self._headers.update({'Authorization': f'sso-jwt {self._get_jwt(self._cert)}'})
+                response = requests.post(endpoint, json=body, headers=self._headers, verify=False)
 
             if response.status_code != 201:
                 self._logger.warning('Failed to admin lock shopper ID: {}, Status code: {}, Message: {}'.format(

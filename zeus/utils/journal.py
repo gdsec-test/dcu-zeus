@@ -34,8 +34,8 @@ class Journal:
         self._sso_endpoint = app_settings.SSO_URL + '/v1/secure/api/token'
         self._journal_endpoint = app_settings.JOURNAL_URL + '/v1/requests'
 
-        cert = (app_settings.ZEUS_SSL_CERT, app_settings.ZEUS_SSL_KEY)
-        self._headers.update({'Authorization': self._get_jwt(cert)})
+        self._cert = (app_settings.ZEUS_SSL_CERT, app_settings.ZEUS_SSL_KEY)
+        self._headers.update({'Authorization': self._get_jwt(self._cert)})
 
     def write(self, event_type, product_family, domain, reason, notes, assets=None):
         """
@@ -65,6 +65,10 @@ class Journal:
 
         try:
             response = requests.post(self._journal_endpoint, json=body, headers=self._headers)
+            if response.status_code in [401, 403]:
+                self._headers.update({'Authorization': f'sso-jwt {self._get_jwt(self._cert)}'})
+                response = requests.post(self._journal_endpoint, json=body, headers=self._headers)
+
             response.raise_for_status()
         except Exception as e:
             self._logger.error(e)
