@@ -104,6 +104,11 @@ spec:
               secretKeyRef:
                 name: auth-cmap-proxy
                 key: password
+          - name: SLACK_HANDLER
+            valueFrom:
+              secretKeyRef:
+                name: zeus-slack
+                key: handler
           - name: CMAP_PROXY_CERT
             value: /proxycerts/tls.crt
           - name: CMAP_PROXY_KEY
