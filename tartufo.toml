@@ -1,0 +1,15 @@
+[tool.tartufo]
+repo-path = "."
+exclude-path-patterns = [
+    'tartufo.*',
+    'certs/DC1Issuing-CA',
+    'certs/DC1Root-CA'
+]
+exclude-signatures = [
+    '3db60a1e20826138eb7ed12274ded7bbe3f0f09a5479216717a57a757f787a49',
+    'ba05861df5b2d15b1238aa0d2f8d5bbb6fc3c3eaccd3431698f5d5eca6fed872',
+    '7e70aa076517df66f684c94bb44e1b21dbd12319146c0b3a596c2d113f138e51',
+    'c487cf82f6bc325008206169537f2a2a08c5d0ca17d466ddda3cef93a5b9827c',
+    '80a13ad437006e3883dc3e99e749741d37d8b9c403985d7a1a685c79eadd9a37',
+    'd5760a9483ab69e142f2932ac3907c0a8f7022c3eccc1cb906416ea0cf48ab82'
+]
