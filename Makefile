@@ -5,18 +5,10 @@ DATE=$(shell date)
 BUILD_BRANCH=origin/master
 SHELL=/bin/bash
 
-# libraries we need to stage for pip to install inside Docker build
-PRIVATE_PIPS="git@github.secureserver.net:digital-crimes/dcdatabase.git" \
-"git@github.secureserver.net:digital-crimes/crm_notate.git" \
-"git@github.secureserver.net:digital-crimes/hermes.git" \
-"git@github.com:gdcorp-infosec/dcu-structured-logging-celery.git" \
-git@github.secureserver.net:auth-contrib/PyAuth.git
-
 all: env
 
 env:
 	pip install -r test_requirements.txt
-	pip install -r private_pips.txt
 	pip install -r requirements.txt
 
 .PHONY: flake8
@@ -46,24 +38,9 @@ testcov:
 .PHONY: prep
 prep: tools test
 	@echo "----- preparing $(REPONAME) build -----"
-	# stage pips we will need to install in Docker build
-	mkdir -p $(BUILDROOT)/private_pips && rm -rf $(BUILDROOT)/private_pips/*
-	for entry in $(PRIVATE_PIPS) ; do \
-		IFS=";" read repo revision <<< "$$entry" ; \
-		cd $(BUILDROOT)/private_pips && git clone $$repo ; \
-		if [ "$$revision" != "" ] ; then \
-			name=$$(echo $$repo | awk -F/ '{print $$NF}' | sed -e 's/.git$$//') ; \
-			cd $(BUILDROOT)/private_pips/$$name ; \
-			current_revision=$$(git rev-parse HEAD) ; \
-			echo $$repo HEAD is currently at revision: $$current_revision ; \
-			echo Dependency specified in the Makefile for $$name is set to revision: $$revision ; \
-			echo Reverting to revision: $$revision in $$repo ; \
-			git reset --hard $$revision; \
-		fi ; \
-	done
-
-	# copy the app code to the build root
+	mkdir -p $(BUILDROOT)
 	cp -rp ./* $(BUILDROOT)
+	cp -rp ~/.pip $(BUILDROOT)/pip_config
 
 .PHONY: prod
 prod: prep
