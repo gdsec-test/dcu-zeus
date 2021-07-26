@@ -255,6 +255,7 @@ class TestRegisteredHandler:
                                                          mimir, mock_db, suspend):
         self._registered.intentionally_malicious(self.ticket_hosted_same_account)
         suspend.assert_not_called()
+        mimir.assert_not_called()
 
     @patch.object(RegisteredHandler, 'suspend', return_value=True)
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)

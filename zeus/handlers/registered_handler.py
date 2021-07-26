@@ -170,9 +170,11 @@ class RegisteredHandler(Handler):
         '''When we have a HOSTED IntMal resolution, Zeus will also suspend the domain name in addition to the host.
         This section accounts for the domain and hosting being in different accounts so we do not take all actions of
         intentionally malicious automation on an account we have not actually put eyes on'''
+        hosted_same_shopper = None
         if hosted_status == self.HOSTED:
-            host_shopper = get_host_shopper_id_from_dict(data)
-            if host_shopper and host_shopper != shopper_id:
+            if shopper_id == get_host_shopper_id_from_dict(data):
+                hosted_same_shopper = True
+            else:
                 return self.suspend(data)
 
         if self._is_domain_protected(domain, action='intentionally_malicious'):
@@ -192,15 +194,18 @@ class RegisteredHandler(Handler):
         self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
                            note_mappings['journal']['intentionallyMalicious'], [source])
 
-        self.mimir.write(abuse_type=report_type,
-                         domain=domain,
-                         subdomain=subdomain,
-                         domain_id=domain_id,
-                         hosted_status=self.REGISTERED,
-                         infraction_type=InfractionTypes.intentionally_malicious,
-                         record_type=RecordTypes.infraction,
-                         shopper_number=shopper_id,
-                         ticket_number=ticket_id)
+        '''We do not want to create a second infraction for the domain suspension if the associated hosting is in the
+        same customer account'''
+        if not hosted_same_shopper:
+            self.mimir.write(abuse_type=report_type,
+                             domain=domain,
+                             subdomain=subdomain,
+                             domain_id=domain_id,
+                             hosted_status=self.REGISTERED,
+                             infraction_type=InfractionTypes.intentionally_malicious,
+                             record_type=RecordTypes.infraction,
+                             shopper_number=shopper_id,
+                             ticket_number=ticket_id)
 
         self._notify_fraud(data, ticket_id, domain, shopper_id, report_type, source, target)
 
@@ -374,6 +379,7 @@ class RegisteredHandler(Handler):
         subdomain = data.get('sourceSubDomain')
         domain_id = get_kelvin_domain_id_from_dict(data)
         report_type = data.get('type')
+        hosted_status = data.get('hosted_status')
 
         if self._is_domain_protected(domain, action='suspend_csam'):
             return False
@@ -389,15 +395,23 @@ class RegisteredHandler(Handler):
                                                                                type=report_type)
         self.crm.notate_crm_account([shopper_id], ticket_id, note)
 
-        self.mimir.write(abuse_type=report_type,
-                         domain=domain,
-                         subdomain=subdomain,
-                         domain_id=domain_id,
-                         hosted_status=self.REGISTERED,
-                         infraction_type=InfractionTypes.suspended_csam,
-                         record_type=RecordTypes.infraction,
-                         shopper_number=shopper_id,
-                         ticket_number=ticket_id)
+        '''We do not want to create a second infraction for the domain suspension if the associated hosting is in the
+        same customer account'''
+        hosted_same_shopper = None
+        if hosted_status == self.HOSTED:
+            if shopper_id == get_host_shopper_id_from_dict(data):
+                hosted_same_shopper = True
+
+        if not hosted_same_shopper:
+            self.mimir.write(abuse_type=report_type,
+                             domain=domain,
+                             subdomain=subdomain,
+                             domain_id=domain_id,
+                             hosted_status=self.REGISTERED,
+                             infraction_type=InfractionTypes.suspended_csam,
+                             record_type=RecordTypes.infraction,
+                             shopper_number=shopper_id,
+                             ticket_number=ticket_id)
 
         if not self.registered_mailer.send_csam_shopper_suspension(ticket_id, domain, shopper_id, domain_id):
             self.slack.failed_sending_email(ticket_id)
