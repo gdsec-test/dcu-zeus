@@ -26,7 +26,7 @@ class VPS4(Product):
         :param response:
         :return:
         """
-        if response and response.status_code not in [401, 403, 500]:
+        if response and response.status_code in [401, 403, 500]:
             self._headers['Authorization'] = f'sso-jwt {self._get_jwt()}'
             return True
         return False
