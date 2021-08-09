@@ -72,10 +72,11 @@ def get_host_abuse_email_from_dict(dict_to_search):
         if hosting_abuse_list is not None:
             if isinstance(hosting_abuse_list, list):
                 for address in hosting_abuse_list:
-                    # Check for an address containing the string 'abuse'
+                    # When presented with a list of email addresses, we prefer to send to one
+                    #  with the following substrings
                     if any(x in address.lower() for x in ['abuse', 'noc']):
                         host_abuse_email.append(address)
-                # If no address containing 'abuse' was found, then just grab the first address
+                # If no address containing those substrings was found, then just grab the first address
                 if not host_abuse_email and hosting_abuse_list:
                     host_abuse_email.append(hosting_abuse_list[0])
             elif isinstance(hosting_abuse_list, str):

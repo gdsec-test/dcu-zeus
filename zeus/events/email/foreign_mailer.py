@@ -2,7 +2,6 @@ import logging
 
 from hermes.messenger import send_mail
 
-from settings import config_by_name
 from zeus.events.email.interface import Mailer
 from zeus.events.user_logging.events import generate_event
 from zeus.utils.functions import sanitize_url
@@ -12,8 +11,7 @@ class ForeignMailer(Mailer):
     def __init__(self, app_settings):
         super(ForeignMailer, self).__init__(app_settings)
         self._logger = logging.getLogger('celery.tasks')
-        self.testing_email_address = [
-            {'email': config_by_name[self.env].NON_PROD_EMAIL_ADDRESS}] if self.env != 'prod' else []
+        self.testing_email_address = [{'email': app_settings.NON_PROD_EMAIL_ADDRESS}] if self.env != 'prod' else []
 
     def send_foreign_hosting_notice(self, ticket_id, domain, source, hosting_brand, recipients,
                                     ip_address='Unable to ascertain IP Address'):
@@ -24,7 +22,7 @@ class ForeignMailer(Mailer):
         :param domain:
         :param source:
         :param hosting_brand:
-        :param recipients:
+        :param recipients: list of email addresses
         :param ip_address:
         :return:
         """
@@ -43,9 +41,8 @@ class ForeignMailer(Mailer):
                                    'IPADDRESS': ip_address}
 
             for email in recipients:
-                if email and any(x in email.lower() for x in ['abuse', 'noc']):
-                    kwargs['recipients'] = self.testing_email_address or [{'email': email}]
-                    send_mail(template, substitution_values, **kwargs)
+                kwargs['recipients'] = self.testing_email_address or [{'email': email}]
+                send_mail(template, substitution_values, **kwargs)
         except Exception as e:
             self._logger.error(f'Unable to send {template} for {domain}: {e}')
             generate_event(ticket_id, exception_type, type=message_type)
