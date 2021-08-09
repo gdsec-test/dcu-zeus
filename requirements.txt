@@ -33,7 +33,7 @@ sentinels==1.0.0
 six==1.15.0
 suds-py3==1.4.4.1
 typing-extensions==3.7.4.3
-urllib3==1.26.4
+urllib3==1.26.5
 vine==5.0.0
 wcwidth==0.2.5
 zipp==3.4.1
