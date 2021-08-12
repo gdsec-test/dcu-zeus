@@ -90,8 +90,8 @@ class Throttle(object):
 
     ''' Shopper ID specific time outs '''
 
-    def can_crm_be_notated(self, shopper_id):
-        crm_key = f'{shopper_id}_notated_24hr_hold'
+    def can_crm_be_notated(self, key):
+        crm_key = f'{key}_notated_24hr_hold'
         if not self._get_anti_spam_key(crm_key):
             self._set_anti_spam_key(crm_key)
             return True

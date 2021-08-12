@@ -44,10 +44,10 @@ class TestPersist:
         assert_false(self._persist.can_suspend_domain(self._domain))
 
     def test_can_crm_be_notated(self):
-        assert_true(self._persist.can_crm_be_notated(self._shopper_id))
+        assert_true(self._persist.can_crm_be_notated(self._domain))
 
-        self._persist.set_key(self._shopper_id)
-        assert_false(self._persist.can_crm_be_notated(self._shopper_id))
+        self._persist.set_key(self._domain)
+        assert_false(self._persist.can_crm_be_notated(self._domain))
 
     def test_can_slack_message_be_sent(self):
         key = 'slack-key'

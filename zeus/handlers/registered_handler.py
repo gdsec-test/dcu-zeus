@@ -123,7 +123,7 @@ class RegisteredHandler(Handler):
         note = note_mappings['registered']['customerWarning']['crm'].format(domain=domain,
                                                                             type=report_type,
                                                                             location=source)
-        self.crm.notate_crm_account(shopper_id_list, ticket_id, note)
+        self.crm.notate_crm_account(shopper_id_list, ticket_id, note, domain)
         self.journal.write(EventTypes.customer_warning, self.DOMAIN, domain, report_type,
                            note_mappings['journal']['customerWarning'], [source])
 
@@ -190,7 +190,7 @@ class RegisteredHandler(Handler):
         note = note_mappings['registered']['intentionallyMalicious']['crm'].format(domain=domain,
                                                                                    type=report_type,
                                                                                    location=source)
-        self.crm.notate_crm_account([shopper_id], ticket_id, note)
+        self.crm.notate_crm_account([shopper_id], ticket_id, note, domain)
         self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
                            note_mappings['journal']['intentionallyMalicious'], [source])
 
@@ -250,7 +250,7 @@ class RegisteredHandler(Handler):
 
         note = note_mappings['registered']['shopperCompromise']['crm'].format(domain=domain, type=report_type,
                                                                               location=source)
-        self.crm.notate_crm_account([shopper_id], ticket_id, note)
+        self.crm.notate_crm_account([shopper_id], ticket_id, note, domain)
         self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
                            note_mappings['journal']['shopperCompromise'], [source])
 
@@ -301,7 +301,7 @@ class RegisteredHandler(Handler):
         note = note_mappings['registered']['repeatOffender']['crm'].format(domain=domain,
                                                                            type=report_type,
                                                                            location=source)
-        self.crm.notate_crm_account([shopper_id], ticket_id, note)
+        self.crm.notate_crm_account([shopper_id], ticket_id, note, domain)
         self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
                            note_mappings['journal']['repeatOffender'], [source])
 
@@ -348,7 +348,7 @@ class RegisteredHandler(Handler):
         note = note_mappings['registered']['suspension']['crm'].format(domain=domain,
                                                                        type=report_type,
                                                                        location=source)
-        self.crm.notate_crm_account([shopper_id], ticket_id, note)
+        self.crm.notate_crm_account([shopper_id], ticket_id, note, domain)
         self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
                            note_mappings['journal']['suspension'], [source])
 
@@ -393,7 +393,7 @@ class RegisteredHandler(Handler):
 
         note = note_mappings['registered']['suspension']['csam']['crm'].format(domain=domain,
                                                                                type=report_type)
-        self.crm.notate_crm_account([shopper_id], ticket_id, note)
+        self.crm.notate_crm_account([shopper_id], ticket_id, note, domain)
 
         '''We do not want to create a second infraction for the domain suspension if the associated hosting is in the
         same customer account'''
