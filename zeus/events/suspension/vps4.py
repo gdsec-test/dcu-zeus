@@ -37,7 +37,8 @@ class VPS4(Product):
 
         try:
             response = requests.get(credits_url, headers=self._headers)
-
+            # Add temporary debugging so we understand why VPS4 interactions are failing.
+            self._logger.info(f'Attempting to retrieve credits got {response.status_code} and {response.text}')
             if self._require_jwt_refresh(response):
                 response = requests.get(credits_url, headers=self._headers)
 
