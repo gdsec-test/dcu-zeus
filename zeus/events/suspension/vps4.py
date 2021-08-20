@@ -26,7 +26,8 @@ class VPS4(Product):
         :param response:
         :return:
         """
-        if response and response.status_code in [401, 403, 500]:
+        # You can not just perform a if check on response, as that returns false for non 2xx status codes.
+        if isinstance(response, requests.models.Response) and response.status_code in [401, 403, 500]:
             self._headers['Authorization'] = f'sso-jwt {self._get_jwt()}'
             return True
         return False
@@ -37,8 +38,6 @@ class VPS4(Product):
 
         try:
             response = requests.get(credits_url, headers=self._headers)
-            # Add temporary debugging so we understand why VPS4 interactions are failing.
-            self._logger.info(f'Attempting to retrieve credits got {response.status_code} and {response.text}')
             if self._require_jwt_refresh(response):
                 response = requests.get(credits_url, headers=self._headers)
 
