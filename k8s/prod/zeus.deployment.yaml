@@ -46,12 +46,12 @@ spec:
           - name: DB_PASS
             valueFrom:
               secretKeyRef:
-                name: db-zeus
+                name: db-phishstory-v2
                 key: password
           - name: DB_KELVIN_PASS
             valueFrom:
               secretKeyRef:
-                name: db-kelvin-zeus
+                name: db-kelvin-v2
                 key: password
 
           - name: DIABLOUSER

@@ -91,11 +91,11 @@ class ProductionAppConfig(AppConfig):
 
     DB = 'phishstory'
     DB_HOST = '10.22.9.209'
-    DB_USER = 'sau_p_phish'
+    DB_USER = 'sau_p_phishv2'
 
     DB_KELVIN = 'dcu_kelvin'
     DB_KELVIN_HOST = '10.22.9.209'
-    DB_KELVIN_USER = 'sau_service_kelvin'
+    DB_KELVIN_USER = 'sau_service_kelvinv2'
 
     SLACK_CHANNEL = '#dcu_alerts'
 
