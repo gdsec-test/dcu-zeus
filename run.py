@@ -10,6 +10,7 @@ from dcustructuredlogging import celerylogger  # noqa: F401
 from celeryconfig import CeleryConfig
 from settings import config_by_name
 from zeus.events.email.reporter_mailer import ReporterMailer
+from zeus.events.email.utility_mailer import UtilityMailer
 from zeus.handlers.foreign_handler import ForeignHandler
 from zeus.handlers.fraud_handler import FraudHandler
 from zeus.handlers.hosted_handler import HostedHandler
@@ -52,6 +53,7 @@ fraud = FraudHandler(config)
 hosted = HostedHandler(config)
 registered = RegisteredHandler(config)
 foreign = ForeignHandler(config)
+utility_mailer = UtilityMailer(config)
 reporter_mailer = ReporterMailer(config)
 
 
@@ -172,6 +174,16 @@ def shopper_compromise(ticket_id, investigator_id):
     # Add investigator user id to data so its available in _notify_fraud()
     data['investigator_user_id'] = investigator_id
     return route_request(data, 'shopper_compromise') if data else None
+
+
+@celery.task()
+def shopper_comp_notify(source):
+    return utility_mailer.send_account_compromised_email(source)
+
+
+@celery.task()
+def pci_compliance(shopper_id, domain):
+    return utility_mailer.send_pci_compliance_violation(shopper_id, domain)
 
 
 @celery.task()
