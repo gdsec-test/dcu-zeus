@@ -71,17 +71,3 @@ class UtilityMailer(Mailer):
             generate_event(domain, exception_type, type=message_type)
             return False
         return True
-
-    def _email_limit(self, entries):
-        """
-        Limits the number of bulk emails submitted at once to 1,000 or less.
-        :param entries:
-        :return: boolean
-        """
-        submission_limit = 1000
-        count = 0
-        for entry in entries:
-            count += 1
-            if count == submission_limit:
-                self._logger.warning(f'Email limit has been reached; capacity is set to 1,000 recipients at a time.')
-                break

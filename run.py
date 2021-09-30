@@ -56,6 +56,8 @@ foreign = ForeignHandler(config)
 utility_mailer = UtilityMailer(config)
 reporter_mailer = ReporterMailer(config)
 
+email_limit = 1000
+
 
 def route_request(data, request_type, dual_suspension=False):
     hosted_status = data.get('hosted_status') or data.get('hostedStatus')
@@ -177,13 +179,39 @@ def shopper_compromise(ticket_id, investigator_id):
 
 
 @celery.task()
-def shopper_comp_notify(source):
-    return utility_mailer.send_account_compromised_email(source)
+def shopper_comp_notify(list_of_shoppers):
+    failed_tasks = []
+    if len(list_of_shoppers) <= email_limit:
+        for shopper in list_of_shoppers:
+            email_result = utility_mailer.send_account_compromised_email(shopper)
+            if not email_result:
+                failed_tasks.append(shopper)
+    else:
+        raise ValueError('Email limit is set to 1,000 recipients at a time. Please try a smaller list')
+
+    return failed_tasks
 
 
 @celery.task()
-def pci_compliance(shopper_id, domain):
-    return utility_mailer.send_pci_compliance_violation(shopper_id, domain)
+def pci_compliance(shopper_and_domain_list):
+    failed_tasks = []
+    shopper_id = None
+    domain = None
+    if len(shopper_and_domain_list) <= email_limit:
+        for dic in shopper_and_domain_list:
+            for val in dic.values():
+                if val.isdecimal():
+                    shopper_id = val
+                else:
+                    domain = val
+
+            email_result = utility_mailer.send_pci_compliance_violation(shopper_id, domain)
+
+            if not email_result:
+                failed_tasks.append(dic)
+    else:
+        raise ValueError('Email limit is set to 1,000 recipients at a time. Please try a smaller list')
+    return failed_tasks
 
 
 @celery.task()
