@@ -179,7 +179,7 @@ def shopper_compromise(ticket_id, investigator_id):
 
 
 @celery.task()
-def shopper_comp_notify(list_of_shoppers):
+def shopper_comp_notify(list_of_shoppers: list) -> list:
     failed_tasks = []
     if len(list_of_shoppers) <= email_limit:
         for shopper in list_of_shoppers:
@@ -193,22 +193,19 @@ def shopper_comp_notify(list_of_shoppers):
 
 
 @celery.task()
-def pci_compliance(shopper_and_domain_list):
+def pci_compliance(shopper_and_domain_list: list) -> list:
     failed_tasks = []
     shopper_id = None
     domain = None
     if len(shopper_and_domain_list) <= email_limit:
-        for dic in shopper_and_domain_list:
-            for val in dic.values():
-                if val.isdecimal():
-                    shopper_id = val
-                else:
-                    domain = val
+        for index, hosting_customer in enumerate(shopper_and_domain_list):
+            shopper_id = hosting_customer[0]
+            domain = hosting_customer[1]
 
             email_result = utility_mailer.send_pci_compliance_violation(shopper_id, domain)
 
             if not email_result:
-                failed_tasks.append(dic)
+                failed_tasks.append(hosting_customer)
     else:
         raise ValueError('Email limit is set to 1,000 recipients at a time. Please try a smaller list')
     return failed_tasks

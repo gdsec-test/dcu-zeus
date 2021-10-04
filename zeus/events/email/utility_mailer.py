@@ -14,13 +14,8 @@ class UtilityMailer(Mailer):
         self._throttle = Throttle(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)
         self._CAN_FLOOD = app_settings.CAN_FLOOD
 
-    def send_account_compromised_email(self, shopper_id):
-        """
-        Sends an email to impacted shoppers regarding possible account compromise
-        success_message = 'shopper_compromise_email_sent', 'template': 5282
-        :param shopper_id:
-        :return: boolean
-        """
+    def send_account_compromised_email(self, shopper_id: int) -> bool:
+        # Sends an OCM template 5282 to impacted shoppers regarding possible account compromise
 
         template = 'hosted.suspend_shopper_compromise'
         message_type = 'shopper_compromise_email'
@@ -42,14 +37,8 @@ class UtilityMailer(Mailer):
             return False
         return True
 
-    def send_pci_compliance_violation(self, shopper_id, domain):
-        """
-        Sends an email to impacted shoppers regarding possible account compromise
-        success_message = 'pci_violation_email_sent', 'template': 6471
-        :param shopper_id:
-        :param domain:
-        :return: boolean
-        """
+    def send_pci_compliance_violation(self, shopper_id: int, domain: str) -> bool:
+        # Sends an OCM template 6471 to hosted shoppers regarding pci compliance violations
 
         template = 'hosted.suspend_pci_compliance'
         message_type = 'pci_compliance_email'
