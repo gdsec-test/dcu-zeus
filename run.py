@@ -10,6 +10,7 @@ from dcustructuredlogging import celerylogger  # noqa: F401
 from celeryconfig import CeleryConfig
 from settings import config_by_name
 from zeus.events.email.reporter_mailer import ReporterMailer
+from zeus.events.email.utility_mailer import UtilityMailer
 from zeus.handlers.foreign_handler import ForeignHandler
 from zeus.handlers.fraud_handler import FraudHandler
 from zeus.handlers.hosted_handler import HostedHandler
@@ -52,7 +53,10 @@ fraud = FraudHandler(config)
 hosted = HostedHandler(config)
 registered = RegisteredHandler(config)
 foreign = ForeignHandler(config)
+utility_mailer = UtilityMailer(config)
 reporter_mailer = ReporterMailer(config)
+
+email_limit = 1000
 
 
 def route_request(data, request_type, dual_suspension=False):
@@ -172,6 +176,39 @@ def shopper_compromise(ticket_id, investigator_id):
     # Add investigator user id to data so its available in _notify_fraud()
     data['investigator_user_id'] = investigator_id
     return route_request(data, 'shopper_compromise') if data else None
+
+
+@celery.task()
+def shopper_comp_notify(list_of_shoppers: list) -> list:
+    failed_tasks = []
+    if len(list_of_shoppers) <= email_limit:
+        for shopper in list_of_shoppers:
+            email_result = utility_mailer.send_account_compromised_email(shopper)
+            if not email_result:
+                failed_tasks.append(shopper)
+    else:
+        raise ValueError('Email limit is set to 1,000 recipients at a time. Please try a smaller list')
+
+    return failed_tasks
+
+
+@celery.task()
+def pci_compliance(shopper_and_domain_list: list) -> list:
+    failed_tasks = []
+    shopper_id = None
+    domain = None
+    if len(shopper_and_domain_list) <= email_limit:
+        for index, hosting_customer in enumerate(shopper_and_domain_list):
+            shopper_id = hosting_customer[0]
+            domain = hosting_customer[1]
+
+            email_result = utility_mailer.send_pci_compliance_violation(shopper_id, domain)
+
+            if not email_result:
+                failed_tasks.append(hosting_customer)
+    else:
+        raise ValueError('Email limit is set to 1,000 recipients at a time. Please try a smaller list')
+    return failed_tasks
 
 
 @celery.task()
