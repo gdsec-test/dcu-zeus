@@ -5,11 +5,13 @@ from kombu import Exchange, Queue
 
 
 class CeleryConfig:
+    _result_hostname = os.getenv("RESULT_BACKEND_HOSTNAME", "result-backend")
     broker_transport = 'pyamqp'
     broker_use_ssl = not os.getenv('DISABLESSL', False)  # True unless local docker-compose testing
     worker_concurrency = 4
     task_serializer = 'json'
-    result_serializer = 'json'
+    result_serializer = 'pickle'
+    result_backend = f'redis://{_result_hostname}:6379/0'
     accept_content = ['json', 'pickle']
     imports = 'run'
     worker_hijack_root_logger = False

@@ -129,6 +129,8 @@ spec:
             value: /gocentral_certs/tls.crt
           - name: GOCENTRAL_SSL_KEY
             value: /gocentral_certs/tls.key
+          - name: RESULT_BACKEND_HOSTNAME
+            value: godaddy-service-redis.abuse-api-ote.svc.cluster.local
 
           volumeMounts:
           - name: tls-ocm-files

@@ -100,6 +100,7 @@ If you would like to run Zeus locally you will need to specify the following env
 * `OCM_SSL_KEY` (The path to the SSL Key white-listed for OCM API `phishstory.int.`)
 * `ORION_SSL_CERT` (The path to the SSL Cert white-listed for Orion Web Service `dcu.ecomm.dev.authclient.int.godaddy.com` prod only)
 * `ORION_SSL_KEY` (The path to the SSL Key white-listed for Orion Web Service `dcu.ecomm.dev.authclient.int.godaddy.com` prod only)
+* `RESULT_BACKEND_HOSTNAME` (localhost)
 * `ZEUS_SSL_CERT` (The path to the SSL Cert for communicating with CRM Alert, DCU Journal, Mimir and Shoplocked `dcu.zeus.int`)
 * `ZEUS_SSL_KEY` (The path to the SSL Key for communicating with CRM Alert, DCU Journal, Mimir and Shoplocked `dcu.zeus.int`)
 * `EMAIL_RECIPIENT` (The email address you want `non-shopper` emails sent to while testing, instead of emailing fraud. e.g. user@example.com)  *** *ONLY WORKS WITH TEMPLATES THAT SEND TO NON-SHOPPERS* ***
