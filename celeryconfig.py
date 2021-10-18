@@ -18,6 +18,8 @@ class CeleryConfig:
     task_acks_late = True
     worker_prefetch_multiplier = 1
     worker_send_task_events = False
+    # Force kill a task if it takes longer than three minutes.
+    task_time_limit = 180
 
     def __init__(self, app_settings):
         self.broker_url = os.getenv('BROKER_URL', None)  # For local docker-compose testing
