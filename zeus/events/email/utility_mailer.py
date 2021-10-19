@@ -14,7 +14,7 @@ class UtilityMailer(Mailer):
         self._throttle = Throttle(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)
         self._CAN_FLOOD = app_settings.CAN_FLOOD
 
-    def send_account_compromised_email(self, shopper_id: int) -> bool:
+    def send_account_compromised_email(self, shopper_id: str) -> bool:
         # Sends an OCM template 5282 to impacted shoppers regarding possible account compromise
 
         template = 'hosted.suspend_shopper_compromise'
@@ -26,8 +26,8 @@ class UtilityMailer(Mailer):
         try:
             if self._throttle.can_shopper_email_be_sent(redis_key) or self._CAN_FLOOD:
                 substitution_values = {'ACCOUNT_NUMBER': shopper_id}
-
-                send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
+                sc = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
+                self._logger.info(f'ShopperID: {shopper_id}; Result: {sc}')  # log OCM info
 
             else:
                 self._logger.warning(f'Cannot send {template} for {shopper_id}... still within 24hr window')
@@ -37,7 +37,7 @@ class UtilityMailer(Mailer):
             return False
         return True
 
-    def send_pci_compliance_violation(self, shopper_id: int, domain: str) -> bool:
+    def send_pci_compliance_violation(self, shopper_id: str, domain: str) -> bool:
         # Sends an OCM template 6471 to hosted shoppers regarding pci compliance violations
 
         template = 'hosted.suspend_pci_compliance'
@@ -51,7 +51,8 @@ class UtilityMailer(Mailer):
                 substitution_values = {'ACCOUNT_NUMBER': shopper_id,
                                        'DOMAIN': domain}
 
-                send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
+                pci = send_mail(template, substitution_values, **self.generate_kwargs_for_hermes())
+                self._logger.info(f'ShopperID: {shopper_id}, Domain: {domain}; Result: {pci}')  # log OCM info
 
             else:
                 self._logger.warning(f'Cannot send {template} for {domain}... still within 24hr window')
