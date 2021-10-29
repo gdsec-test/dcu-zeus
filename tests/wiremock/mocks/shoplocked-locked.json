@@ -1,0 +1,11 @@
+{
+  "request" : {
+    "method" : "POST",
+    "urlPattern" : "/shoplocked/lockAdmin"
+  },
+  "response" : {
+    "status" : 201,
+    "body": "{ \"success\": [] }",
+    "transformers": ["response-template"]
+  }
+}

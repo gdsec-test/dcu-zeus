@@ -18,11 +18,12 @@ spec:
         app: "zeus"
     spec:
       imagePullSecrets:
-        -
-          name: "dcu-artifactory-creds"
+        - name: "dcu-artifactory-creds"
       containers:
-        -
-          name: "zeus"
+        - name: wiremock
+          imagePullPolicy: Always
+          image: docker-dcu-local.artifactory.secureserver.net/zeus/wiremock:dev
+        - name: "zeus"
           imagePullPolicy: "Always"
           image: "docker-dcu-local.artifactory.secureserver.net/zeus:dev"
           livenessProbe:

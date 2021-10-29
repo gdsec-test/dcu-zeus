@@ -66,6 +66,7 @@ dev: prep
 	@echo "----- building $(REPONAME) dev -----"
 	sed -ie 's/THIS_STRING_IS_REPLACED_DURING_BUILD/$(DATE)/g' $(BUILDROOT)/k8s/dev/zeus.deployment.yaml
 	docker build -t $(DOCKERREPO):dev $(BUILDROOT)
+	docker build --no-cache=true -t $(DOCKERREPO)/wiremock:dev -f Dockerfile.wiremock .
 
 .PHONY: prod-deploy
 prod-deploy: prod
@@ -83,6 +84,7 @@ ote-deploy: ote
 dev-deploy: dev
 	@echo "----- deploying $(REPONAME) dev -----"
 	docker push $(DOCKERREPO):dev
+	docker push $(DOCKERREPO)/wiremock:dev
 	kubectl --context dev-dcu apply -f $(BUILDROOT)/k8s/dev/zeus.deployment.yaml --record
 
 .PHONY: clean

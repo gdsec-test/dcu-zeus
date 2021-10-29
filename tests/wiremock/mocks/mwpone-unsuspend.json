@@ -1,0 +1,11 @@
+{
+  "request" : {
+    "method" : "POST",
+    "urlPattern" : "/mwpone/v1/accounts/(.*\\?unsuspendAccount)"
+  },
+  "response" : {
+    "status" : 200,
+    "body": "true",
+    "transformers": ["response-template"]
+  }
+}

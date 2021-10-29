@@ -1,0 +1,18 @@
+{
+    "request": {
+        "method": "POST",
+        "urlPattern": "/domains/v1/domains/domaininfo",
+        "bodyPatterns": [
+            {
+                "matchesJsonPath": "$[?(@.domain =~ /^stub(registered)(\\d{9}|random)(\\d{9}|random)(diablo|gocentral|mwpone|foreign)(\\d{9}|random)([0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}|random)-.*\\.com$/i)]"
+            }
+        ]
+    },
+    "response": {
+        "status": 200,
+        "bodyFileName": "domain-info-resp.json",
+        "transformers": [
+            "response-template"
+        ]
+    }
+}

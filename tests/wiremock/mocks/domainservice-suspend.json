@@ -1,0 +1,13 @@
+{
+    "request": {
+        "method": "POST",
+        "urlPattern": "/domains/v1/domains/suspenddomain"
+    },
+    "response": {
+        "status": 200,
+        "body": "{\"count\":1}",
+        "transformers": [
+            "response-template"
+        ]
+    }
+}

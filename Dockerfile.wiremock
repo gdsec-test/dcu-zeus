@@ -1,0 +1,17 @@
+FROM openjdk:8-jre-alpine
+
+ENV WIREMOCK_VERSION 2.28.1
+
+# grab wiremock standalone jar
+RUN mkdir -p /var/wiremock/lib/
+RUN wget https://repo1.maven.org/maven2/com/github/tomakehurst/wiremock-jre8-standalone/$WIREMOCK_VERSION/wiremock-jre8-standalone-$WIREMOCK_VERSION.jar -O /var/wiremock/lib/wiremock-jre8-standalone.jar
+RUN mkdir -p /wiremock/mappings/
+RUN mkdir -p /wiremock/__files/
+COPY tests/wiremock/mocks/* /wiremock/mappings/
+COPY tests/wiremock/files/* /wiremock/__files/
+
+WORKDIR /wiremock
+
+EXPOSE 8080
+
+CMD java -jar /var/wiremock/lib/wiremock-jre8-standalone.jar --port 8080 --root-dir /wiremock --global-response-templating

@@ -1,0 +1,10 @@
+{
+  "request" : {
+    "method" : "POST",
+    "urlPattern" : "/diablo/v1/accounts/(.*\\?reinstate)"
+  },
+  "response" : {
+    "status" : 200,
+    "transformers": ["response-template"]
+  }
+}

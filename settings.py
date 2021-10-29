@@ -153,12 +153,15 @@ class DevelopmentAppConfig(AppConfig):
     DB_KELVIN_HOST = '10.36.156.188'
     DB_KELVIN_USER = 'devkelvin'
 
-    DOMAIN_SERVICE = 'domainservice-rest.abuse-api-dev.svc.cluster.local:8080'
+    DOMAIN_SERVICE = 'localhost:8080/domains'
+    GOCENTRAL_URL = 'http://localhost:8080/orion/account/accountoperations.asmx'
+    MWPONE_URL = 'http://localhost:8080/mwpone/v1/accounts/'
+    DIABLO_URL = 'http://localhost:8080/diablo/v1/accounts/'
 
     SSO_URL = 'https://sso.dev-godaddy.com'
     JOURNAL_URL = 'http://dcu-journal.abuse-api-dev.svc.cluster.local:5000'
     MIMIR_URL = 'https://mimir.int.dev-godaddy.com'
-    SHOPLOCKED_URL = 'https://shoplocked.api.int.dev-godaddy.com'
+    SHOPLOCKED_URL = 'http://localhost:8080/shoplocked'
     CRMALERT_URL = 'https://crm-alert.int.dev-godaddy.com'
 
     VPS4_URLS = OrderedDict([('IAD2', 'https://vps4.api.dev-godaddy.com'),
