@@ -1,4 +1,4 @@
-import logging.config
+import logging
 import os
 
 import yaml
@@ -48,6 +48,8 @@ if os.path.exists(path):
     logging.config.dictConfig(lconfig)
 else:
     logging.basicConfig(level=logging.INFO)
+
+logger = logging.getLogger('celery.tasks')
 
 fraud = FraudHandler(config)
 hosted = HostedHandler(config)
@@ -229,3 +231,54 @@ def submitted_to_ncmec(ticket_id):
 def suspend_csam(ticket_id):
     data = get_kelvin_database_handle().get_incident(ticket_id)
     return route_request(data, 'suspend_csam', dual_suspension=True) if data else None
+
+
+''' Route request for new tasks coming from hubstream'''
+
+
+def route_hubstream_action(data, ticket_id: str, entity_type: str, action: str) -> bool:
+    if data is None:
+        logger.error('Unable to retrieve info for ticket id: {ticket_id}')
+        return False
+    hosted_status = data.get('hosted_status') or data.get('hostedStatus')
+    if entity_type == 'HOST' and hosted_status == 'HOSTED':
+        return hosted.process(data, action)
+    elif entity_type == 'HOST':
+        logger.error(f'Ticket id: {ticket_id} has a hosted status of {hosted_status}. The host action cannot be processed')
+        return False
+    elif entity_type == 'DOMAIN' and hosted_status in ['HOSTED', 'REGISTED', 'FOREIGN']:
+        return registered.process(data, action)
+    elif entity_type == 'DOMAIN':
+        logger.error(f'Ticket id: {ticket_id} has a hosted status of {hosted_status}. The domain action cannot be processed')
+        return False
+    else:
+        logger.error(f'Action: {action} cannot be processed on Ticket id: {ticket_id}')
+        return False
+
+
+'''New hubstrem celery tasks'''
+
+
+@celery.task
+def suspend_v2(ticket_id: str, entity_type: str) -> bool:
+    data = get_database_handle().get_incident(ticket_id)
+    return route_hubstream_action(data, ticket_id, entity_type, 'suspend')
+
+
+@celery.task()
+def intentionally_malicious_v2(ticket_id: str, entity_type: str, investigator_id: str) -> bool:
+    data = get_database_handle().get_incident(ticket_id)
+    data['investigator_user_id'] = investigator_id
+    return route_hubstream_action(data, ticket_id, entity_type, 'intentionally_malicious')
+
+
+@celery.task()
+def extensive_compromise_v2(ticket_id: str, entity_type: str) -> bool:
+    data = get_database_handle().get_incident(ticket_id)
+    return route_hubstream_action(data, ticket_id, entity_type, 'extensive_compromise')
+
+
+@celery.task()
+def repeat_offender_v2(ticket_id: str, entity_type: str) -> bool:
+    data = get_database_handle().get_incident(ticket_id)
+    return route_hubstream_action(data, ticket_id, entity_type, 'repeat_offender')
