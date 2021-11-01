@@ -26,10 +26,10 @@ class TestPersist:
         assert_false(self._persist.can_shopper_email_be_sent(self._shopper_id))
 
     def test_can_fraud_email_be_sent(self):
-        assert_true(self._persist.can_fraud_email_be_sent(self._domain))
+        assert_true(self._persist.can_fraud_email_be_sent(self._shopper_id))
 
-        self._persist.set_key(self._domain)
-        assert_false(self._persist.can_fraud_email_be_sent(self._domain))
+        self._persist.set_key(self._shopper_id)
+        assert_false(self._persist.can_fraud_email_be_sent(self._shopper_id))
 
     def test_can_suspend_hosting_product(self):
         assert_true(self._persist.can_suspend_hosting_product(self._guid))

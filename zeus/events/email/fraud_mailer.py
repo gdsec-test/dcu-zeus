@@ -38,7 +38,7 @@ class FraudMailer(Mailer):
         kwargs = self.generate_kwargs_for_hermes()
 
         try:
-            if self._throttle.can_fraud_email_be_sent(domain):
+            if self._throttle.can_fraud_email_be_sent(shopper_id):
                 substitution_values = {'ACCOUNT_NUMBER': shopper_id,
                                        'DOMAIN_CREATION_DATE': str(domain_create_date),
                                        'DOMAIN': domain,
@@ -75,7 +75,7 @@ class FraudMailer(Mailer):
         kwargs = self.generate_kwargs_for_hermes()
 
         try:
-            if self._throttle.can_fraud_email_be_sent(domain):
+            if self._throttle.can_fraud_email_be_sent(shopper_id):
                 substitution_values = {'ACCOUNT_NUMBER': shopper_id,
                                        'SHOPPER_CREATION_DATE': str(shopper_create_date),
                                        'DOMAIN': domain,
@@ -110,7 +110,7 @@ class FraudMailer(Mailer):
         kwargs = self.generate_kwargs_for_hermes()
 
         try:
-            if self._throttle.can_fraud_email_be_sent(domain):
+            if self._throttle.can_fraud_email_be_sent(shopper_id):
                 substitution_values = {'ACCOUNT_NUMBER': shopper_id,
                                        'DOMAIN': domain,
                                        'MALICIOUS_ACTIVITY': report_type,
@@ -144,7 +144,7 @@ class FraudMailer(Mailer):
         kwargs = self.generate_kwargs_for_hermes()
 
         try:
-            if self._throttle.can_fraud_email_be_sent(domain):
+            if self._throttle.can_fraud_email_be_sent(shopper_id):
                 substitution_values = {'ACCOUNT_NUMBER': shopper_id,
                                        'DOMAIN': domain,
                                        'MALICIOUS_ACTIVITY': report_type,
@@ -182,7 +182,7 @@ class FraudMailer(Mailer):
         kwargs = self.generate_kwargs_for_hermes()
 
         try:
-            if self._throttle.can_fraud_email_be_sent(domain):
+            if self._throttle.can_fraud_email_be_sent(shopper_id):
                 substitution_values = {'ACCOUNT_NUMBER': shopper_id,
                                        'SHOPPER_CREATION_DATE': str(account_create_date),
                                        'DOMAIN': domain,
@@ -219,7 +219,7 @@ class FraudMailer(Mailer):
         kwargs = self.generate_kwargs_for_hermes()
 
         try:
-            if self._throttle.can_fraud_email_be_sent(domain):
+            if self._throttle.can_fraud_email_be_sent(shopper_id):
                 substitution_values = {'ACCOUNT_NUMBER': shopper_id,
                                        'DOMAIN': guid,  # Template requires DOMAIN param
                                        'MALICIOUS_ACTIVITY': report_type,
@@ -255,7 +255,7 @@ class FraudMailer(Mailer):
         kwargs = self.generate_kwargs_for_hermes()
 
         try:
-            if self._throttle.can_fraud_email_be_sent(domain):
+            if self._throttle.can_fraud_email_be_sent(shopper_id):
                 substitution_values = {'ACCOUNT_NUMBER': shopper_id,
                                        'DOMAIN': guid,  # Template requires DOMAIN param
                                        'MALICIOUS_ACTIVITY': report_type,
