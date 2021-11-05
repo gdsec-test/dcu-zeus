@@ -1,6 +1,7 @@
 import os
 import urllib.parse
 from collections import OrderedDict
+from urllib.parse import quote
 
 
 class AppConfig(object):
@@ -53,6 +54,9 @@ class AppConfig(object):
 
     SHOPLOCKED_URL = ''
     CRMALERT_URL = ''
+
+    BROKER_PASS = quote(os.getenv('BROKER_PASS', 'password'))
+    BROKER_URL = 'amqp://02d1081iywc7Av2:' + BROKER_PASS + '@rmq-dcu.int.dev-godaddy.com:5672/grandma'
 
     def __init__(self):
         self.DB_PASS = urllib.parse.quote(os.getenv('DB_PASS', 'password'))
@@ -112,6 +116,9 @@ class ProductionAppConfig(AppConfig):
                              ('SIN2', 'https://vps4.api.sin2.godaddy.com'),
                              ('AMS3', 'https://vps4.api.ams3.godaddy.com')])
 
+    BROKER_PASS = quote(os.getenv('BROKER_PASS', 'password'))
+    BROKER_URL = 'amqp://02d1081iywc7Av2:' + BROKER_PASS + '@rmq-dcu.int.godaddy.com:5672/grandma'
+
     def __init__(self):
         super(ProductionAppConfig, self).__init__()
 
@@ -137,6 +144,9 @@ class OTEAppConfig(AppConfig):
     VPS4_URLS = OrderedDict([('IAD2', 'https://vps4.api.test-godaddy.com'),
                              ('SIN2', 'https://vps4.api.test-godaddy.com'),
                              ('AMS3', 'https://vps4.api.test-godaddy.com')])
+
+    BROKER_PASS = quote(os.getenv('BROKER_PASS', 'password'))
+    BROKER_URL = 'amqp://02d1081iywc7Av2:' + BROKER_PASS + '@rmq-dcu.int.godaddy.com:5672/grandma'
 
     def __init__(self):
         super(OTEAppConfig, self).__init__()

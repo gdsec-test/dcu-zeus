@@ -1,7 +1,8 @@
 import os
-from urllib.parse import quote
 
 from kombu import Exchange, Queue
+
+from settings import AppConfig
 
 
 class CeleryConfig:
@@ -21,11 +22,12 @@ class CeleryConfig:
     # Force kill a task if it takes longer than three minutes.
     task_time_limit = 180
 
-    def __init__(self, app_settings):
+    def __init__(self, app_settings: AppConfig):
         self.broker_url = os.getenv('BROKER_URL', None)  # For local docker-compose testing
         if not self.broker_url:
-            self.BROKER_PASS = quote(os.getenv('BROKER_PASS', 'password'))
-            self.broker_url = 'amqp://02d1081iywc7Av2:' + self.BROKER_PASS + '@rmq-dcu.int.godaddy.com:5672/grandma'
+            self.BROKER_PASS = app_settings.BROKER_PASS
+            self.broker_url = app_settings.BROKER_URL
+
         self.task_queues = (
             Queue(app_settings.ZEUSQUEUE, Exchange(app_settings.ZEUSQUEUE), routing_key=app_settings.ZEUSQUEUE),
         )
