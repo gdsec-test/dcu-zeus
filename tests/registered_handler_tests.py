@@ -12,7 +12,7 @@ from zeus.events.email.ssl_mailer import SSLMailer
 from zeus.events.support_tools.crm import ThrottledCRM
 from zeus.events.suspension.domains import ThrottledDomainService
 from zeus.handlers.registered_handler import RegisteredHandler
-from zeus.reviews.reviews import BasicReview
+from zeus.reviews.reviews import BasicReview, HighValueReview
 from zeus.utils.crmalert import CRMAlert
 from zeus.utils.journal import Journal
 from zeus.utils.mimir import Mimir
@@ -43,6 +43,7 @@ class TestRegisteredHandler:
     KEY_DOMAIN_QUERY = 'domainQuery'
     KEY_HOST = 'host'
     KEY_HOSTED_STATUS = 'hosted_status'
+    KEY_IS_DOMAIN_HIGH_VALUE = 'isDomainHighValue'
     KEY_REGISTRAR = 'registrar'
     KEY_SHOPPER_ID = 'shopperId'
     KEY_SHOPPER_INFO = 'shopperInfo'
@@ -86,6 +87,15 @@ class TestRegisteredHandler:
                                            KEY_DOMAIN_QUERY: {KEY_HOST: {KEY_SHOPPER_ID: 'different_shopper'},
                                                               KEY_SHOPPER_INFO: {KEY_SHOPPER_ID: '1234'},
                                                               KEY_SSL_SUB: ssl_subscription}}}
+    ticket_valid_high_value_domain = {KEY_HOSTED_STATUS: reg,
+                                      KEY_TYPE: phishing,
+                                      KEY_DOMAIN: domain,
+                                      KEY_DATA:
+                                          {KEY_DOMAIN_QUERY: {KEY_SHOPPER_INFO: {KEY_SHOPPER_ID: sid},
+                                                              KEY_SSL_SUB: ssl_subscription,
+                                                              KEY_REGISTRAR: {KEY_DOMAIN_ID: did,
+                                                                              KEY_DOMAIN_DATE: current_test_date},
+                                                              KEY_IS_DOMAIN_HIGH_VALUE: True}}}
 
     @classmethod
     def setup(cls):
@@ -114,6 +124,15 @@ class TestRegisteredHandler:
     @patch.object(BasicReview, 'place_in_review', return_value=None)
     def test_customer_warning_failed_registrant_warning(self, review, hosting, registrant, crm, slack, journal):
         assert_false(self._registered.customer_warning(self.ticket_valid))
+
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
+    @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
+    @patch.object(RegisteredMailer, 'send_registrant_warning', return_value=True)
+    @patch.object(ForeignMailer, 'send_foreign_hosting_notice', return_value=None)
+    @patch.object(HighValueReview, 'place_in_review', return_value=None)
+    def test_customer_warning_high_value_domain(self, review, hosting, registrant, crm, slack, journal):
+        assert_true(self._registered.customer_warning(self.ticket_valid_high_value_domain))
 
     @patch.object(RegisteredHandler, '_validate_required_args', return_value=False)
     def test_forward_user_gen_complaint_failed_arg_validation(self, validation):

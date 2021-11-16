@@ -10,7 +10,7 @@ from zeus.events.email.hosted_mailer import HostedMailer
 from zeus.events.email.ssl_mailer import SSLMailer
 from zeus.events.suspension.hosting_service import ThrottledHostingService
 from zeus.handlers.hosted_handler import HostedHandler
-from zeus.reviews.reviews import BasicReview
+from zeus.reviews.reviews import BasicReview, HighValueReview
 from zeus.utils.crmalert import CRMAlert
 from zeus.utils.journal import Journal
 from zeus.utils.mimir import Mimir
@@ -48,6 +48,10 @@ class TestHostedHandler:
                                                            'sslSubscriptions': ssl_subscription}}}
     ticket_valid_child_abuse = {'type': child_abuse, 'sourceDomainOrIP': domain, 'ncmecReportID': ncmecReportID,
                                 'data': {'domainQuery': {'host': {'guid': guid, 'shopperId': sid},
+                                                         'sslSubscriptions': ssl_subscription}}}
+    ticket_high_value_domain = {'type': phishing, 'sourceDomainOrIp': domain, 'hosted_status': 'HOSTED',
+                                'data': {'domainQuery': {'host': {'guid': guid, 'shopperId': sid},
+                                                         'isDomainHighValue': True,
                                                          'sslSubscriptions': ssl_subscription}}}
 
     @classmethod
@@ -95,6 +99,14 @@ class TestHostedHandler:
     @patch.object(BasicReview, 'place_in_review', return_value=None)
     def test_customer_warning_success(self, review, scribe, mailer, journal, mimir):
         assert_true(self._hosted.customer_warning(self.ticket_valid))
+
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(Journal, 'write', return_value=None)
+    @patch.object(HostedMailer, 'send_hosted_warning', return_value=True)
+    @patch.object(HostedScribe, 'customer_warning', return_value=None)
+    @patch.object(HighValueReview, 'place_in_review', return_value=None)
+    def test_customer_warning_high_value_success(self, review, scribe, mailer, journal, mimir):
+        assert_true(self._hosted.customer_warning(self.ticket_high_value_domain))
 
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
     def test_content_removed_none(self, invalid_abuse_type):

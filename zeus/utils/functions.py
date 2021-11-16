@@ -149,3 +149,11 @@ def get_sucuri_product_from_dict(dict_to_search):
     if isinstance(dict_to_search, dict):
         return _get_domain_query(dict_to_search).get('securitySubscription', {}).get('sucuriProduct', [])
     return []
+
+
+def get_high_value_domain_from_dict(data):
+    #  The isDomainHighValue field currently appears in...
+    #    1: data->domainQuery->isDomainHighValue
+    if isinstance(data, dict):
+        return _get_domain_query(data).get('isDomainHighValue')
+    return None

@@ -1,6 +1,7 @@
 from nose.tools import assert_equal, assert_is_none
 
 from zeus.utils.functions import (get_domain_create_date_from_dict,
+                                  get_high_value_domain_from_dict,
                                   get_host_abuse_email_from_dict,
                                   get_host_brand_from_dict,
                                   get_kelvin_domain_id_from_dict,
@@ -140,3 +141,8 @@ class TestFunctions:
     def test_sanitize_url_with_email(self, url='https://anotherurl.xyz/?email=reporter@domain.biz'):
         sanitized = sanitize_url(url)
         assert_equal('hxxps://anotherurl.xyz/?email=redacted@redacted.tld', sanitized)
+
+    def test_get_high_value_domain_from_dict(self):
+        data = {'data': {'domainQuery': {'isDomainHighValue': True}}}
+        actual = get_high_value_domain_from_dict(data)
+        assert_equal(actual, True)

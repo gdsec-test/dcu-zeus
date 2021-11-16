@@ -11,9 +11,10 @@ from zeus.events.support_tools.constants import alert_mappings, note_mappings
 from zeus.events.support_tools.crm import ThrottledCRM
 from zeus.events.suspension.domains import ThrottledDomainService
 from zeus.handlers.interface import Handler
-from zeus.reviews.reviews import BasicReview, SucuriReview
+from zeus.reviews.reviews import BasicReview, HighValueReview, SucuriReview
 from zeus.utils.crmalert import CRMAlert
 from zeus.utils.functions import (get_domain_id_from_dict,
+                                  get_high_value_domain_from_dict,
                                   get_host_abuse_email_from_dict,
                                   get_host_brand_from_dict,
                                   get_host_info_from_dict,
@@ -54,8 +55,10 @@ class RegisteredHandler(Handler):
 
         self.basic_review = BasicReview(app_settings)
         self.sucuri_review = SucuriReview(app_settings)
+        self.high_value_review = HighValueReview(app_settings)
         self.HOLD_TIME = app_settings.HOLD_TIME
         self.SUCURI_HOLD_TIME = app_settings.SUCURI_HOLD_TIME
+        self.HIGH_VALUE_HOLD_TIME = app_settings.HIGH_VALUE_HOLD_TIME
         self.SUCURI_PRODUCT_LIST = app_settings.SUCURI_PRODUCT_LIST
         self.ENTERED_BY = app_settings.ENTERED_BY
         self.PROTECTED_DOMAINS = app_settings.PROTECTED_DOMAINS
@@ -91,6 +94,7 @@ class RegisteredHandler(Handler):
         sucuri_product = get_sucuri_product_from_dict(data)
         source = data.get('source')
         ticket_id = data.get('ticketId')
+        high_value_domain = get_high_value_domain_from_dict(data)
 
         if self._is_domain_protected(domain, action='customer_warning'):
             return False
@@ -108,7 +112,13 @@ class RegisteredHandler(Handler):
                                                                   source):
                 self.slack.failed_sending_email(domain)
                 return False
-
+        elif high_value_domain:
+            self.high_value_review.place_in_review(ticket_id, datetime.utcnow() + timedelta(
+                seconds=self.HIGH_VALUE_HOLD_TIME), '72hr_notice_sent')
+            if not self.registered_mailer.send_registrant_warning(ticket_id, domain, domain_id, shopper_id_list,
+                                                                  source):
+                self.slack.failed_sending_email(domain)
+                return False
         else:
             self.basic_review.place_in_review(ticket_id, datetime.utcnow() + timedelta(seconds=self.HOLD_TIME),
                                               '24hr_notice_sent')

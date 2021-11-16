@@ -10,6 +10,7 @@ class AppConfig(object):
     HOLD_TIME = 60  # Time to place something in review
     SUCURI_HOLD_TIME = 60  # Just 60 seconds for testing purposes
     FRAUD_REVIEW_TIME = 365  # Year for testing purposes
+    HIGH_VALUE_HOLD_TIME = 60  # Just 60 seconds for testing purposes
 
     DB = 'test'
     DB_USER = 'dbuser'
@@ -90,6 +91,7 @@ class ProductionAppConfig(AppConfig):
     HOLD_TIME = 24 * 60 * 60  # Time to place something in review
     SUCURI_HOLD_TIME = 72 * 60 * 60  # Tickets with domains that have Sucuri malware removal products given 72 hour hold
     FRAUD_REVIEW_TIME = 90  # If it is within 90 days, Fraud can review
+    HIGH_VALUE_HOLD_TIME = 72 * 60 * 60  # Tickets with domains identified as High Value given 72 hour hold
 
     ZEUSQUEUE = 'zeus'
 
@@ -190,6 +192,7 @@ class TestingConfig(AppConfig):
     COLLECTION = 'test'
     HOLD_TIME = 1
     SUCURI_HOLD_TIME = 1
+    HIGH_VALUE_HOLD_TIME = 1
 
     REDIS = 'localhost'
     CAN_FLOOD = False

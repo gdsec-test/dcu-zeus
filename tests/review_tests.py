@@ -3,7 +3,8 @@ from dcdatabase.phishstorymongo import PhishstoryMongo
 from nose.tools import assert_equal, assert_is_none, assert_is_not_none
 
 from settings import TestingConfig
-from zeus.reviews.reviews import BasicReview, FraudReview, SucuriReview
+from zeus.reviews.reviews import (BasicReview, FraudReview, HighValueReview,
+                                  SucuriReview)
 
 
 class TestReview:
@@ -14,6 +15,7 @@ class TestReview:
     KEY_HOLD_REASON = 'hold_reason'
     KEY_HOLD_UNTIL = 'hold_until'
     SUCURI_HOLD_REASON = '72hr_notice_sent'
+    HIGH_VALUE_HOLD_REASON = '72hr_notice_sent'
 
     @classmethod
     def setup(cls):
@@ -24,6 +26,7 @@ class TestReview:
         cls._db.add_new_incident(1236, dict(sourceDomainOrIp='lmn.com'))
         cls._db.add_new_incident(1237, dict(sourceDomainOrIp='abc.com'))
         cls._db.add_new_incident(1238, dict(sourceDomainOrIp='xyz.com'))
+        cls._db.add_new_incident(1239, dict(sourceDomainOrIp='123.com'))
 
         cls._basic = BasicReview(cls._config)
         cls._basic._db = cls._db  # Replace db with mock
@@ -33,6 +36,9 @@ class TestReview:
 
         cls._sucuri = SucuriReview(cls._config)
         cls._sucuri._db = cls._db  # Replace db with mock
+
+        cls._high_value = HighValueReview(cls._config)
+        cls._high_value._db = cls._db  # Replace db with mock
 
     def test_basic_hold(self):
         doc = self._basic.place_in_review(1236, self.HOLD_TIME)
@@ -75,3 +81,16 @@ class TestReview:
         assert_is_not_none(doc.get(self.KEY_HOLD_REASON))
         assert_equal(doc.get(self.KEY_HOLD_UNTIL), self.HOLD_TIME)
         assert_equal(doc.get(self.KEY_HOLD_REASON), self.SUCURI_HOLD_REASON)
+
+    def test_high_value_hold(self):
+        doc = self._high_value.place_in_review(1239, self.HOLD_TIME)
+        assert_is_not_none(doc.get(self.KEY_HOLD_UNTIL))
+        assert_is_none(doc.get(self.KEY_HOLD_REASON))
+        assert_equal(doc.get(self.KEY_HOLD_UNTIL), self.HOLD_TIME)
+
+    def test_high_value_hold_with_reason(self):
+        doc = self._sucuri.place_in_review(1239, self.HOLD_TIME, self.HIGH_VALUE_HOLD_REASON)
+        assert_is_not_none(doc.get(self.KEY_HOLD_UNTIL))
+        assert_is_not_none(doc.get(self.KEY_HOLD_REASON))
+        assert_equal(doc.get(self.KEY_HOLD_UNTIL), self.HOLD_TIME)
+        assert_equal(doc.get(self.KEY_HOLD_REASON), self.HIGH_VALUE_HOLD_REASON)

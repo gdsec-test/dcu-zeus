@@ -9,9 +9,10 @@ from zeus.events.email.ssl_mailer import SSLMailer
 from zeus.events.support_tools.constants import alert_mappings, note_mappings
 from zeus.events.suspension.hosting_service import ThrottledHostingService
 from zeus.handlers.interface import Handler
-from zeus.reviews.reviews import BasicReview, SucuriReview
+from zeus.reviews.reviews import BasicReview, HighValueReview, SucuriReview
 from zeus.utils.crmalert import CRMAlert
-from zeus.utils.functions import (get_host_info_from_dict,
+from zeus.utils.functions import (get_high_value_domain_from_dict,
+                                  get_host_info_from_dict,
                                   get_host_shopper_id_from_dict,
                                   get_parent_child_shopper_ids_from_dict,
                                   get_ssl_subscriptions_from_dict,
@@ -43,8 +44,10 @@ class HostedHandler(Handler):
 
         self.basic_review = BasicReview(app_settings)
         self.sucuri_review = SucuriReview(app_settings)
+        self.high_value_review = HighValueReview(app_settings)
         self.HOLD_TIME = app_settings.HOLD_TIME
         self.SUCURI_HOLD_TIME = app_settings.SUCURI_HOLD_TIME
+        self.HIGH_VALUE_HOLD_TIME = app_settings.HIGH_VALUE_HOLD_TIME
         self.SUCURI_PRODUCT_LIST = app_settings.SUCURI_PRODUCT_LIST
         self.FRAUD_REVIEW_TIME = app_settings.FRAUD_REVIEW_TIME
 
@@ -74,6 +77,7 @@ class HostedHandler(Handler):
         source = data.get('source')
         ticket_id = data.get('ticketId')
         sucuri_product = get_sucuri_product_from_dict(data)
+        high_value_domain = get_high_value_domain_from_dict(data)
 
         report_type, guid, shopper_id = self._validate_required_args(data)
 
@@ -91,6 +95,14 @@ class HostedHandler(Handler):
             # Since we have a shopper_id, try to send the sucuri warning email, even if guid or report_type was not
             # found
             if not self.hosted_mailer.send_sucuri_hosted_warning(ticket_id, domain, shopper_id, source):
+                self.slack.failed_sending_email(domain)
+                return False
+        elif high_value_domain:
+            self.high_value_review.place_in_review(ticket_id, datetime.utcnow() + timedelta(
+                seconds=self.HIGH_VALUE_HOLD_TIME), '72hr_notice_sent')
+
+            # Since we have a shopper_id, try to send the warning email, even if guid or report_type was not found
+            if not self.hosted_mailer.send_hosted_warning(ticket_id, domain, shopper_id, source):
                 self.slack.failed_sending_email(domain)
                 return False
         else:
