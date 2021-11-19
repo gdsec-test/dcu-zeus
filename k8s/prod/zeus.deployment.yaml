@@ -77,12 +77,12 @@ spec:
           - name: MWPONEUSER
             valueFrom:
               secretKeyRef:
-                name: auth-zeus-envs
+                name: mwp-one-creds-v2
                 key: mwponeuser
           - name: MWPONEPASS
             valueFrom:
               secretKeyRef:
-                name: auth-zeus-envs
+                name: mwp-one-creds-v2
                 key: mwponepass
           - name: VPS4USER
             valueFrom:
