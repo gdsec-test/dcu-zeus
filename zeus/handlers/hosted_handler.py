@@ -97,7 +97,7 @@ class HostedHandler(Handler):
             if not self.hosted_mailer.send_sucuri_hosted_warning(ticket_id, domain, shopper_id, source):
                 self.slack.failed_sending_email(domain)
                 return False
-        elif high_value_domain:
+        elif high_value_domain == 'true':
             self.high_value_review.place_in_review(ticket_id, datetime.utcnow() + timedelta(
                 seconds=self.HIGH_VALUE_HOLD_TIME), '72hr_notice_sent')
 

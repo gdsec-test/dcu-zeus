@@ -112,7 +112,7 @@ class RegisteredHandler(Handler):
                                                                   source):
                 self.slack.failed_sending_email(domain)
                 return False
-        elif high_value_domain:
+        elif high_value_domain == 'true':
             self.high_value_review.place_in_review(ticket_id, datetime.utcnow() + timedelta(
                 seconds=self.HIGH_VALUE_HOLD_TIME), '72hr_notice_sent')
             if not self.registered_mailer.send_registrant_warning(ticket_id, domain, domain_id, shopper_id_list,

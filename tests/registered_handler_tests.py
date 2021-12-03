@@ -55,7 +55,8 @@ class TestRegisteredHandler:
     ticket_valid = {KEY_HOSTED_STATUS: reg, KEY_TYPE: phishing, KEY_DOMAIN: domain,
                     KEY_DATA: {
                         KEY_DOMAIN_QUERY: {KEY_SHOPPER_INFO: {KEY_SHOPPER_ID: sid}, KEY_SSL_SUB: ssl_subscription,
-                                           KEY_REGISTRAR: {KEY_DOMAIN_ID: did, KEY_DOMAIN_DATE: current_test_date}}}}
+                                           KEY_REGISTRAR: {KEY_DOMAIN_ID: did, KEY_DOMAIN_DATE: current_test_date},
+                                           KEY_IS_DOMAIN_HIGH_VALUE: 'unsupported'}}}
     ticket_fraud_hold = {'fraud_hold_reason': 'test', KEY_HOSTED_STATUS: reg, KEY_TYPE: phishing,
                          KEY_DOMAIN: domain, KEY_DATA: {KEY_DOMAIN_QUERY: {KEY_SHOPPER_INFO: {KEY_SHOPPER_ID: sid},
                                                                            KEY_SSL_SUB: ssl_subscription}}}
@@ -95,7 +96,7 @@ class TestRegisteredHandler:
                                                               KEY_SSL_SUB: ssl_subscription,
                                                               KEY_REGISTRAR: {KEY_DOMAIN_ID: did,
                                                                               KEY_DOMAIN_DATE: current_test_date},
-                                                              KEY_IS_DOMAIN_HIGH_VALUE: True}}}
+                                                              KEY_IS_DOMAIN_HIGH_VALUE: 'true'}}}
 
     @classmethod
     def setup(cls):
