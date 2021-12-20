@@ -74,7 +74,7 @@ class VPS4(Product):
             self._logger.info(f'Credits retrieved for {guid} and url {url}')
 
             vm_id = credits_data.get('productId')
-            abuse_url = url + f'/api/vms/{vm_id}/abuseSuspend'
+            abuse_url = url + f'/api/vms/{vm_id}/suspend?reason=FRAUD'
 
             try:
                 response = requests.post(abuse_url, headers=self._headers)
