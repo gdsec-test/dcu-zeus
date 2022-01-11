@@ -3,7 +3,6 @@ BUILDROOT=$(HOME)/dockerbuild/$(REPONAME)
 DOCKERREPO=docker-dcu-local.artifactory.secureserver.net/zeus
 DATE=$(shell date)
 BUILD_BRANCH=origin/main
-SHELL=/bin/bash
 
 all: env
 
