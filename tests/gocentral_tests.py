@@ -2,7 +2,7 @@ from mock import MagicMock, patch
 from nose.tools import assert_equal, assert_false, assert_raises, assert_true
 from requests.exceptions import Timeout
 
-from settings import TestingConfig
+from settings import UnitTestConfig
 from zeus.events.suspension.gocentral import GoCentral
 
 
@@ -17,7 +17,7 @@ class TestGoCentral:
 
     @classmethod
     def setup(cls):
-        cls._gocentral = GoCentral(TestingConfig)
+        cls._gocentral = GoCentral(UnitTestConfig)
 
     # When the request to suspend times out: fail
     @patch('requests.post', side_effect=Timeout())
@@ -48,7 +48,7 @@ class TestGoCentral:
     # Make sure we get back the expected cert/key pair
     def test_set_certs_success(self):
         _expected_certs = ('cert', 'key')
-        _certs = GoCentral._set_certs(TestingConfig)
+        _certs = GoCentral._set_certs(UnitTestConfig)
         assert_equal(_expected_certs, _certs)
 
     # Make sure we get back the expected cert/key pair

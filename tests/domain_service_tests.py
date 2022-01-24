@@ -3,7 +3,7 @@ import json
 from mock import MagicMock, patch
 from nose.tools import assert_equal, assert_false
 
-from settings import TestingConfig
+from settings import UnitTestConfig
 from zeus.events.suspension.domains import DomainService
 
 
@@ -20,7 +20,7 @@ class TestDomainService:
 
     @classmethod
     def setup(cls):
-        cls._domain_service = DomainService(TestingConfig.DOMAIN_SERVICE)
+        cls._domain_service = DomainService(UnitTestConfig.DOMAIN_SERVICE)
 
     @patch('zeus.events.suspension.domains.requests.post', return_value=None)
     def test_bad_post_request(self, post):

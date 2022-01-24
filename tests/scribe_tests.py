@@ -1,7 +1,7 @@
 from mock import patch
 from nose.tools import assert_true
 
-from settings import TestingConfig
+from settings import UnitTestConfig
 from zeus.events.support_tools.crm import ThrottledCRM
 from zeus.utils.scribe import HostedScribe
 
@@ -9,7 +9,7 @@ from zeus.utils.scribe import HostedScribe
 class TestHostedScribe:
     @classmethod
     def setup(cls):
-        cls._scribe = HostedScribe(TestingConfig)
+        cls._scribe = HostedScribe(UnitTestConfig)
 
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     def test_customer_warning_success(self, notate_crm_account):

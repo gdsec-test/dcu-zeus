@@ -1,0 +1,142 @@
+---
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: "zeus"
+  namespace: "abuse-api-test"
+  labels:
+    app: "zeus"
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: "zeus"
+  template:
+    metadata:
+      labels:
+        app: "zeus"
+    spec:
+      imagePullSecrets:
+        -
+          name: "dcu-artifactory-creds"
+      containers:
+        -
+          name: "zeus"
+          imagePullPolicy: "Always"
+          image: "docker-dcu-local.artifactory.secureserver.net/zeus:test"
+          livenessProbe:
+            exec:
+              command:
+                - '/app/health.sh'
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          env:
+          - name: BUILD_DATE
+            value: 'THIS_STRING_IS_REPLACED_DURING_BUILD'
+          - name: sysenv
+            value: test
+          - name: BROKER_PASS
+            valueFrom:
+              secretKeyRef:
+                name: amqp-shared-creds
+                key: password
+          - name: DB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: db-phishstory-v2
+                key: password
+          - name: DB_KELVIN_PASS
+            valueFrom:
+              secretKeyRef:
+                name: db-kelvin-v2
+                key: password
+          - name: DIABLOUSER
+            valueFrom:
+              secretKeyRef:
+                name: auth-diablo
+                key: diablouser
+          - name: DIABLOPASS
+            valueFrom:
+              secretKeyRef:
+                name: auth-diablo
+                key: diablopass
+          - name: PLESKUSER
+            valueFrom:
+              secretKeyRef:
+                name: auth-plesk
+                key: pleskuser
+          - name: PLESKPASS
+            valueFrom:
+              secretKeyRef:
+                name: auth-plesk
+                key: pleskpass
+          - name: MWPONEUSER
+            valueFrom:
+              secretKeyRef:
+                name: mwp-one-creds-v2
+                key: mwponeuser
+          - name: MWPONEPASS
+            valueFrom:
+              secretKeyRef:
+                name: mwp-one-creds-v2
+                key: mwponepass
+          - name: VPS4USER
+            valueFrom:
+              secretKeyRef:
+                name: auth-vps4-api
+                key: vps4user
+          - name: VPS4PASS
+            valueFrom:
+              secretKeyRef:
+                name: auth-vps4-api
+                key: vps4pass
+          - name: SLACK_HANDLER
+            valueFrom:
+              secretKeyRef:
+                name: zeus-slack
+                key: handler
+          - name: OCM_SSL_CERT
+            value: /ocm_certs/tls.crt
+          - name: OCM_SSL_KEY
+            value: /ocm_certs/tls.key
+          - name: ZEUS_SSL_CERT
+            value: /zeus_certs/tls.crt
+          - name: ZEUS_SSL_KEY
+            value: /zeus_certs/tls.key
+          - name: GOCENTRAL_SSL_CERT
+            value: /gocentral_certs/tls.crt
+          - name: GOCENTRAL_SSL_KEY
+            value: /gocentral_certs/tls.key
+          - name: RESULT_BACKEND_HOSTNAME
+            value: godaddy-service-redis.abuse-api-test.svc.cluster.local
+          volumeMounts:
+          - name: tls-ocm-files
+            mountPath: /ocm_certs
+            readOnly: true
+          - name: tls-zeus-files
+            mountPath: /zeus_certs
+            readOnly: true
+          - name: tls-gocentral-files
+            mountPath: /gocentral_certs
+            readOnly: true
+        - name: "redis"
+          imagePullPolicy: "Always"
+          image: "redis"
+          livenessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 15
+            timeoutSeconds: 5
+      volumes:
+        - name: tls-ocm-files
+          secret:
+            secretName: tls-phishnet
+        - name: tls-zeus-files
+          secret:
+            secretName: tls-zeus
+        - name: tls-gocentral-files
+          secret:
+            secretName: tls-gocentral

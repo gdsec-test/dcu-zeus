@@ -4,7 +4,7 @@ from dcdatabase.phishstorymongo import PhishstoryMongo
 from mock import patch
 from nose.tools import assert_equal, assert_false, assert_true
 
-from settings import TestingConfig
+from settings import UnitTestConfig
 from zeus.events.email.fraud_mailer import FraudMailer
 from zeus.events.email.hosted_mailer import HostedMailer
 from zeus.events.email.ssl_mailer import SSLMailer
@@ -28,7 +28,7 @@ class TestHostedHandler:
     domain = 'domain'
     ncmecReportID = '5678'
     current_test_date = datetime.utcnow()
-    oldest_valid_fraud_review_test_date = current_test_date - timedelta(days=TestingConfig.FRAUD_REVIEW_TIME - 1)
+    oldest_valid_fraud_review_test_date = current_test_date - timedelta(days=UnitTestConfig.FRAUD_REVIEW_TIME - 1)
     ticket_no_guid = {'type': phishing}
     ticket_no_shopper = {'type': phishing, 'data': {'domainQuery': {'host': {'guid': guid}}}}
     ticket_valid = {'type': phishing, 'sourceDomainOrIp': domain, 'hosted_status': 'HOSTED',
@@ -56,7 +56,7 @@ class TestHostedHandler:
 
     @classmethod
     def setup(cls):
-        cls._hosted = HostedHandler(TestingConfig)
+        cls._hosted = HostedHandler(UnitTestConfig)
 
     def test_process_invalid_mapping(self):
         assert_false(self._hosted.process({}, 'invalid-request'))

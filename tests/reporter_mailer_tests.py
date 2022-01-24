@@ -2,7 +2,7 @@ from hermes.exceptions import OCMException
 from mock import patch
 from nose.tools import assert_false, assert_true
 
-from settings import TestingConfig
+from settings import UnitTestConfig
 from zeus.events.email.reporter_mailer import ReporterMailer
 from zeus.persist.notification_timeouts import Throttle
 
@@ -13,7 +13,7 @@ class TestReporterMailer(object):
 
     @classmethod
     def setup(cls):
-        cls._mailer = ReporterMailer(TestingConfig)
+        cls._mailer = ReporterMailer(UnitTestConfig)
 
     @patch('zeus.events.email.reporter_mailer.send_mail', return_value={})
     @patch('zeus.events.email.reporter_mailer.generate_event')

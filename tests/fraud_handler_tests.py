@@ -1,7 +1,7 @@
 from mock import patch
 from nose.tools import assert_false, assert_true
 
-from settings import TestingConfig
+from settings import UnitTestConfig
 from zeus.events.email.fraud_mailer import FraudMailer
 from zeus.handlers.fraud_handler import FraudHandler
 
@@ -9,7 +9,7 @@ from zeus.handlers.fraud_handler import FraudHandler
 class TestFraudHandler:
     @classmethod
     def setup(cls):
-        cls._fraud = FraudHandler(TestingConfig)
+        cls._fraud = FraudHandler(UnitTestConfig)
 
     @patch.object(FraudMailer, 'send_new_domain_notification', return_value=False)
     def test_new_domain_failure(self, new_domain):

@@ -2,7 +2,7 @@ import requests
 from mock import MagicMock, patch
 from nose.tools import assert_equal
 
-from settings import TestingConfig
+from settings import UnitTestConfig
 from zeus.utils.crmalert import CRMAlert
 from zeus.utils.slack import SlackFailures
 
@@ -10,7 +10,7 @@ from zeus.utils.slack import SlackFailures
 class TestCRMAlert:
     @classmethod
     def setup_class(cls):
-        cls._crmalert = CRMAlert(TestingConfig())
+        cls._crmalert = CRMAlert(UnitTestConfig())
 
     @patch.object(requests, 'post')
     def test_create_alert_success(self, requests_mocked_method):

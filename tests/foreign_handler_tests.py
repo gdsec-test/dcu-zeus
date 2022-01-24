@@ -1,7 +1,7 @@
 from mock import patch
 from nose.tools import assert_false, assert_true
 
-from settings import TestingConfig
+from settings import UnitTestConfig
 from zeus.events.email.foreign_mailer import ForeignMailer
 from zeus.handlers.foreign_handler import ForeignHandler
 from zeus.reviews.reviews import BasicReview
@@ -14,7 +14,7 @@ class TestForeignHandler:
 
     @classmethod
     def setup(cls):
-        cls._foreign = ForeignHandler(TestingConfig)
+        cls._foreign = ForeignHandler(UnitTestConfig)
 
     @patch.object(SlackFailures, 'invalid_hosted_status', return_value=None)
     def test_foreign_notice_unsupported_hosted_status(self, slack):

@@ -3,14 +3,14 @@ from mock import MagicMock, patch
 from nose.tools import assert_false, assert_true
 from requests.exceptions import Timeout
 
-from settings import TestingConfig
+from settings import UnitTestConfig
 from zeus.events.suspension.vps4 import VPS4
 
 
 class TestVPS4:
     @classmethod
     def setup(cls):
-        cls._vps4 = VPS4(TestingConfig)
+        cls._vps4 = VPS4(UnitTestConfig)
 
     @patch('requests.get', side_effect=Timeout())
     @patch('requests.post', return_value=MagicMock(text='true'))

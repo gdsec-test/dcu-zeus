@@ -2,7 +2,7 @@ import mongomock
 from dcdatabase.phishstorymongo import PhishstoryMongo
 from nose.tools import assert_equal, assert_is_none, assert_is_not_none
 
-from settings import TestingConfig
+from settings import UnitTestConfig
 from zeus.reviews.reviews import (BasicReview, FraudReview, HighValueReview,
                                   SucuriReview)
 
@@ -19,7 +19,7 @@ class TestReview:
 
     @classmethod
     def setup(cls):
-        cls._config = TestingConfig()
+        cls._config = UnitTestConfig()
         cls._db = PhishstoryMongo(cls._config)
         # replace collection with mock
         cls._db._mongo._collection = mongomock.MongoClient().db.collection

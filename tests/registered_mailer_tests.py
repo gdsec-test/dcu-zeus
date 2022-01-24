@@ -8,7 +8,7 @@ from nose.tools import assert_false, assert_true
 
 import mongohandler as handler
 from mongohandler import MongoLogFactory
-from settings import TestingConfig
+from settings import UnitTestConfig
 from zeus.events.email.registered_mailer import RegisteredMailer
 from zeus.events.user_logging.user_logger import UEVENT
 from zeus.persist.notification_timeouts import Throttle
@@ -17,7 +17,7 @@ from zeus.persist.notification_timeouts import Throttle
 class TestRegisteredMailer:
     @classmethod
     def setup(cls):
-        cls._mailer = RegisteredMailer(TestingConfig)
+        cls._mailer = RegisteredMailer(UnitTestConfig)
         cls._mailer._throttle = cls._persist = Throttle('0.0.0.0', 1)
         cls._persist.redis = mock_redis_client(host='0.0.0.0', port=6379, db=0)
         cls._connection = mongomock.MongoClient()

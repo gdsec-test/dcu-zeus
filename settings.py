@@ -184,7 +184,40 @@ class DevelopmentAppConfig(AppConfig):
         super(DevelopmentAppConfig, self).__init__()
 
 
-class TestingConfig(AppConfig):
+class TestAppConfig(AppConfig):
+    ZEUSQUEUE = 'testzeus'
+
+    DB = 'testphishstory'
+    DB_HOST = '10.36.156.188'
+    DB_USER = 'testuser'
+
+    DB_KELVIN = 'testkelvin'
+    DB_KELVIN_HOST = '10.36.156.188'
+    DB_KELVIN_USER = 'testkelvin'
+
+    DOMAIN_SERVICE = 'domainservice-rest.abuse-api-test.svc.cluster.local:8080'
+
+    DIABLO_URL = 'https://diablo.api.test-godaddy.com/v1/accounts/'
+    GOCENTRAL_URL = 'https://services.orion.test.glbt1.gdg/account/accountoperations.asmx'
+    MWPONE_URL = 'https://api.servicemanager.test-godaddy.com/v1/accounts/'
+    PLESK_URL = 'https://p3nwplskapp.test-godaddy.com:8084/v1/accounts/'
+    VERT_URL = ''
+
+    SSO_URL = 'https://sso.test-godaddy.com'
+    JOURNAL_URL = 'http://dcu-journal.abuse-api-test.svc.cluster.local:5000'
+    MIMIR_URL = 'https://mimir.int.test-godaddy.com'
+    SHOPLOCKED_URL = 'https://shoplocked.api.int.test-godaddy.com'
+    CRMALERT_URL = 'https://crm-alert.int.test-godaddy.com'
+
+    VPS4_URLS = OrderedDict([('IAD2', 'https://vps4.api.test-godaddy.com'),
+                             ('SIN2', 'https://vps4.api.test-godaddy.com'),
+                             ('AMS3', 'https://vps4.api.test-godaddy.com')])
+
+    def __init__(self):
+        super(TestAppConfig, self).__init__()
+
+
+class UnitTestConfig(AppConfig):
     ZEUSQUEUE = 'devzeus'
 
     DBURL = 'mongodb://localhost/devphishstory'
@@ -230,4 +263,4 @@ class TestingConfig(AppConfig):
                              ('AMS3', '')])
 
 
-config_by_name = {'dev': DevelopmentAppConfig, 'prod': ProductionAppConfig, 'ote': OTEAppConfig, 'test': TestingConfig}
+config_by_name = {'dev': DevelopmentAppConfig, 'prod': ProductionAppConfig, 'ote': OTEAppConfig, 'unit-test': UnitTestConfig, 'test': TestAppConfig}

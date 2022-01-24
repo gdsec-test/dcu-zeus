@@ -7,7 +7,7 @@ from nose.tools import assert_false, assert_true
 
 import mongohandler as handler
 from mongohandler import MongoLogFactory
-from settings import TestingConfig
+from settings import UnitTestConfig
 from zeus.events.email.foreign_mailer import ForeignMailer
 from zeus.events.user_logging.user_logger import UEVENT
 
@@ -15,7 +15,7 @@ from zeus.events.user_logging.user_logger import UEVENT
 class TestForeignMailer:
     @classmethod
     def setup(cls):
-        cls._mailer = ForeignMailer(TestingConfig)
+        cls._mailer = ForeignMailer(UnitTestConfig)
         cls._connection = mongomock.MongoClient()
         cls._collection = cls._connection.logs.logs
         handler._connection = cls._connection

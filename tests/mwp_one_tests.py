@@ -2,14 +2,14 @@ from mock import MagicMock, patch
 from nose.tools import assert_false, assert_true
 from requests.exceptions import Timeout
 
-from settings import TestingConfig
+from settings import UnitTestConfig
 from zeus.events.suspension.mwp_one import MWPOne
 
 
 class TestMWPOne:
     @classmethod
     def setup(cls):
-        cls._mwp_one = MWPOne(TestingConfig)
+        cls._mwp_one = MWPOne(UnitTestConfig)
 
     @patch('requests.post', side_effect=Timeout())
     def test_suspend_fails(self, post):
