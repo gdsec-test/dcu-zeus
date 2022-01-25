@@ -44,7 +44,7 @@ class VPS4(Product):
             credits_data = response.json() if response.status_code == 200 else None
 
         except Exception as e:
-            self._logger.error(f'Failed to retrieve credits data from server : {vps4_url} for guid : {guid}. Details: {e}')
+            self._logger.error(f'Failed to retrieve credits data from {vps4_url} for guid : {guid}. Details: {e}')
         return credits_data
 
     def suspend(self, guid, data, **kwargs):
@@ -67,7 +67,6 @@ class VPS4(Product):
         return False
 
     def _suspend(self, url, guid):
-        max_retries = 10
         credits_data = self._retrieve_credits(url, guid)
 
         if credits_data:
@@ -82,15 +81,9 @@ class VPS4(Product):
                 if self._require_jwt_refresh(response):
                     response = requests.post(abuse_url, headers=self._headers)
 
-                while max_retries > 0 and response.status_code == 200:
-                    credits_data = self._retrieve_credits(url, guid)
-                    self._logger.info(f'Credits retrieved after suspension for {guid} and url {url}')
-
-                    if credits_data.get('abuseSuspendedFlagSet'):
-                        self._logger.info(f'Successfully suspended VPS4 guid {guid} on server {url}')
-                        return True
-
-                    max_retries -= 1
+                if response.status_code == 200:
+                    self._logger.info(f'Successfully suspended VPS4 guid {guid} on server {url}')
+                    return True
 
             except Exception as e:
                 self._logger.error(f'Unable to suspend guid : {guid} using url : {url}. Details: {e}')
@@ -118,7 +111,8 @@ class VPS4(Product):
         :return:
         """
         try:
-            response = requests.post(self._sso_endpoint, data={'username': self._vps4_user, 'password': self._vps4_pass, 'realm': 'jomax'})
+            response = requests.post(self._sso_endpoint,
+                                     data={'username': self._vps4_user, 'password': self._vps4_pass, 'realm': 'jomax'})
             response.raise_for_status()
 
             body = json.loads(response.text)
