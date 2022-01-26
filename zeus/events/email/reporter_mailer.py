@@ -33,7 +33,7 @@ class ReporterMailer(Mailer):
             if self._throttle.can_reporter_acknowledge_email_be_sent(reporter_email) or self._CAN_FLOOD:
                 kwargs['recipients'] = [{'email': reporter_email}]
                 resp = send_mail(template, {}, **kwargs)
-                resp.update({'type': message_type, 'template': 3454})
+                resp.update({'type': message_type, 'template': 7010})
                 generate_event(source, success_message, **resp)
                 return True
             else:

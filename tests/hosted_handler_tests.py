@@ -51,7 +51,7 @@ class TestHostedHandler:
                                                          'sslSubscriptions': ssl_subscription}}}
     ticket_high_value_domain = {'type': phishing, 'sourceDomainOrIp': domain, 'hosted_status': 'HOSTED',
                                 'data': {'domainQuery': {'host': {'guid': guid, 'shopperId': sid},
-                                                         'isDomainHighValue': True,
+                                                         'isDomainHighValue': 'true',
                                                          'sslSubscriptions': ssl_subscription}}}
 
     @classmethod
