@@ -61,8 +61,9 @@ reporter_mailer = ReporterMailer(config)
 email_limit = 1000
 
 
-def route_request(data, request_type, dual_suspension=False):
+def route_request(data, ticket_id, request_type, dual_suspension=False):
     hosted_status = data.get('hosted_status') or data.get('hostedStatus')
+    result = None
 
     if dual_suspension:
         registrar_brand = data.get('data', {}).get('domainQuery', {}).get('registrar', {}).get('brand')
@@ -72,19 +73,21 @@ def route_request(data, request_type, dual_suspension=False):
             registered_suspension = True
             if registrar_brand == 'GODADDY':
                 registered_suspension = registered.process(data, request_type)
-            return hosted_suspension and registered_suspension
+            result = hosted_suspension and registered_suspension
         elif hosted_status in ['REGISTERED', 'FOREIGN']:
-            return registered.process(data, request_type)
+            result = registered.process(data, request_type)
         else:
-            return 'Unable to route request for dual suspension: Hosting Status = {}, Registrar Brand = {}' \
-                .format(hosted_status, registrar_brand)
+            result = f'Unable to route request for dual suspension: Hosting Status = {hosted_status}, Registrar Brand = {registrar_brand}'
     else:
         if hosted_status == 'HOSTED':
-            return hosted.process(data, request_type)
+            result = hosted.process(data, request_type)
         elif hosted_status in ['REGISTERED', 'FOREIGN']:
-            return registered.process(data, request_type)
+            result = registered.process(data, request_type)
         else:
-            return 'Unable to route request', hosted_status
+            result = ('Unable to route request', hosted_status)
+
+    celery.send_task('run.hubstream_sync', ({'ticketId': ticket_id},))
+    return result
 
 
 def get_database_handle():
@@ -131,13 +134,13 @@ def foreign_notice(ticket_id):
 @celery.task()
 def forward_user_gen_complaint(ticket_id):
     data = get_database_handle().get_incident(ticket_id)
-    return route_request(data, 'forward_complaint') if data else None
+    return route_request(data, ticket_id, 'forward_complaint') if data else None
 
 
 @celery.task()
 def customer_warning(ticket_id):
     data = get_database_handle().get_incident(ticket_id)
-    return route_request(data, 'customer_warning') if data else None
+    return route_request(data, ticket_id, 'customer_warning') if data else None
 
 
 @celery.task()
@@ -145,31 +148,31 @@ def intentionally_malicious(ticket_id, investigator_id):
     data = get_database_handle().get_incident(ticket_id)
     # Add investigator user id to data so its available in _notify_fraud and ssl subscription check
     data['investigator_user_id'] = investigator_id
-    return route_request(data, 'intentionally_malicious', dual_suspension=True) if data else None
+    return route_request(data, ticket_id, 'intentionally_malicious', dual_suspension=True) if data else None
 
 
 @celery.task()
 def suspend(ticket_id):
     data = get_database_handle().get_incident(ticket_id)
-    return route_request(data, 'suspend') if data else None
+    return route_request(data, ticket_id, 'suspend') if data else None
 
 
 @celery.task()
 def content_removed(ticket_id):
     data = get_database_handle().get_incident(ticket_id)
-    return route_request(data, 'content_removed') if data else None
+    return route_request(data, ticket_id, 'content_removed') if data else None
 
 
 @celery.task()
 def repeat_offender(ticket_id):
     data = get_database_handle().get_incident(ticket_id)
-    return route_request(data, 'repeat_offender') if data else None
+    return route_request(data, ticket_id, 'repeat_offender') if data else None
 
 
 @celery.task()
 def extensive_compromise(ticket_id):
     data = get_database_handle().get_incident(ticket_id)
-    return route_request(data, 'extensive_compromise') if data else None
+    return route_request(data, ticket_id, 'extensive_compromise') if data else None
 
 
 @celery.task()
@@ -177,7 +180,7 @@ def shopper_compromise(ticket_id, investigator_id):
     data = get_database_handle().get_incident(ticket_id)
     # Add investigator user id to data so its available in _notify_fraud()
     data['investigator_user_id'] = investigator_id
-    return route_request(data, 'shopper_compromise') if data else None
+    return route_request(data, ticket_id, 'shopper_compromise') if data else None
 
 
 @celery.task()
@@ -224,61 +227,10 @@ def send_acknowledgement(source, reporter_email):
 @celery.task()
 def submitted_to_ncmec(ticket_id):
     data = get_kelvin_database_handle().get_incident(ticket_id)
-    return route_request(data, 'ncmec_submitted') if data else None
+    return route_request(data, ticket_id, 'ncmec_submitted') if data else None
 
 
 @celery.task()
 def suspend_csam(ticket_id):
     data = get_kelvin_database_handle().get_incident(ticket_id)
-    return route_request(data, 'suspend_csam', dual_suspension=True) if data else None
-
-
-''' Route request for new tasks coming from hubstream'''
-
-
-def route_hubstream_action(data, ticket_id: str, entity_type: str, action: str) -> bool:
-    if data is None:
-        logger.error('Unable to retrieve info for ticket id: {ticket_id}')
-        return False
-    hosted_status = data.get('hosted_status') or data.get('hostedStatus')
-    if entity_type == 'HOST' and hosted_status == 'HOSTED':
-        return hosted.process(data, action)
-    elif entity_type == 'HOST':
-        logger.error(f'Ticket id: {ticket_id} has a hosted status of {hosted_status}. The host action cannot be processed')
-        return False
-    elif entity_type == 'DOMAIN' and hosted_status in ['HOSTED', 'REGISTED', 'FOREIGN']:
-        return registered.process(data, action)
-    elif entity_type == 'DOMAIN':
-        logger.error(f'Ticket id: {ticket_id} has a hosted status of {hosted_status}. The domain action cannot be processed')
-        return False
-    else:
-        logger.error(f'Action: {action} cannot be processed on Ticket id: {ticket_id}')
-        return False
-
-
-'''New hubstrem celery tasks'''
-
-
-@celery.task
-def suspend_v2(ticket_id: str, entity_type: str) -> bool:
-    data = get_database_handle().get_incident(ticket_id)
-    return route_hubstream_action(data, ticket_id, entity_type, 'suspend')
-
-
-@celery.task()
-def intentionally_malicious_v2(ticket_id: str, entity_type: str, investigator_id: str) -> bool:
-    data = get_database_handle().get_incident(ticket_id)
-    data['investigator_user_id'] = investigator_id
-    return route_hubstream_action(data, ticket_id, entity_type, 'intentionally_malicious')
-
-
-@celery.task()
-def extensive_compromise_v2(ticket_id: str, entity_type: str) -> bool:
-    data = get_database_handle().get_incident(ticket_id)
-    return route_hubstream_action(data, ticket_id, entity_type, 'extensive_compromise')
-
-
-@celery.task()
-def repeat_offender_v2(ticket_id: str, entity_type: str) -> bool:
-    data = get_database_handle().get_incident(ticket_id)
-    return route_hubstream_action(data, ticket_id, entity_type, 'repeat_offender')
+    return route_request(data, ticket_id, 'suspend_csam', dual_suspension=True) if data else None

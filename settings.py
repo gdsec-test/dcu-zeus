@@ -58,6 +58,7 @@ class AppConfig(object):
 
     BROKER_PASS = quote(os.getenv('BROKER_PASS', 'password'))
     BROKER_URL = 'amqp://02d1081iywc7Av2:' + BROKER_PASS + '@rmq-dcu.int.dev-godaddy.com:5672/grandma'
+    GDBS_QUEUE = 'devgdbrandservice'
 
     def __init__(self):
         self.DB_PASS = urllib.parse.quote(os.getenv('DB_PASS', 'password'))
@@ -120,6 +121,7 @@ class ProductionAppConfig(AppConfig):
 
     BROKER_PASS = quote(os.getenv('BROKER_PASS', 'password'))
     BROKER_URL = 'amqp://02d1081iywc7Av2:' + BROKER_PASS + '@rmq-dcu.int.godaddy.com:5672/grandma'
+    GDBS_QUEUE = 'gdbrandservice'
 
     def __init__(self):
         super(ProductionAppConfig, self).__init__()
@@ -149,6 +151,7 @@ class OTEAppConfig(AppConfig):
 
     BROKER_PASS = quote(os.getenv('BROKER_PASS', 'password'))
     BROKER_URL = 'amqp://02d1081iywc7Av2:' + BROKER_PASS + '@rmq-dcu.int.godaddy.com:5672/grandma'
+    GDBS_QUEUE = 'otegdbrandservice'
 
     def __init__(self):
         super(OTEAppConfig, self).__init__()
@@ -179,6 +182,7 @@ class DevelopmentAppConfig(AppConfig):
     VPS4_URLS = OrderedDict([('IAD2', 'https://vps4.api.dev-godaddy.com'),
                              ('SIN2', 'https://vps4.api.dev-godaddy.com'),
                              ('AMS3', 'https://vps4.api.dev-godaddy.com')])
+    GDBS_QUEUE = 'devgdbrandservice'
 
     def __init__(self):
         super(DevelopmentAppConfig, self).__init__()
@@ -212,6 +216,7 @@ class TestAppConfig(AppConfig):
     VPS4_URLS = OrderedDict([('IAD2', 'https://vps4.api.test-godaddy.com'),
                              ('SIN2', 'https://vps4.api.test-godaddy.com'),
                              ('AMS3', 'https://vps4.api.test-godaddy.com')])
+    GDBS_QUEUE = 'testgdbrandservice'
 
     def __init__(self):
         super(TestAppConfig, self).__init__()
