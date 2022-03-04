@@ -20,8 +20,6 @@ services:
       MWPONEPASS: ${MWPONEPASS}
       OCM_SSL_CERT: '/tmp/certs/phishstory.int.dev-godaddy.com.crt'
       OCM_SSL_KEY: '/tmp/certs/phishstory.int.dev-godaddy.com.key'
-      ORION_SSL_CERT: '/tmp/certs/dcu.ecomm.dev.authclient.int.godaddy.com.crt'
-      ORION_SSL_KEY: '/tmp/certs/dcu.ecomm.dev.authclient.int.godaddy.com.key'
       PLESKPASS: ${PLESKPASS}
       PLESKUSER: ${PLESKUSER}
       REDIS: redis

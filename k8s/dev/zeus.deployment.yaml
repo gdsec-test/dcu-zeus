@@ -122,14 +122,10 @@ spec:
             value: /zeus_certs/tls.crt
           - name: ZEUS_SSL_KEY
             value: /zeus_certs/tls.key
-          - name: ORION_SSL_CERT
-            value: /ecomm_certs/tls.crt
-          - name: ORION_SSL_KEY
-            value: /ecomm_certs/tls.key
           - name: GOCENTRAL_SSL_CERT
-            value: /gocentral_certs/tls.crt
+            value: /ecomm_certs/tls.crt
           - name: GOCENTRAL_SSL_KEY
-            value: /gocentral_certs/tls.key
+            value: /ecomm_certs/tls.key
           - name: RESULT_BACKEND_HOSTNAME
             value: godaddy-service-redis.abuse-api-dev.svc.cluster.local
 
@@ -145,9 +141,6 @@ spec:
             readOnly: true
           - name: tls-ecomm-files
             mountPath: /ecomm_certs
-            readOnly: true
-          - name: tls-gocentral-files
-            mountPath: /gocentral_certs
             readOnly: true
 
         -
@@ -175,6 +168,3 @@ spec:
         - name: tls-ecomm-files
           secret:
             secretName: tls-ecomm
-        - name: tls-gocentral-files
-          secret:
-            secretName: tls-gocentral

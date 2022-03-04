@@ -105,9 +105,9 @@ spec:
           - name: ZEUS_SSL_KEY
             value: /zeus_certs/tls.key
           - name: GOCENTRAL_SSL_CERT
-            value: /gocentral_certs/tls.crt
+            value: /ecomm_certs/tls.crt
           - name: GOCENTRAL_SSL_KEY
-            value: /gocentral_certs/tls.key
+            value: /ecomm_certs/tls.key
           - name: RESULT_BACKEND_HOSTNAME
             value: godaddy-service-redis.abuse-api-test.svc.cluster.local
           volumeMounts:
@@ -117,8 +117,8 @@ spec:
           - name: tls-zeus-files
             mountPath: /zeus_certs
             readOnly: true
-          - name: tls-gocentral-files
-            mountPath: /gocentral_certs
+          - name: tls-ecomm-files
+            mountPath: /ecomm_certs
             readOnly: true
         - name: "redis"
           imagePullPolicy: "Always"
@@ -137,6 +137,6 @@ spec:
         - name: tls-zeus-files
           secret:
             secretName: tls-zeus
-        - name: tls-gocentral-files
+        - name: tls-ecomm-files
           secret:
-            secretName: tls-gocentral
+            secretName: tls-ecomm
