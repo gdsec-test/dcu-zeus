@@ -27,7 +27,7 @@ celery = Celery()
 celery.config_from_object(CeleryConfig(config))
 
 instrument()
-apm = Client(service_name='zeus', env=env)
+apm = Client(service_name='zeus')
 register_exception_tracking(apm)
 register_instrumentation(apm)
 register_dcu_transaction_handler(apm)
