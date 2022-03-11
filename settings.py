@@ -218,6 +218,10 @@ class TestAppConfig(AppConfig):
                              ('AMS3', 'https://vps4.api.test-godaddy.com')])
     GDBS_QUEUE = 'testgdbrandservice'
 
+    HOLD_TIME = 1 * 60 * 30
+    SUCURI_HOLD_TIME = 1 * 60 * 30
+    HIGH_VALUE_HOLD_TIME = 1 * 60 * 30
+
     def __init__(self):
         super(TestAppConfig, self).__init__()
 
