@@ -3,8 +3,8 @@ import logging
 import requests
 from requests.packages.urllib3.exceptions import (InsecurePlatformWarning,
                                                   InsecureRequestWarning)
-from settings import AppConfig
 
+from settings import AppConfig
 from zeus.events.suspension.interface import Product
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -39,7 +39,7 @@ class MWPOne(Product):
         url = self.mwpone_url + guid + '?unsuspendAccount'
 
         try:
-            response = requests.post(url, auth=self.mwponeauth, headers=self.headers, verify=False)
+            response = requests.post(url, cert=self.cert, headers=self.headers, verify=False)
             if response.status_code == 200:
                 if response.text == 'true':
                     self._logger.info(f'Managed Wordpress 1.0 account {guid} has been reinstated')
