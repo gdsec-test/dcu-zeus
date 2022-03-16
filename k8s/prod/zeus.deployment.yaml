@@ -74,16 +74,10 @@ spec:
               secretKeyRef:
                 name: auth-zeus-envs
                 key: pleskpass
-          - name: MWPONEUSER
-            valueFrom:
-              secretKeyRef:
-                name: mwp-one-creds-v2
-                key: mwponeuser
-          - name: MWPONEPASS
-            valueFrom:
-              secretKeyRef:
-                name: mwp-one-creds-v2
-                key: mwponepass
+          - name: CMAP_API_CERT
+            value: /apicerts/tls.crt
+          - name: CMAP_API_KEY
+            value: /apicerts/tls.key
           - name: VPS4USER
             valueFrom:
               secretKeyRef:
@@ -142,6 +136,9 @@ spec:
             value: prod
 
           volumeMounts:
+          - name: tls-files-api
+            mountPath: /apicerts
+            readOnly: true
           - name: tls-ocm-files
             mountPath: /ocm_certs
             readOnly: true
@@ -180,3 +177,6 @@ spec:
         - name: tls-ecomm-files
           secret:
             secretName: tls-ecomm
+        - name: tls-files-api
+          secret:
+            secretName: tls-cmap-api

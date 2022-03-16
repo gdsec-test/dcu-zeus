@@ -6,6 +6,8 @@ services:
       BROKER_URL: amqp://guest@rabbitmq:5672//
       CMAP_PROXY_CERT: '/tmp/certs/proxyuser.cmap.int.godaddy.com.crt'
       CMAP_PROXY_KEY: '/tmp/certs/proxyuser.cmap.int.godaddy.com.key'
+      CMAP_API_CERT: '/tmp/certs/apiuser.cmap.int.godaddy.com.crt'
+      CMAP_API_KEY: '/tmp/certs/apiuser.cmap.int.godaddy.com.key'
       CMAP_PROXY_PASS: ${CMAP_PROXY_PASS}
       CMAP_PROXY_USER: ${CMAP_PROXY_USER}
       DB_PASS: ${DB_PASS}
@@ -16,8 +18,6 @@ services:
       GOCENTRAL_SSL_CERT: '/tmp/certs/dcu.ecomm.dev.authclient.int.godaddy.com.crt'
       GOCENTRAL_SSL_KEY: '/tmp/certs/dcu.ecomm.dev.authclient.int.godaddy.com.key'
       GOCENTRAL_URL: 'https://services.orion.dev.sdl1.gdg/account/accountoperations.asmx'
-      MWPONEUSER: ${MWPONEUSER}
-      MWPONEPASS: ${MWPONEPASS}
       OCM_SSL_CERT: '/tmp/certs/phishstory.int.dev-godaddy.com.crt'
       OCM_SSL_KEY: '/tmp/certs/phishstory.int.dev-godaddy.com.key'
       PLESKPASS: ${PLESKPASS}

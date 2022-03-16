@@ -54,21 +54,22 @@ make tools   # Runs both Flake8 and isort
 ## Certs Required
 The following certs are required to run this project, must include proper ENV domain:
  1. `OCM API`: phishstory.int.
- 2. `ZEUS DCU Journal`: dcu.zeus.int.
- 3. `Ecomm/Orion Web Service`: dcu.ecomm.
+ 1. `ZEUS DCU Journal`: dcu.zeus.int.
+ 1. `Ecomm/Orion Web Service`: dcu.ecomm.
+ 1. `CMAP_API_CERT` Path to apiuser.cmap.int certificate file (for connecting to MWP V1)
+ 1. `CMAP_API_KEY` Path to apiuser.cmap.int key file (for connecting to MWP V1)
  
 ## Running Locally
 ### Docker-compose, local docker images zeus redis, and rabbitmq, with dev mongo
 
 Environment variables for docker-compose.yml file:
 1. `DB_PASS` (Password for dev MongoDB)
-2. `BROKER_PASS` (Broker Password)
-3. `DIABLOUSER` & `DIABLOPASS` (Account credentials to access the diablo API)
-4. `MWPONEUSER` & `MWPONEPASS` (Account credentials to access the managed wordpress API)
-5. `PLESKUSER` & `PLESKPASS` (Account credentials to access the plesk API)
-6. `VPS4USER` & `VPS4PASS` (Account credentials to access the vps4 API)
-7. `CMAP_PROXY_PASS` & `CMAP_PROXY_PASS` (Account credentials to access theCMAP Proxy)
-8. `EMAIL_RECIPIENT` (The email address you want `non-shopper` emails sent to while testing, instead of emailing fraud. e.g. user@example.com)  *** *ONLY WORKS WITH TEMPLATES THAT SEND TO NON-SHOPPERS* ***
+1. `BROKER_PASS` (Broker Password)
+1. `DIABLOUSER` & `DIABLOPASS` (Account credentials to access the diablo API)
+1. `PLESKUSER` & `PLESKPASS` (Account credentials to access the plesk API)
+1. `VPS4USER` & `VPS4PASS` (Account credentials to access the vps4 API)
+1. `CMAP_PROXY_PASS` & `CMAP_PROXY_PASS` (Account credentials to access theCMAP Proxy)
+1. `EMAIL_RECIPIENT` (The email address you want `non-shopper` emails sent to while testing, instead of emailing fraud. e.g. user@example.com)  *** *ONLY WORKS WITH TEMPLATES THAT SEND TO NON-SHOPPERS* ***
 
 Changes to docker-compose.yml file:
 * Run `docker-compose up -d` to run zeus, rabbitmq and redis locally in a docker container.
@@ -85,7 +86,6 @@ If you would like to run Zeus locally you will need to specify the following env
 * `DB_PASS` (MongoDB password for Phishstory database)
 * `BROKER_PASS` (The Broker Pass for the RabbitMQ server to connect to)
 * `BROKER_URL` (amqp://guest@localhost:5672//)
-* `MWPONEUSER` & `MWPONEPASS` (Account credentials to access the managed wordpress API)
 * `DIABLOUSER` & `DIABLOPASS` (Account credentials to access the diablo API)
 * `PLESKUSER` & `PLESKPASS` (Account credentials to access the plesk API)
 * `VPS4USER` & `VPS4PASS` (Account credentials to access the vps4 API)

@@ -50,6 +50,8 @@ class AppConfig(object):
     ZEUS_SSL_KEY = os.getenv('ZEUS_SSL_KEY')
     GOCENTRAL_SSL_CERT = os.getenv('GOCENTRAL_SSL_CERT')
     GOCENTRAL_SSL_KEY = os.getenv('GOCENTRAL_SSL_KEY')
+    CMAP_API_CERT = os.getenv('CMAP_API_CERT', 'api.crt')
+    CMAP_API_KEY = os.getenv('CMAP_API_KEY', 'api.key')
 
     REDIS = os.getenv('REDIS', 'localhost')
 
@@ -67,8 +69,6 @@ class AppConfig(object):
         self.DB_KELVIN_PASS = urllib.parse.quote(os.getenv('DB_KELVIN_PASS', 'password'))
         self.DB_KELVIN_URL = 'mongodb://{}:{}@{}/{}'.format(self.DB_KELVIN_USER, self.DB_KELVIN_PASS, self.DB_HOST, self.DB_KELVIN)
 
-        self.MWPONEUSER = os.getenv('MWPONEUSER', 'mwponeuser')
-        self.MWPONEPASS = os.getenv('MWPONEPASS', 'mwponepass')
         self.DIABLOUSER = os.getenv('DIABLOUSER', 'diablouser')
         self.DIABLOPASS = os.getenv('DIABLOPASS', 'diablopass')
         self.PLESKUSER = os.getenv('PLESKUSER', 'pleskuser')
@@ -239,8 +239,8 @@ class UnitTestConfig(AppConfig):
     REDIS = 'localhost'
     CAN_FLOOD = False
 
-    MWPONEUSER = 'mwponeuser'
-    MWPONEPASS = 'mwponepass'
+    CMAP_API_CERT = 'api.crt'
+    CMAP_API_KEY = 'api.key'
     DIABLOUSER = 'diablouser'
     DIABLOPASS = 'diablopass'
     PLESKUSER = 'pleskuser'

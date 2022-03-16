@@ -3,6 +3,7 @@ import logging
 import requests
 from requests.packages.urllib3.exceptions import (InsecurePlatformWarning,
                                                   InsecureRequestWarning)
+from settings import AppConfig
 
 from zeus.events.suspension.interface import Product
 
@@ -13,16 +14,16 @@ requests.packages.urllib3.disable_warnings(InsecurePlatformWarning)
 class MWPOne(Product):
     headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
 
-    def __init__(self, app_settings):
+    def __init__(self, app_settings: AppConfig):
         self._logger = logging.getLogger('celery.tasks')
         self.mwpone_url = app_settings.MWPONE_URL
-        self.mwponeauth = (app_settings.MWPONEUSER, app_settings.MWPONEPASS)
+        self.cert = (app_settings.CMAP_API_CERT, app_settings.CMAP_API_KEY)
 
     def suspend(self, guid, **kwargs):
         url = self.mwpone_url + guid + '?suspendAccount'
 
         try:
-            response = requests.post(url, auth=self.mwponeauth, headers=self.headers, verify=False)
+            response = requests.post(url, cert=self.cert, headers=self.headers, verify=False)
             if response.status_code == 200:
                 if response.text == 'true':
                     self._logger.info(f'Managed Wordpress 1.0 account {guid} has been suspended')
