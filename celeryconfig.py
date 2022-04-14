@@ -21,16 +21,19 @@ class CeleryConfig:
     worker_send_task_events = False
     # Force kill a task if it takes longer than three minutes.
     task_time_limit = 180
+    WORKER_ENABLE_REMOTE_CONTROL = False
 
     def __init__(self, app_settings: AppConfig):
-        self.broker_url = os.getenv('BROKER_URL', None)  # For local docker-compose testing
-        if not self.broker_url:
-            self.BROKER_PASS = app_settings.BROKER_PASS
-            self.broker_url = app_settings.BROKER_URL
+        self.broker_url = app_settings.BROKER_URL
+        # TODO CMAPT-5032: set this to 'quorum'
+        queue_type = app_settings.QUEUE_TYPE
 
         self.task_queues = (
-            Queue(app_settings.ZEUSQUEUE, Exchange(app_settings.ZEUSQUEUE), routing_key=app_settings.ZEUSQUEUE),
+            Queue(app_settings.ZEUSQUEUE, Exchange(app_settings.ZEUSQUEUE), routing_key=app_settings.ZEUSQUEUE,
+                  queue_arguments={'x-queue-type': queue_type}),
         )
         self.task_routes = {
-            'run.hubstream_sync': {'queue': app_settings.GDBS_QUEUE}
+            'run.hubstream_sync': {
+                'queue': Queue(app_settings.GDBS_QUEUE, Exchange(app_settings.GDBS_QUEUE),
+                               routing_key=app_settings.GDBS_QUEUE, queue_arguments={'x-queue-type': queue_type})}
         }

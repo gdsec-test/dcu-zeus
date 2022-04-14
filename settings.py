@@ -1,7 +1,6 @@
 import os
 import urllib.parse
 from collections import OrderedDict
-from urllib.parse import quote
 
 
 class AppConfig(object):
@@ -58,9 +57,10 @@ class AppConfig(object):
     SHOPLOCKED_URL = ''
     CRMALERT_URL = ''
 
-    BROKER_PASS = quote(os.getenv('BROKER_PASS', 'password'))
-    BROKER_URL = 'amqp://02d1081iywc7Av2:' + BROKER_PASS + '@rmq-dcu.int.dev-godaddy.com:5672/grandma'
+    QUEUE_TYPE = os.getenv('QUEUE_TYPE')
+    BROKER_URL = os.getenv('MULTIPLE_BROKERS') if QUEUE_TYPE == 'quorum' else os.getenv('SINGLE_BROKER')
     GDBS_QUEUE = 'devgdbrandservice'
+    ZEUSQUEUE = 'devzeus'
 
     def __init__(self):
         self.DB_PASS = urllib.parse.quote(os.getenv('DB_PASS', 'password'))
@@ -119,8 +119,6 @@ class ProductionAppConfig(AppConfig):
                              ('SIN2', 'https://vps4.api.sin2.godaddy.com'),
                              ('AMS3', 'https://vps4.api.ams3.godaddy.com')])
 
-    BROKER_PASS = quote(os.getenv('BROKER_PASS', 'password'))
-    BROKER_URL = 'amqp://02d1081iywc7Av2:' + BROKER_PASS + '@rmq-dcu.int.godaddy.com:5672/grandma'
     GDBS_QUEUE = 'gdbrandservice'
 
     def __init__(self):
@@ -149,8 +147,6 @@ class OTEAppConfig(AppConfig):
                              ('SIN2', 'https://vps4.api.test-godaddy.com'),
                              ('AMS3', 'https://vps4.api.test-godaddy.com')])
 
-    BROKER_PASS = quote(os.getenv('BROKER_PASS', 'password'))
-    BROKER_URL = 'amqp://02d1081iywc7Av2:' + BROKER_PASS + '@rmq-dcu.int.godaddy.com:5672/grandma'
     GDBS_QUEUE = 'otegdbrandservice'
 
     def __init__(self):
@@ -158,8 +154,6 @@ class OTEAppConfig(AppConfig):
 
 
 class DevelopmentAppConfig(AppConfig):
-    ZEUSQUEUE = 'devzeus'
-
     DB = 'devphishstory'
     DB_HOST = '10.36.156.188'
     DB_USER = 'devuser'
@@ -227,8 +221,6 @@ class TestAppConfig(AppConfig):
 
 
 class UnitTestConfig(AppConfig):
-    ZEUSQUEUE = 'devzeus'
-
     DBURL = 'mongodb://localhost/devphishstory'
     DB = 'test'
     COLLECTION = 'test'
