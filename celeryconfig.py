@@ -25,15 +25,15 @@ class CeleryConfig:
 
     def __init__(self, app_settings: AppConfig):
         self.broker_url = app_settings.BROKER_URL
-        # TODO CMAPT-5032: set this to 'quorum'
-        queue_type = app_settings.QUEUE_TYPE
 
+        # TODO CMAPT-5032: set this to 'x-queue-type': 'quorum'
+        queue_args = {'x-queue-type': 'quorum'} if app_settings.QUEUE_TYPE == 'quorum' else None
         self.task_queues = (
             Queue(app_settings.ZEUSQUEUE, Exchange(app_settings.ZEUSQUEUE), routing_key=app_settings.ZEUSQUEUE,
-                  queue_arguments={'x-queue-type': queue_type}),
+                  queue_arguments=queue_args),
         )
         self.task_routes = {
             'run.hubstream_sync': {
                 'queue': Queue(app_settings.GDBS_QUEUE, Exchange(app_settings.GDBS_QUEUE),
-                               routing_key=app_settings.GDBS_QUEUE, queue_arguments={'x-queue-type': queue_type})}
+                               routing_key=app_settings.GDBS_QUEUE, queue_arguments=queue_args)}
         }
