@@ -2,8 +2,8 @@ services:
   zeus:
     image: docker-dcu-local.artifactory.secureserver.net/zeus:dev
     environment:
-      BROKER_PASS: ${BROKER_PASS}
-      BROKER_URL: amqp://guest@rabbitmq:5672//
+      BROKER_URL: ${BROKER_URL}
+      QUEUE_TYPE: 'quorum'
       CMAP_PROXY_CERT: '/tmp/certs/proxyuser.cmap.int.godaddy.com.crt'
       CMAP_PROXY_KEY: '/tmp/certs/proxyuser.cmap.int.godaddy.com.key'
       CMAP_API_CERT: '/tmp/certs/apiuser.cmap.int.godaddy.com.crt'
