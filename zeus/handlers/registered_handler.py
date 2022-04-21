@@ -276,7 +276,8 @@ class RegisteredHandler(Handler):
 
         self._notify_fraud(data, ticket_id, domain, shopper_id, report_type, source, target)
 
-        self.shoplocked.adminlock(shopper_id, note_mappings['registered']['shopperCompromise']['shoplocked'])
+        self.shoplocked.adminlock(shopper_id, note_mappings['registered']['shopperCompromise']['shoplocked_lock'])
+        self.shoplocked.scrambler(shopper_id, note_mappings['registered']['shopperCompromise']['shoplocked_scramble'])
 
         if not self.domain_service.can_suspend_domain(domain):
             self._logger.info("Domain {} already suspended".format(domain))

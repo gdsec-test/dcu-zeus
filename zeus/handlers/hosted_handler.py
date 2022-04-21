@@ -256,7 +256,8 @@ class HostedHandler(Handler):
 
         self._notify_fraud(data, ticket_id, domain, shopper_id, guid, source, report_type, target)
 
-        self.shoplocked.adminlock(shopper_id, note_mappings['hosted']['shopperCompromise']['shoplocked'])
+        self.shoplocked.adminlock(shopper_id, note_mappings['hosted']['shopperCompromise']['shoplocked_lock'])
+        self.shoplocked.scrambler(shopper_id, note_mappings['hosted']['shopperCompromise']['shoplocked_scramble'])
 
         if not self.hosting_service.can_suspend_hosting_product(guid):
             self._logger.info("Hosting {} already suspended".format(guid))
