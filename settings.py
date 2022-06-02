@@ -155,11 +155,11 @@ class OTEAppConfig(AppConfig):
 
 class DevelopmentAppConfig(AppConfig):
     DB = 'devphishstory'
-    DB_HOST = '10.36.156.188'
+    DB_HOST = '10.36.190.222'
     DB_USER = 'devuser'
 
     DB_KELVIN = 'devkelvin'
-    DB_KELVIN_HOST = '10.36.156.188'
+    DB_KELVIN_HOST = '10.36.190.222'
     DB_KELVIN_USER = 'devkelvin'
 
     DOMAIN_SERVICE = 'localhost:8080/domains'
@@ -186,11 +186,11 @@ class TestAppConfig(AppConfig):
     ZEUSQUEUE = 'testzeus'
 
     DB = 'testphishstory'
-    DB_HOST = '10.36.156.188'
+    DB_HOST = '10.36.190.222'
     DB_USER = 'testuser'
 
     DB_KELVIN = 'testkelvin'
-    DB_KELVIN_HOST = '10.36.156.188'
+    DB_KELVIN_HOST = '10.36.190.222'
     DB_KELVIN_USER = 'testkelvin'
 
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-test.svc.cluster.local:8080'
