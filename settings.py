@@ -57,8 +57,7 @@ class AppConfig(object):
     SHOPLOCKED_URL = ''
     CRMALERT_URL = ''
 
-    QUEUE_TYPE = os.getenv('QUEUE_TYPE')
-    BROKER_URL = os.getenv('MULTIPLE_BROKERS') if QUEUE_TYPE == 'quorum' else os.getenv('SINGLE_BROKER')
+    BROKER_URL = os.getenv('MULTIPLE_BROKERS')
     GDBS_QUEUE = 'devgdbrandservice'
     ZEUSQUEUE = 'devzeus'
 
