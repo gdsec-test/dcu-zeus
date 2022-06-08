@@ -4,9 +4,6 @@ Zeus is responsible for facilitating automated actions on GoDaddy Products.
 These are mainly broken up into 1) Registered 2) Hosted) and 3) Fraud actions. Its major functionality currently include
  1. Product Suspensions (Domains, cPanel, MWP 1.0, etc.)
  2. Customer Warnings (Domains, Vertigo)
- 
-In the future, Zeus will be extended to interact with DCU Journal to help publish events for Hosting Product Team and other entities
-to consume. This will aid in the decentralization of abuse management at GoDaddy.
 
 ## Cloning
 To clone the repository via SSH perform the following
@@ -54,7 +51,6 @@ make tools   # Runs both Flake8 and isort
 ## Certs Required
 The following certs are required to run this project, must include proper ENV domain:
  1. `OCM API`: phishstory.int.
- 1. `ZEUS DCU Journal`: dcu.zeus.int.
  1. `Ecomm/Orion Web Service`: dcu.ecomm.
  1. `CMAP_API_CERT` Path to apiuser.cmap.int certificate file (for connecting to MWP V1)
  1. `CMAP_API_KEY` Path to apiuser.cmap.int key file (for connecting to MWP V1)
@@ -99,8 +95,8 @@ If you would like to run Zeus locally you will need to specify the following env
 * `OCM_SSL_CERT` (The path to the SSL Cert white-listed for OCM API `phishstory.int.`)
 * `OCM_SSL_KEY` (The path to the SSL Key white-listed for OCM API `phishstory.int.`)
 * `RESULT_BACKEND_HOSTNAME` (localhost)
-* `ZEUS_SSL_CERT` (The path to the SSL Cert for communicating with CRM Alert, DCU Journal, Mimir and Shoplocked `dcu.zeus.int`)
-* `ZEUS_SSL_KEY` (The path to the SSL Key for communicating with CRM Alert, DCU Journal, Mimir and Shoplocked `dcu.zeus.int`)
+* `ZEUS_SSL_CERT` (The path to the SSL Cert for communicating with CRM Alert, Mimir and Shoplocked `dcu.zeus.int`)
+* `ZEUS_SSL_KEY` (The path to the SSL Key for communicating with CRM Alert, Mimir and Shoplocked `dcu.zeus.int`)
 * `EMAIL_RECIPIENT` (The email address you want `non-shopper` emails sent to while testing, instead of emailing fraud. e.g. user@example.com)  *** *ONLY WORKS WITH TEMPLATES THAT SEND TO NON-SHOPPERS* ***
 * Run `docker-compose up -d rabbitmq redis` to run rabbitmq and redis locally in a docker container.
 * PyCharm script path will need to be set to: `/PATH_TO_ZEUS_ENVS/bin/celery`.

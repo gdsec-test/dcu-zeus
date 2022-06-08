@@ -25,7 +25,6 @@ from zeus.utils.functions import (get_domain_id_from_dict,
                                   get_shopper_id_from_dict,
                                   get_ssl_subscriptions_from_dict,
                                   get_sucuri_product_from_dict)
-from zeus.utils.journal import EventTypes, Journal
 from zeus.utils.mimir import InfractionTypes, Mimir, RecordTypes
 from zeus.utils.shoplocked import Shoplocked
 from zeus.utils.slack import SlackFailures, ThrottledSlack
@@ -47,7 +46,6 @@ class RegisteredHandler(Handler):
 
         self.domain_service = ThrottledDomainService(app_settings)
         self.crm = ThrottledCRM(app_settings)
-        self.journal = Journal(app_settings)
         self.slack = SlackFailures(ThrottledSlack(app_settings))
         self.shoplocked = Shoplocked(app_settings)
         self.crmalert = CRMAlert(app_settings)
@@ -134,8 +132,6 @@ class RegisteredHandler(Handler):
                                                                             type=report_type,
                                                                             location=source)
         self.crm.notate_crm_account(shopper_id_list, ticket_id, note, domain)
-        self.journal.write(EventTypes.customer_warning, self.DOMAIN, domain, report_type,
-                           note_mappings['journal']['customerWarning'], [source])
 
         self.mimir.write(abuse_type=report_type,
                          domain=domain,
@@ -201,8 +197,6 @@ class RegisteredHandler(Handler):
                                                                                    type=report_type,
                                                                                    location=source)
         self.crm.notate_crm_account([shopper_id], ticket_id, note, domain)
-        self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
-                           note_mappings['journal']['intentionallyMalicious'], [source])
 
         '''We do not want to create a second infraction for the domain suspension if the associated hosting is in the
         same customer account'''
@@ -261,8 +255,6 @@ class RegisteredHandler(Handler):
         note = note_mappings['registered']['shopperCompromise']['crm'].format(domain=domain, type=report_type,
                                                                               location=source)
         self.crm.notate_crm_account([shopper_id], ticket_id, note, domain)
-        self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
-                           note_mappings['journal']['shopperCompromise'], [source])
 
         self.mimir.write(abuse_type=report_type,
                          domain=domain,
@@ -313,8 +305,6 @@ class RegisteredHandler(Handler):
                                                                            type=report_type,
                                                                            location=source)
         self.crm.notate_crm_account([shopper_id], ticket_id, note, domain)
-        self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
-                           note_mappings['journal']['repeatOffender'], [source])
 
         self.mimir.write(abuse_type=report_type,
                          domain=domain,
@@ -360,8 +350,6 @@ class RegisteredHandler(Handler):
                                                                        type=report_type,
                                                                        location=source)
         self.crm.notate_crm_account([shopper_id], ticket_id, note, domain)
-        self.journal.write(EventTypes.product_suspension, self.DOMAIN, domain, report_type,
-                           note_mappings['journal']['suspension'], [source])
 
         self.mimir.write(abuse_type=report_type,
                          domain=domain,

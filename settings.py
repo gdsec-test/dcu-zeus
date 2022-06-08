@@ -108,7 +108,6 @@ class ProductionAppConfig(AppConfig):
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-prod.svc.cluster.local:8080'
 
     SSO_URL = 'https://sso.godaddy.com'
-    JOURNAL_URL = 'http://dcu-journal.abuse-api-prod.svc.cluster.local:5000'
     MIMIR_URL = 'https://mimir.int.godaddy.com'
     SHOPLOCKED_URL = 'https://shoplocked.api.int.godaddy.com'
     VERT_URL = 'https://vertigo.cmap.proxy.int.godaddy.com/vertigo/v1/container/'
@@ -138,7 +137,6 @@ class OTEAppConfig(AppConfig):
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-ote.svc.cluster.local:8080'
 
     SSO_URL = 'https://sso.ote-godaddy.com'
-    JOURNAL_URL = 'http://dcu-journal.abuse-api-ote.svc.cluster.local:5000'
     MIMIR_URL = 'https://mimir.int.ote-godaddy.com'
     CRMALERT_URL = 'https://crm-alert.int.ote-godaddy.com'
 
@@ -167,7 +165,6 @@ class DevelopmentAppConfig(AppConfig):
     DIABLO_URL = 'http://localhost:8080/diablo/v1/accounts/'
 
     SSO_URL = 'https://sso.dev-godaddy.com'
-    JOURNAL_URL = 'http://dcu-journal.abuse-api-dev.svc.cluster.local:5000'
     MIMIR_URL = 'https://mimir.int.dev-godaddy.com'
     SHOPLOCKED_URL = 'http://localhost:8080/shoplocked'
     CRMALERT_URL = 'https://crm-alert.int.dev-godaddy.com'
@@ -201,7 +198,6 @@ class TestAppConfig(AppConfig):
     VERT_URL = ''
 
     SSO_URL = 'https://sso.test-godaddy.com'
-    JOURNAL_URL = 'http://dcu-journal.abuse-api-test.svc.cluster.local:5000'
     MIMIR_URL = 'https://mimir.int.test-godaddy.com'
     SHOPLOCKED_URL = 'https://shoplocked.api.int.test-godaddy.com'
     CRMALERT_URL = 'https://crm-alert.int.test-godaddy.com'
@@ -253,7 +249,6 @@ class UnitTestConfig(AppConfig):
     NOTIFICATION_LOCK_TIME = 60
 
     SSO_URL = ''
-    JOURNAL_URL = ''
     MIMIR_URL = ''
     CRMALERT_URL = ''
     GOCENTRAL_URL = ''

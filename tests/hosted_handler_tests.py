@@ -12,7 +12,6 @@ from zeus.events.suspension.hosting_service import ThrottledHostingService
 from zeus.handlers.hosted_handler import HostedHandler
 from zeus.reviews.reviews import BasicReview, HighValueReview
 from zeus.utils.crmalert import CRMAlert
-from zeus.utils.journal import Journal
 from zeus.utils.mimir import Mimir
 from zeus.utils.scribe import HostedScribe
 from zeus.utils.shoplocked import Shoplocked
@@ -93,19 +92,17 @@ class TestHostedHandler:
         assert_false(self._hosted.customer_warning(self.ticket_valid))
 
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedMailer, 'send_hosted_warning', return_value=True)
     @patch.object(HostedScribe, 'customer_warning', return_value=None)
     @patch.object(BasicReview, 'place_in_review', return_value=None)
-    def test_customer_warning_success(self, review, scribe, mailer, journal, mimir):
+    def test_customer_warning_success(self, review, scribe, mailer, mimir):
         assert_true(self._hosted.customer_warning(self.ticket_valid))
 
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedMailer, 'send_hosted_warning', return_value=True)
     @patch.object(HostedScribe, 'customer_warning', return_value=None)
     @patch.object(HighValueReview, 'place_in_review', return_value=None)
-    def test_customer_warning_high_value_success(self, review, scribe, mailer, journal, mimir):
+    def test_customer_warning_high_value_success(self, review, scribe, mailer, mimir):
         assert_true(self._hosted.customer_warning(self.ticket_high_value_domain))
 
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
@@ -138,21 +135,19 @@ class TestHostedHandler:
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=False)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     def test_intentionally_malicious_failed_shopper_email_fraud_hold(self, ssl_mailer, can_suspend, scribe,
-                                                                     slack, mailer, journal, mimir, shoplocked,
+                                                                     slack, mailer, mimir, shoplocked,
                                                                      mock_db):
         assert_false(self._hosted.intentionally_malicious(self.ticket_fraud_hold))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=True)
     @patch.object(SlackFailures, 'failed_sending_revocation_email', return_value=None)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
@@ -160,7 +155,7 @@ class TestHostedHandler:
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=False)
     def test_intentionally_malicious_failed_revocation_email(self, ssl_mailer, can_suspend, scribe, slack,
-                                                             slack_ssl, mailer, journal, mimir, shoplocked,
+                                                             slack_ssl, mailer, mimir, shoplocked,
                                                              mock_db):
         assert_false(self._hosted.intentionally_malicious(self.ticket_valid))
 
@@ -168,14 +163,13 @@ class TestHostedHandler:
     @patch.object(CRMAlert, 'create_alert', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=True)
     @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     def test_intentionally_malicious_no_termination_email(self, ssl_mailer, can_suspend, scribe, mailer,
-                                                          suspend, journal, mimir, shoplocked, crmalert,
+                                                          suspend, mimir, shoplocked, crmalert,
                                                           mock_db):
         assert_true(self._hosted.intentionally_malicious(self.ticket_fraud_hold))
 
@@ -183,13 +177,12 @@ class TestHostedHandler:
     @patch.object(CRMAlert, 'create_alert', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=True)
     @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    def test_intentionally_malicious_success(self, ssl_mailer, can_suspend, scribe, mailer, suspend, journal,
+    def test_intentionally_malicious_success(self, ssl_mailer, can_suspend, scribe, mailer, suspend,
                                              mimir, shoplocked, crmalert, mock_db):
         assert_true(self._hosted.intentionally_malicious(self.ticket_valid))
 
@@ -198,14 +191,13 @@ class TestHostedHandler:
     @patch.object(CRMAlert, 'create_alert', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=True)
     @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     def test_intentionally_malicious_no_fraud_email(self, ssl_mailer, can_suspend, scribe, mailer, suspend,
-                                                    journal, mimir, shoplocked, crmalert, fraud, mock_db):
+                                                    mimir, shoplocked, crmalert, fraud, mock_db):
         self._hosted.intentionally_malicious(self.ticket_valid_api_reseller)
         fraud.assert_not_called()
 
@@ -214,14 +206,13 @@ class TestHostedHandler:
     @patch.object(CRMAlert, 'create_alert', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=True)
     @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     def test_intentionally_malicious_success_fraud_email(self, ssl_mailer, can_suspend, scribe,
-                                                         mailer, suspend, journal, mimir, shoplocked, crmalert,
+                                                         mailer, suspend, mimir, shoplocked, crmalert,
                                                          fraud, mock_db):
         self._hosted.intentionally_malicious(self.ticket_no_hold_or_reseller)
         fraud.assert_called()
@@ -234,37 +225,34 @@ class TestHostedHandler:
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedScribe, 'shopper_compromise', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=False)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    def test_shopper_compromise_already_suspended(self, ssl_mailer, can_suspend, scribe, journal,
+    def test_shopper_compromise_already_suspended(self, ssl_mailer, can_suspend, scribe,
                                                   mimir, shoplocked, mock_db):
         assert_false(self._hosted.shopper_compromise(self.ticket_valid))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedMailer, 'send_shopper_compromise_hosted_suspension', return_value=False)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(HostedScribe, 'shopper_compromise', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     def test_shopper_compromise_failed_shopper_email(self, ssl_mailer, can_suspend, scribe, slack, mailer,
-                                                     journal, mimir, shoplocked, mock_db):
+                                                     mimir, shoplocked, mock_db):
         assert_false(self._hosted.shopper_compromise(self.ticket_valid))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_shopper_compromise_hosted_suspension', return_value=True)
     @patch.object(HostedScribe, 'shopper_compromise', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    def test_shopper_compromise_success(self, ssl_mailer, can_suspend, scribe, mailer, suspend, journal,
+    def test_shopper_compromise_success(self, ssl_mailer, can_suspend, scribe, mailer, suspend,
                                         mimir, shoplocked, mopck_db):
         assert_true(self._hosted.shopper_compromise(self.ticket_valid))
 
@@ -272,13 +260,12 @@ class TestHostedHandler:
     @patch.object(FraudMailer, 'send_malicious_hosting_notification', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedMailer, 'send_shopper_compromise_hosted_suspension', return_value=False)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(HostedScribe, 'shopper_compromise', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    def test_shopper_compromise_no_fraud_email(self, ssl_mailer, can_suspend, scribe, slack, mailer, journal,
+    def test_shopper_compromise_no_fraud_email(self, ssl_mailer, can_suspend, scribe, slack, mailer,
                                                mimir, shoplocked, fraud, mock_db):
         self._hosted.shopper_compromise(self.ticket_valid_api_reseller)
         fraud.assert_not_called()
@@ -287,14 +274,13 @@ class TestHostedHandler:
     @patch.object(FraudMailer, 'send_malicious_hosting_notification', return_value=None)
     @patch.object(Shoplocked, 'adminlock', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_shopper_compromise_hosted_suspension', return_value=True)
     @patch.object(HostedScribe, 'shopper_compromise', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     def test_shopper_compromise_success_fraud_email(self, ssl_mailer, can_suspend, scribe, mailer,
-                                                    suspend, journal, mimir, shoplocked, fraud, mock_db):
+                                                    suspend, mimir, shoplocked, fraud, mock_db):
         self._hosted.shopper_compromise(self.ticket_no_hold_or_reseller)
         fraud.assert_called()
 
@@ -307,22 +293,20 @@ class TestHostedHandler:
         assert_false(self._hosted.suspend(self.ticket_valid))
 
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedMailer, 'send_shopper_hosted_suspension', return_value=False)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(HostedScribe, 'suspension', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
-    def test_suspend_failed_shopper_email(self, can_suspend, scribe, slack, mailer, journal, mimir):
+    def test_suspend_failed_shopper_email(self, can_suspend, scribe, slack, mailer, mimir):
         assert_false(self._hosted.suspend(self.ticket_valid))
 
     @patch.object(CRMAlert, 'create_alert', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_shopper_hosted_suspension', return_value=True)
     @patch.object(HostedScribe, 'suspension', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
-    def test_suspend_success(self, can_suspend, scribe, mailer, handler, journal, mimir, crmalert):
+    def test_suspend_success(self, can_suspend, scribe, mailer, handler, mimir, crmalert):
         assert_true(self._hosted.suspend(self.ticket_valid))
 
     @patch.object(SlackFailures, 'failed_hosting_suspension', return_value=None)
@@ -343,22 +327,20 @@ class TestHostedHandler:
         assert_false(self._hosted.repeat_offender(self.ticket_valid))
 
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedMailer, 'send_repeat_offender', return_value=False)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(HostedScribe, 'repeat_offender', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
-    def test_repeat_offender_failed_shopper_email(self, can_suspend, scribe, slack, mailer, journal, mimir):
+    def test_repeat_offender_failed_shopper_email(self, can_suspend, scribe, slack, mailer, mimir):
         assert_false(self._hosted.repeat_offender(self.ticket_valid))
 
     @patch.object(CRMAlert, 'create_alert', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_repeat_offender', return_value=True)
     @patch.object(HostedScribe, 'repeat_offender', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
-    def test_repeat_offender_success(self, can_suspend, scribe, mailer, suspend, journal, mimir, crmalert):
+    def test_repeat_offender_success(self, can_suspend, scribe, mailer, suspend, mimir, crmalert):
         assert_true(self._hosted.repeat_offender(self.ticket_valid))
 
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
@@ -370,22 +352,20 @@ class TestHostedHandler:
         assert_false(self._hosted.extensive_compromise(self.ticket_valid))
 
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedMailer, 'send_extensive_compromise', return_value=False)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(HostedScribe, 'extensive_compromise', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
-    def test_extensive_compromise_failed_shopper_email(self, can_suspend, scribe, slack, mailer, journal, mimir):
+    def test_extensive_compromise_failed_shopper_email(self, can_suspend, scribe, slack, mailer, mimir):
         assert_false(self._hosted.extensive_compromise(self.ticket_valid))
 
     @patch.object(CRMAlert, 'create_alert', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_extensive_compromise', return_value=True)
     @patch.object(HostedScribe, 'extensive_compromise', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
-    def test_extensive_compromise_success(self, can_suspend, scribe, mailer, suspend, journal, mimir, crmalert):
+    def test_extensive_compromise_success(self, can_suspend, scribe, mailer, suspend, mimir, crmalert):
         assert_true(self._hosted.extensive_compromise(self.ticket_valid))
 
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
@@ -398,10 +378,9 @@ class TestHostedHandler:
 
     @patch.object(CRMAlert, 'create_alert', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Journal, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_csam_hosted_suspension', return_value=True)
     @patch.object(HostedScribe, 'suspension', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
-    def test_csam_suspend_success(self, can_suspend, scribe, mailer, handler, journal, mimir, crmalert):
+    def test_csam_suspend_success(self, can_suspend, scribe, mailer, handler, mimir, crmalert):
         assert_true(self._hosted.suspend_csam(self.ticket_valid_child_abuse))

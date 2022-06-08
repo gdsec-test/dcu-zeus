@@ -17,7 +17,6 @@ from zeus.utils.functions import (get_high_value_domain_from_dict,
                                   get_parent_child_shopper_ids_from_dict,
                                   get_ssl_subscriptions_from_dict,
                                   get_sucuri_product_from_dict)
-from zeus.utils.journal import EventTypes, Journal
 from zeus.utils.mimir import InfractionTypes, Mimir, RecordTypes
 from zeus.utils.scribe import HostedScribe
 from zeus.utils.shoplocked import Shoplocked
@@ -35,7 +34,6 @@ class HostedHandler(Handler):
 
         self.hosting_service = ThrottledHostingService(app_settings)
         self.scribe = HostedScribe(app_settings)
-        self.journal = Journal(app_settings)
         self.mimir = Mimir(app_settings)
         self.ssl_mailer = SSLMailer(app_settings)
         self.slack = SlackFailures(ThrottledSlack(app_settings))
@@ -73,7 +71,6 @@ class HostedHandler(Handler):
     def customer_warning(self, data):
         domain = data.get('sourceDomainOrIp')
         subdomain = data.get('sourceSubDomain')
-        product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
         ticket_id = data.get('ticketId')
         sucuri_product = get_sucuri_product_from_dict(data)
@@ -116,9 +113,6 @@ class HostedHandler(Handler):
 
         if not guid or not report_type:
             return False
-
-        self.journal.write(EventTypes.customer_warning, product, domain, report_type,
-                           note_mappings['journal']['customerWarning'], [source])
 
         abuse_type = data.get('type', '').upper()
         self.mimir.write(abuse_type=abuse_type,
@@ -186,9 +180,6 @@ class HostedHandler(Handler):
             self._logger.info("Hosting {} already suspended".format(guid))
             return False
 
-        self.journal.write(EventTypes.product_suspension, product, domain, report_type,
-                           note_mappings['journal']['intentionallyMalicious'], [source])
-
         abuse_type = data.get('type', '').upper()
         self.mimir.write(abuse_type=abuse_type,
                          domain=domain,
@@ -238,9 +229,6 @@ class HostedHandler(Handler):
         if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
             return False
 
-        self.journal.write(EventTypes.product_suspension, product, domain, report_type,
-                           note_mappings['journal']['shopperCompromise'], [source])
-
         abuse_type = data.get('type', '').upper()
         self.mimir.write(abuse_type=abuse_type,
                          domain=domain,
@@ -284,9 +272,6 @@ class HostedHandler(Handler):
             self._logger.info("Hosting {} already suspended".format(guid))
             return False
 
-        self.journal.write(EventTypes.product_suspension, product, domain, report_type,
-                           note_mappings['journal']['repeatOffender'], [source])
-
         abuse_type = data.get('type', '').upper()
         self.mimir.write(abuse_type=abuse_type,
                          domain=domain,
@@ -322,9 +307,6 @@ class HostedHandler(Handler):
         if not self.hosting_service.can_suspend_hosting_product(guid):
             self._logger.info("Hosting {} already suspended".format(guid))
             return False
-
-        self.journal.write(EventTypes.product_suspension, product, domain, report_type,
-                           note_mappings['journal']['suspension'], [source])
 
         abuse_type = data.get('type', '').upper()
         self.mimir.write(abuse_type=abuse_type,
@@ -362,9 +344,6 @@ class HostedHandler(Handler):
         if not self.hosting_service.can_suspend_hosting_product(guid):
             self._logger.info("Hosting {} already suspended".format(guid))
             return False
-
-        self.journal.write(EventTypes.product_suspension, product, domain, report_type,
-                           note_mappings['journal']['extensiveCompromise'], [source])
 
         abuse_type = data.get('type', '').upper()
         self.mimir.write(abuse_type=abuse_type,
