@@ -64,14 +64,6 @@ note_mappings = {
             'shoplocked_lock': SHOPPER_COMPROMISE_ADMINLOCK,
             'shoplocked_scramble': SHOPPER_COMPROMISE_SCRAMBLE
         }
-    },
-    'journal': {
-        'customerWarning': 'Customer should remove abusive content associated with incident.',
-        'intentionallyMalicious': 'Customer engaged in suspected intentionally malicious behavior.',
-        'shopperCompromise': 'Customer account has possibly been compromised.',
-        'suspension': 'Customer failed to resolve incident within provided time period.',
-        'repeatOffender': 'Customer has received excessive repeat occurrences of malicious content reports.',
-        'extensiveCompromise': 'Customer hosting is permanently suspended due to extensive compromise.'
     }
 }
 
