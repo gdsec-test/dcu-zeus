@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../base
+
+namespace: abuse-api-dev
+
+patches:
+- patch: |-
+    - op: add
+      path: "/spec/template/spec/containers/1"
+      value:
+        name: wiremock
+        image: docker-dcu-local.artifactory.secureserver.net/zeus/wiremock:dev
+  target:
+    kind: Deployment
+    name: zeus
+
+images:
+- name: docker-dcu-local.artifactory.secureserver.net/zeus
+  newTag: dev
+
+configMapGenerator:
+- literals:
+  - sysenv=dev
+  - GOCENTRAL_URL='https://services.orion.dev.sdl1.gdg/account/accountoperations.asmx'
+  name: env-specific-values

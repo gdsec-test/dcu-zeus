@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../base
+
+namespace: abuse-api-test
+
+images:
+- name: docker-dcu-local.artifactory.secureserver.net/zeus
+  newTag: test
+
+configMapGenerator:
+- literals:
+  - sysenv=test
+  - GOCENTRAL_URL='https://services.orion.dev.sdl1.gdg/account/accountoperations.asmx'
+  name: env-specific-values

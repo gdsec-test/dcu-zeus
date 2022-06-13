@@ -3,7 +3,6 @@ apiVersion: "apps/v1"
 kind: "Deployment"
 metadata:
   name: "zeus"
-  namespace: "abuse-api-prod"
   labels:
     app: "zeus"
 spec:
@@ -18,13 +17,13 @@ spec:
         app: "zeus"
     spec:
       imagePullSecrets:
-        -
-          name: "dcu-artifactory-creds"
+        - name: "dcu-artifactory-creds"
       containers:
-        -
-          name: "zeus"
-          imagePullPolicy: "Always"
-          image: "docker-dcu-local.artifactory.secureserver.net/zeus:REPLACE_WITH_GIT_COMMIT"
+        - name: "zeus"
+          image: "docker-dcu-local.artifactory.secureserver.net/zeus"
+          envFrom:
+            - configMapRef:
+                name: env-specific-values
           livenessProbe:
             exec:
               command:
@@ -32,12 +31,6 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
           env:
-          - name: BUILD_DATE
-            value: 'THIS_STRING_IS_REPLACED_DURING_BUILD'
-          - name: sysenv
-            value: prod
-          - name: GOCENTRAL_URL
-            value: 'https://services.orion.prod.secureserver.net/account/accountoperations.asmx'
           - name: MULTIPLE_BROKERS
             valueFrom:
               secretKeyRef:
@@ -107,7 +100,6 @@ spec:
             value: /proxycerts/tls.crt
           - name: CMAP_PROXY_KEY
             value: /proxycerts/tls.key
-
           - name: OCM_SSL_CERT
             value: /ocm_certs/tls.crt
           - name: OCM_SSL_KEY
@@ -121,7 +113,7 @@ spec:
           - name: GOCENTRAL_SSL_KEY
             value: /ecomm_certs/tls.key
           - name: RESULT_BACKEND_HOSTNAME
-            value: godaddy-service-redis.abuse-api-prod.svc.cluster.local
+            value: godaddy-service-redis.abuse-api-dev.svc.cluster.local
           - name: ELASTIC_APM_SERVER_URL
             valueFrom:
               secretKeyRef:
@@ -133,8 +125,7 @@ spec:
                 name: apm-access
                 key: secret
           - name: ELASTIC_APM_ENVIRONMENT
-            value: prod
-
+            value: dev
           volumeMounts:
           - name: tls-files-api
             mountPath: /apicerts
@@ -154,7 +145,6 @@ spec:
 
         -
           name: "redis"
-          imagePullPolicy: "Always"
           image: "redis"
           livenessProbe:
             exec:

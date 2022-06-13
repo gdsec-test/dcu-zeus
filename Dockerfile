@@ -1,19 +1,15 @@
 # Zeus
 
-FROM python:3.7.10-slim
+FROM docker-dcu-local.artifactory.secureserver.net/dcu-python3.7:3.3
 LABEL MAINTAINER=dcueng@godaddy.com
 
-RUN addgroup dcu && adduser --disabled-password --disabled-login --no-create-home --ingroup dcu --system dcu
-
+USER root
 WORKDIR /tmp
 
 # Move files to new dir
 ADD . /tmp
 
 RUN PIP_CONFIG_FILE=/tmp/pip_config/pip.conf pip install --compile /tmp
-
-COPY certs/* /usr/local/share/ca-certificates/
-RUN pip install --compile certifi
 
 RUN mkdir -p /app
 COPY *.py logging.yaml *.sh /app/
@@ -25,5 +21,7 @@ RUN sed -i 's#MinProtocol = TLSv1.2#MinProtocol = TLSv1.0#g' /etc/ssl/openssl.cn
 RUN rm -rf /tmp
 
 WORKDIR /app
+
+USER dcu
 
 ENTRYPOINT ["/app/runserver.sh"]
