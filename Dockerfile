@@ -13,15 +13,15 @@ RUN PIP_CONFIG_FILE=/tmp/pip_config/pip.conf pip install --compile /tmp
 
 RUN mkdir -p /app
 COPY *.py logging.yaml *.sh /app/
-RUN /bin/sh -c "cat certs/* >> `python -c 'import certifi; print(certifi.where())'`"
-RUN chown -R dcu:dcu /app && update-ca-certificates
+
+RUN chown dcu:dcu -R /app
+
 RUN sed -i 's#MinProtocol = TLSv1.2#MinProtocol = TLSv1.0#g' /etc/ssl/openssl.cnf
 
 # cleanup
 RUN rm -rf /tmp
 
+
 WORKDIR /app
-
 USER dcu
-
-ENTRYPOINT ["/app/runserver.sh"]
+ENTRYPOINT [ "/usr/local/bin/celery", "-A", "run", "worker", "-l", "INFO", "--without-gossip", "--without-heartbeat", "--without-mingle" ]
