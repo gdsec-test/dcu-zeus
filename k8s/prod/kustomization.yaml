@@ -12,7 +12,7 @@ images:
 configMapGenerator:
 - literals:
   - sysenv=prod
-  - GOCENTRAL_URL='https://services.orion.prod.secureserver.net/account/accountoperations.asmx'
-  - RESULT_BACKEND_HOSTNAME="godaddy-service-redis.abuse-api-prod.svc.cluster.local"
-
+  - GOCENTRAL_URL=https://services.orion.prod.secureserver.net/account/accountoperations.asmx
+  - RESULT_BACKEND_HOSTNAME=godaddy-service-redis.abuse-api-prod.svc.cluster.local
+  - ELASTIC_APM_ENVIRONMENT=prod
   name: env-specific-values
