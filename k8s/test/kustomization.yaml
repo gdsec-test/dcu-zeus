@@ -9,8 +9,10 @@ images:
 - name: docker-dcu-local.artifactory.secureserver.net/zeus
   newTag: test
 
+
 configMapGenerator:
 - literals:
   - sysenv=test
   - GOCENTRAL_URL='https://services.orion.dev.sdl1.gdg/account/accountoperations.asmx'
+  - RESULT_BACKEND_HOSTNAME="godaddy-service-redis.abuse-api-test.svc.cluster.local"
   name: env-specific-values

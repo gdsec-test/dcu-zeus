@@ -112,8 +112,6 @@ spec:
             value: /ecomm_certs/tls.crt
           - name: GOCENTRAL_SSL_KEY
             value: /ecomm_certs/tls.key
-          - name: RESULT_BACKEND_HOSTNAME
-            value: godaddy-service-redis.abuse-api-dev.svc.cluster.local
           - name: ELASTIC_APM_SERVER_URL
             valueFrom:
               secretKeyRef:
