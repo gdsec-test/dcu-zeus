@@ -3,15 +3,11 @@ import os
 
 import yaml
 from celery import Celery, bootsteps
+from csetutils.celery import instrument
 from dcdatabase.kelvinmongo import KelvinMongo
 from dcdatabase.phishstorymongo import PhishstoryMongo
-from dcustructuredlogging import celerylogger  # noqa: F401
-from elasticapm import Client, instrument
-from elasticapm.contrib.celery import (register_exception_tracking,
-                                       register_instrumentation)
 from kombu.common import QoS
 
-from apm import register_dcu_transaction_handler
 from celeryconfig import CeleryConfig
 from settings import config_by_name
 from zeus.events.email.reporter_mailer import ReporterMailer
@@ -27,11 +23,7 @@ config = config_by_name[env]()
 celery = Celery()
 celery.config_from_object(CeleryConfig(config))
 
-instrument()
-apm = Client(service_name='zeus')
-register_exception_tracking(apm)
-register_instrumentation(apm)
-register_dcu_transaction_handler(apm)
+instrument(service_name='zeus', env=env)
 
 log_level = os.getenv('LOG_LEVEL', 'INFO')
 
