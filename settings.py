@@ -107,7 +107,7 @@ class ProductionAppConfig(AppConfig):
 
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-prod.svc.cluster.local:8080'
 
-    SSO_URL = 'https://sso.godaddy.com'
+    SSO_URL = 'https://sso.gdcorp.tools'
     MIMIR_URL = 'https://mimir.int.godaddy.com'
     SHOPLOCKED_URL = 'https://shoplocked.api.int.godaddy.com'
     VERT_URL = 'https://vertigo.cmap.proxy.int.godaddy.com/vertigo/v1/container/'
@@ -136,7 +136,7 @@ class OTEAppConfig(AppConfig):
 
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-ote.svc.cluster.local:8080'
 
-    SSO_URL = 'https://sso.ote-godaddy.com'
+    SSO_URL = 'https://sso.ote-gdcorp.tools'
     MIMIR_URL = 'https://mimir.int.ote-godaddy.com'
     CRMALERT_URL = 'https://crm-alert.int.ote-godaddy.com'
 
@@ -164,7 +164,7 @@ class DevelopmentAppConfig(AppConfig):
     MWPONE_URL = 'http://localhost:8080/mwpone/v1/accounts/'
     DIABLO_URL = 'http://localhost:8080/diablo/v1/accounts/'
 
-    SSO_URL = 'https://sso.dev-godaddy.com'
+    SSO_URL = 'https://sso.dev-gdcorp.tools'
     MIMIR_URL = 'https://mimir.int.dev-godaddy.com'
     SHOPLOCKED_URL = 'http://localhost:8080/shoplocked'
     CRMALERT_URL = 'https://crm-alert.int.dev-godaddy.com'
@@ -197,7 +197,7 @@ class TestAppConfig(AppConfig):
     PLESK_URL = 'https://p3nwplskapp.test-godaddy.com:8084/v1/accounts/'
     VERT_URL = ''
 
-    SSO_URL = 'https://sso.test-godaddy.com'
+    SSO_URL = 'https://sso.test-gdcorp.tools'
     MIMIR_URL = 'https://mimir.int.test-godaddy.com'
     SHOPLOCKED_URL = 'https://shoplocked.api.int.test-godaddy.com'
     CRMALERT_URL = 'https://crm-alert.int.test-godaddy.com'
