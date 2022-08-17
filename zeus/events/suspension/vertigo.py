@@ -2,6 +2,7 @@ import json
 import logging
 
 import requests
+from csetutils.appsec.logging import get_logging
 
 from zeus.events.suspension.interface import Product
 
@@ -22,8 +23,20 @@ class Vertigo(Product):
         try:
             body = json.dumps({'reason': 'DCU Suspension'}, ensure_ascii=False)
 
-            response = requests.post(url, cert=self._cert, auth=self._auth, headers=self.headers, data=body, verify=False)
+            response = requests.post(url, cert=self._cert, auth=self._auth, headers=self.headers, data=body,
+                                     verify=False)
             response.raise_for_status()
+            appseclogger = get_logging("dev", "zeus")
+            container_id = data.get('data', {}).get('domainQuery', {}).get('host', {}).get('containerId', '')
+            appseclogger.info("suspending vertigo product", extra={"event": {"kind": "event",
+                                                                             "category": "process",
+                                                                             "type": ["change", "user"],
+                                                                             "outcome": "success",
+                                                                             "action": "suspend"},
+                                                                   "suspension":
+                                                                       {"guid": guid,
+                                                                        "product": "Vertigo",
+                                                                        "container_id": container_id}})
 
             return response.status_code == 202
 

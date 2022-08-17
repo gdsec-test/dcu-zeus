@@ -2,6 +2,7 @@ import json
 import logging
 
 import requests
+from csetutils.appsec.logging import get_logging
 
 from zeus.persist.notification_timeouts import Throttle
 
@@ -55,7 +56,8 @@ class DomainService:
             #  404: u'Not Found\n'
             #  500: u'{"error":"No Active shoppers for this Domain Name","code":13}'
             if resp.status_code not in [200, 404]:
-                self._logger.error(f'Domain lookup failed for {domain_name} with status code {resp.status_code} : {resp.text}')
+                self._logger.error(
+                    f'Domain lookup failed for {domain_name} with status code {resp.status_code} : {resp.text}')
             elif resp.status_code == 404:
                 self._logger.error(f'URL not found : {resp.text}')
 
@@ -73,7 +75,16 @@ class DomainService:
                         return_value = self._suspend(payload)
                         if not return_value:
                             self._logger.error(f'Domain suspension failed for {domain_name}: {status}')
-
+                        appseclogger = get_logging("dev", "zeus")
+                        appseclogger.info("suspending a domain", extra={"event": {"kind": "event",
+                                                                                  "category": "process",
+                                                                                  "type": ["change", "user"],
+                                                                                  "outcome": "success",
+                                                                                  "action": "suspend"},
+                                                                        "suspension":
+                                                                            {"domain_name": domain_name,
+                                                                             "entered_by": entered_by,
+                                                                             "reason": reason}})
                     else:
                         self._logger.error(f'Unable to suspend domain {domain_name}. Currently in state {status}')
         except Exception as e:

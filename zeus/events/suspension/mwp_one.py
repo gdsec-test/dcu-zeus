@@ -1,6 +1,7 @@
 import logging
 
 import requests
+from csetutils.appsec.logging import get_logging
 from requests.packages.urllib3.exceptions import (InsecurePlatformWarning,
                                                   InsecureRequestWarning)
 
@@ -27,6 +28,13 @@ class MWPOne(Product):
             if response.status_code == 200:
                 if response.text == 'true':
                     self._logger.info(f'Managed Wordpress 1.0 account {guid} has been suspended')
+                    appseclogger = get_logging("dev", "zeus")
+                    appseclogger.info("suspending mwp product", extra={"event": {"kind": "event",
+                                                                                 "category": "process",
+                                                                                 "type": ["change", "user"],
+                                                                                 "outcome": "success",
+                                                                                 "action": "suspend"},
+                                                                       "guid": guid})
                     return True
             else:
                 self._logger.error(f'Failed to suspend account {guid}: {response.reason}')

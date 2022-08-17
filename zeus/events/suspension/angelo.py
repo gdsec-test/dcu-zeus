@@ -2,6 +2,7 @@ import json
 import logging
 
 import requests
+from csetutils.appsec.logging import get_logging
 from requests.packages.urllib3.exceptions import (InsecurePlatformWarning,
                                                   InsecureRequestWarning)
 
@@ -62,6 +63,14 @@ class Angelo(Product):
 
             response = requests.post(url, auth=self.auth, headers=self.headers, data=body, verify=False)
             response.raise_for_status()
+            appseclogger = get_logging("dev", "zeus")
+            shopperId = data.get('domainQuery', {}).get('host', {}).get('shopperId', {})
+            appseclogger.info("suspending angelo product", extra={"event": {"kind": "event",
+                                                                            "category": "process",
+                                                                            "type": ["change", "user"],
+                                                                            "outcome": "success",
+                                                                            "action": "suspend"},
+                                                                  "shopper_id": shopperId})
 
             return response.status_code == 200
 
