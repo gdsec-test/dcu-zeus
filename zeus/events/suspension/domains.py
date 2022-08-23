@@ -2,7 +2,6 @@ import json
 import logging
 
 import requests
-from csetutils.appsec.logging import get_logging
 
 from zeus.persist.notification_timeouts import Throttle
 
@@ -75,16 +74,6 @@ class DomainService:
                         return_value = self._suspend(payload)
                         if not return_value:
                             self._logger.error(f'Domain suspension failed for {domain_name}: {status}')
-                        appseclogger = get_logging("dev", "zeus")
-                        appseclogger.info("suspending a domain", extra={"event": {"kind": "event",
-                                                                                  "category": "process",
-                                                                                  "type": ["change", "user"],
-                                                                                  "outcome": "success",
-                                                                                  "action": "suspend"},
-                                                                        "suspension":
-                                                                            {"domain_name": domain_name,
-                                                                             "entered_by": entered_by,
-                                                                             "reason": reason}})
                     else:
                         self._logger.error(f'Unable to suspend domain {domain_name}. Currently in state {status}')
         except Exception as e:

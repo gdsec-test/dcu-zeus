@@ -1,7 +1,6 @@
 import logging
 
 import requests
-from csetutils.appsec.logging import get_logging
 from requests.packages.urllib3.exceptions import (InsecurePlatformWarning,
                                                   InsecureRequestWarning)
 
@@ -64,14 +63,6 @@ class GoCentral(Product):
                 self._logger.error(f'Bad status code {r.status_code} in suspend response')
                 return False
             self._logger.info(f'Suspended GoCentral ticket {ticket_id}')
-            appseclogger = get_logging("dev", "zeus")
-            appseclogger.info("suspending gocentral product", extra={"event": {"kind": "event",
-                                                                               "category": "process",
-                                                                               "type": ["change", "user"],
-                                                                               "outcome": "success",
-                                                                               "action": "suspend"},
-                                                                     "suspension": {"guid": guid,
-                                                                                    "host_shopper": host_shopper}})
             return True
         except Exception as e:
             self._logger.error(f'Unable to suspend GoCentral product: {e}')

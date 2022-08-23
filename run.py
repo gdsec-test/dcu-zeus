@@ -3,6 +3,7 @@ import os
 
 import yaml
 from celery import Celery, bootsteps
+from csetutils.appsec.logging import get_logging
 from csetutils.celery import instrument
 from dcdatabase.kelvinmongo import KelvinMongo
 from dcdatabase.phishstorymongo import PhishstoryMongo
@@ -178,6 +179,14 @@ def intentionally_malicious(ticket_id, investigator_id):
 @celery.task()
 def suspend(ticket_id):
     data = get_database_handle().get_incident(ticket_id)
+    appseclogger = get_logging("dev", "zeus")
+    shopper_id = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('shopperId')
+    appseclogger.info("suspending shopper", extra={"event": {"kind": "event",
+                                                             "category": "process",
+                                                             "type": ["change", "user"],
+                                                             "outcome": "success",
+                                                             "action": "suspend"},
+                                                   "shopper_id": shopper_id})
     return route_request(data, ticket_id, 'suspend') if data else None
 
 

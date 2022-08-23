@@ -2,7 +2,6 @@ import json
 import logging
 
 import requests
-from csetutils.appsec.logging import get_logging
 
 from zeus.events.suspension.interface import Product
 from zeus.utils.functions import get_host_info_from_dict
@@ -84,14 +83,6 @@ class VPS4(Product):
 
                 if response.status_code == 200:
                     self._logger.info(f'Successfully suspended VPS4 guid {guid} on server {url}')
-                    appseclogger = get_logging("dev", "zeus")
-                    appseclogger.info("suspending vps4 product", extra={"event": {"kind": "event",
-                                                                                  "category": "process",
-                                                                                  "type": ["change", "user"],
-                                                                                  "outcome": "success",
-                                                                                  "action": "suspend"},
-                                                                        "guid": guid})
-
                     return True
 
             except Exception as e:
