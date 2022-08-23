@@ -25,6 +25,7 @@ class Vertigo(Product):
             response = requests.post(url, cert=self._cert, auth=self._auth, headers=self.headers, data=body,
                                      verify=False)
             response.raise_for_status()
+
             return response.status_code == 202
 
         except Exception as e:

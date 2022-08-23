@@ -27,6 +27,7 @@ class Diablo(Product):
 
             response = requests.post(url, auth=self.auth, headers=self.headers, data=body, verify=False)
             response.raise_for_status()
+
             return response.status_code == 200
 
         except Exception as e:

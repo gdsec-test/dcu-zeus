@@ -74,6 +74,7 @@ class DomainService:
                         return_value = self._suspend(payload)
                         if not return_value:
                             self._logger.error(f'Domain suspension failed for {domain_name}: {status}')
+
                     else:
                         self._logger.error(f'Unable to suspend domain {domain_name}. Currently in state {status}')
         except Exception as e:
