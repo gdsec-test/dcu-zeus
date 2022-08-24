@@ -108,10 +108,10 @@ class ProductionAppConfig(AppConfig):
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-prod.svc.cluster.local:8080'
 
     SSO_URL = 'https://sso.gdcorp.tools'
-    MIMIR_URL = 'https://mimir.int.godaddy.com'
-    SHOPLOCKED_URL = 'https://shoplocked.api.int.godaddy.com'
+    MIMIR_URL = 'https://mimir.cset.int.gdcorp.tools'
+    SHOPLOCKED_URL = 'https://shoplocked.api.cset.int.gdcorp.tools'
     VERT_URL = 'https://vertigo.cmap.proxy.int.godaddy.com/vertigo/v1/container/'
-    CRMALERT_URL = 'https://crm-alert.int.godaddy.com'
+    CRMALERT_URL = 'https://crm-alert.cset.int.gdcorp.tools'
 
     VPS4_URLS = OrderedDict([('IAD2', 'https://vps4.api.iad2.godaddy.com'),
                              ('SIN2', 'https://vps4.api.sin2.godaddy.com'),
@@ -137,8 +137,8 @@ class OTEAppConfig(AppConfig):
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-ote.svc.cluster.local:8080'
 
     SSO_URL = 'https://sso.ote-gdcorp.tools'
-    MIMIR_URL = 'https://mimir.int.ote-godaddy.com'
-    CRMALERT_URL = 'https://crm-alert.int.ote-godaddy.com'
+    MIMIR_URL = 'https://mimir.cset.int.ote-gdcorp.tools'
+    CRMALERT_URL = 'https://crm-alert.cset.int.ote-gdcorp.tools'
 
     VPS4_URLS = OrderedDict([('IAD2', 'https://vps4.api.test-godaddy.com'),
                              ('SIN2', 'https://vps4.api.test-godaddy.com'),
@@ -165,9 +165,9 @@ class DevelopmentAppConfig(AppConfig):
     DIABLO_URL = 'http://localhost:8080/diablo/v1/accounts/'
 
     SSO_URL = 'https://sso.dev-gdcorp.tools'
-    MIMIR_URL = 'https://mimir.int.dev-godaddy.com'
+    MIMIR_URL = 'https://mimir.cset.int.dev-gdcorp.tools'
     SHOPLOCKED_URL = 'http://localhost:8080/shoplocked'
-    CRMALERT_URL = 'https://crm-alert.int.dev-godaddy.com'
+    CRMALERT_URL = 'https://crm-alert.cset.int.dev-gdcorp.tools'
 
     VPS4_URLS = OrderedDict([('IAD2', 'https://vps4.api.dev-godaddy.com'),
                              ('SIN2', 'https://vps4.api.dev-godaddy.com'),
@@ -198,9 +198,9 @@ class TestAppConfig(AppConfig):
     VERT_URL = ''
 
     SSO_URL = 'https://sso.test-gdcorp.tools'
-    MIMIR_URL = 'https://mimir.int.test-godaddy.com'
-    SHOPLOCKED_URL = 'https://shoplocked.api.int.test-godaddy.com'
-    CRMALERT_URL = 'https://crm-alert.int.test-godaddy.com'
+    MIMIR_URL = 'https://mimir.cset.int.test-gdcorp.tools'
+    SHOPLOCKED_URL = 'https://shoplocked.api.cset.int.test-gdcorp.tools'
+    CRMALERT_URL = 'https://crm-alert.cset.int.test-gdcorp.tools'
 
     VPS4_URLS = OrderedDict([('IAD2', 'https://vps4.api.test-godaddy.com'),
                              ('SIN2', 'https://vps4.api.test-godaddy.com'),
