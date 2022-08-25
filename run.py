@@ -179,7 +179,6 @@ def intentionally_malicious(ticket_id, investigator_id):
 @celery.task()
 def suspend(ticket_id):
     data = get_database_handle().get_incident(ticket_id)
-    logger.info(data.get('sourceDomainOrIp', {}))
     result = route_request(data, ticket_id, 'suspend') if data else None
     if result:
         appseclogger = get_logging(os.getenv("sysenv"), "zeus")
