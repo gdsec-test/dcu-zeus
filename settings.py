@@ -109,7 +109,7 @@ class ProductionAppConfig(AppConfig):
 
     SSO_URL = 'https://sso.gdcorp.tools'
     MIMIR_URL = 'https://mimir.cset.int.gdcorp.tools'
-    SHOPLOCKED_URL = 'https://shoplocked.api.cset.int.gdcorp.tools'
+    SHOPLOCKED_URL = 'https://shoplocked.cset.int.gdcorp.tools'
     VERT_URL = 'https://vertigo.cmap.proxy.int.godaddy.com/vertigo/v1/container/'
     CRMALERT_URL = 'https://crm-alert.cset.int.gdcorp.tools'
 
@@ -199,7 +199,7 @@ class TestAppConfig(AppConfig):
 
     SSO_URL = 'https://sso.test-gdcorp.tools'
     MIMIR_URL = 'https://mimir.cset.int.test-gdcorp.tools'
-    SHOPLOCKED_URL = 'https://shoplocked.api.cset.int.test-gdcorp.tools'
+    SHOPLOCKED_URL = 'https://shoplocked.cset.int.test-gdcorp.tools'
     CRMALERT_URL = 'https://crm-alert.cset.int.test-gdcorp.tools'
 
     VPS4_URLS = OrderedDict([('IAD2', 'https://vps4.api.test-godaddy.com'),
