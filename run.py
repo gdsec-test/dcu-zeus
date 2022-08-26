@@ -278,12 +278,12 @@ def suspend_csam(ticket_id, investigator_id=None):
         shopper_id = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('shopperId')
         domain = data.get('sourceDomainOrIp', {})
         appseclogger.info("csam suspending shopper", extra={"event": {"kind": "event",
-                                                                 "category": "process",
-                                                                 "type": ["change", "user"],
-                                                                 "outcome": "success",
-                                                                 "action": "suspend"},
-                                                       "user": {
-                                                           "domain": domain,
-                                                           "shopper_id": shopper_id,
-                                                           "investigator_id": investigator_id}})
+                                                                      "category": "process",
+                                                                      "type": ["change", "user"],
+                                                                      "outcome": "success",
+                                                                      "action": "suspend"},
+                                                            "user": {
+                                                                "domain": domain,
+                                                                "shopper_id": shopper_id,
+                                                                "investigator_id": investigator_id}})
     return result
