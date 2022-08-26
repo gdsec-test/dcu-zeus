@@ -272,4 +272,18 @@ def submitted_to_ncmec(ticket_id):
 @celery.task()
 def suspend_csam(ticket_id, investigator_id=None):
     data = get_kelvin_database_handle().get_incident(ticket_id)
-    return route_request(data, ticket_id, 'suspend_csam', dual_suspension=True) if data else None
+    result = route_request(data, ticket_id, 'suspend_csam', dual_suspension=True) if data else None
+    if result:
+        appseclogger = get_logging(os.getenv("sysenv"), "zeus")
+        shopper_id = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('shopperId')
+        domain = data.get('sourceDomainOrIp', {})
+        appseclogger.info("csam suspending shopper", extra={"event": {"kind": "event",
+                                                                 "category": "process",
+                                                                 "type": ["change", "user"],
+                                                                 "outcome": "success",
+                                                                 "action": "suspend"},
+                                                       "user": {
+                                                           "domain": domain,
+                                                           "shopper_id": shopper_id,
+                                                           "investigator_id": investigator_id}})
+    return result
