@@ -55,7 +55,8 @@ class DomainService:
             #  404: u'Not Found\n'
             #  500: u'{"error":"No Active shoppers for this Domain Name","code":13}'
             if resp.status_code not in [200, 404]:
-                self._logger.error(f'Domain lookup failed for {domain_name} with status code {resp.status_code} : {resp.text}')
+                self._logger.error(
+                    f'Domain lookup failed for {domain_name} with status code {resp.status_code} : {resp.text}')
             elif resp.status_code == 404:
                 self._logger.error(f'URL not found : {resp.text}')
 
