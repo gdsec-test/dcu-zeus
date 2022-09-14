@@ -11,7 +11,7 @@ class Shoplocked:
         self._shoplocked_url = app_settings.SHOPLOCKED_URL
         self._sso_endpoint = app_settings.SSO_URL + '/v1/secure/api/token'
 
-        self._cert = (app_settings.ZEUS_SSL_CERT, app_settings.ZEUS_SSL_KEY)
+        self._cert = (app_settings.ZEUS_CLIENT_CERT, app_settings.ZEUS_CLIENT_KEY)
         self._headers.update({'Authorization': f'sso-jwt {self._get_jwt(self._cert)}'})
 
     def adminlock(self, shopper_id, note):

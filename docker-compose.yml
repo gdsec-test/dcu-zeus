@@ -27,8 +27,8 @@ services:
       sysenv: dev
       VPS4PASS: ${VPS4PASS}
       VPS4USER: ${VPS4USER}
-      ZEUS_SSL_CERT: '/tmp/certs/dcu.zeus.int.dev-godaddy.com.crt'
-      ZEUS_SSL_KEY: '/tmp/certs/dcu.zeus.int.dev-godaddy.com.key'
+      ZEUS_CLIENT_CERT: '/tmp/certs/zeus.client.cset.int.dev-gdcorp.tools.crt'
+      ZEUS_CLIENT_KEY: '/tmp/certs/zeus.client.cset.int.dev-gdcorp.tools.key'
     volumes:
       - /PATH_TO_YOUR_CERTS_DIRECTORY/:/tmp/certs/
     links:
