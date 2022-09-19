@@ -104,10 +104,10 @@ spec:
             value: /ocm_certs/tls.crt
           - name: OCM_SSL_KEY
             value: /ocm_certs/tls.key
-          - name: ZEUS_SSL_CERT
-            value: /zeus_certs/tls.crt
-          - name: ZEUS_SSL_KEY
-            value: /zeus_certs/tls.key
+          - name: ZEUS_CLIENT_CERT
+            value: /zeus_client_certs/tls.crt
+          - name: ZEUS_CLIENT_KEY
+            value: /zeus_client_certs/tls.key
           - name: GOCENTRAL_SSL_CERT
             value: /ecomm_certs/tls.crt
           - name: GOCENTRAL_SSL_KEY
@@ -129,8 +129,8 @@ spec:
           - name: tls-ocm-files
             mountPath: /ocm_certs
             readOnly: true
-          - name: tls-zeus-files
-            mountPath: /zeus_certs
+          - name: tls-zeus-client-cert-files
+            mountPath: /zeus_client_certs
             readOnly: true
           - name: tls-files-proxy
             mountPath: /proxycerts
@@ -154,9 +154,9 @@ spec:
         - name: tls-ocm-files
           secret:
             secretName: tls-phishnet
-        - name: tls-zeus-files
+        - name: tls-zeus-client-cert-files
           secret:
-            secretName: tls-zeus
+            secretName: tls-zeus-client-cert
         - name: tls-files-proxy
           secret:
             secretName: tls-cmap-auth

@@ -20,7 +20,7 @@ class CRMAlert:
 
         self.slack = SlackFailures(ThrottledSlack(app_settings))
 
-        self._cert = (app_settings.ZEUS_SSL_CERT, app_settings.ZEUS_SSL_KEY)
+        self._cert = (app_settings.ZEUS_CLIENT_CERT, app_settings.ZEUS_CLIENT_KEY)
         self._headers.update({'Authorization': f'sso-jwt {self._get_jwt(self._cert)}'})
 
     def create_alert(self, shopper_id, message, abuse_type, severity, source, resolution=_resolution):

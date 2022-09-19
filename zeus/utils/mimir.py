@@ -34,7 +34,7 @@ class Mimir:
         self._mimir_infraction_endpoint = f'{app_settings.MIMIR_URL}/v1/infractions'
         self._mimir_non_infraction_endpoint = f'{app_settings.MIMIR_URL}/v1/non-infraction'
         self.slack = SlackFailures(ThrottledSlack(app_settings))
-        self._cert = (app_settings.ZEUS_SSL_CERT, app_settings.ZEUS_SSL_KEY)
+        self._cert = (app_settings.ZEUS_CLIENT_CERT, app_settings.ZEUS_CLIENT_KEY)
         self._headers.update({'Authorization': self._get_jwt(self._cert)})
 
     @staticmethod
