@@ -31,8 +31,3 @@ class CeleryConfig:
             Queue(app_settings.ZEUSQUEUE, Exchange(app_settings.ZEUSQUEUE), routing_key=app_settings.ZEUSQUEUE,
                   queue_arguments=queue_args),
         )
-        self.task_routes = {
-            'run.hubstream_sync': {
-                'queue': Queue(app_settings.GDBS_QUEUE, Exchange(app_settings.GDBS_QUEUE),
-                               routing_key=app_settings.GDBS_QUEUE, queue_arguments=queue_args)}
-        }
