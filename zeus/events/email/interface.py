@@ -5,8 +5,8 @@ import os
 class Mailer(object, metaclass=abc.ABCMeta):
     def __init__(self, app_settings):
         self.env = os.getenv('sysenv', 'dev')
-        self.cert = app_settings.OCM_SSL_CERT
-        self.key = app_settings.OCM_SSL_KEY
+        self.cert = app_settings.ZEUS_CLIENT_CERT
+        self.key = app_settings.ZEUS_CLIENT_KEY
 
     def generate_kwargs_for_hermes(self):
         """

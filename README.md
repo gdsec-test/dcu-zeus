@@ -92,8 +92,6 @@ If you would like to run Zeus locally you will need to specify the following env
 * `CMAP_PROXY_KEY` Path to key file(for connecting to CMAP Proxy `proxyuser.cmap.int.godaddy.com`  prod only)
 * `CMAP_PROXY_USER` (User for CMAP Proxy)
 * `CMAP_PROXY_PASS` (Password for CMAP Proxy)
-* `OCM_SSL_CERT` (The path to the SSL Cert white-listed for OCM API `phishstory.int.`)
-* `OCM_SSL_KEY` (The path to the SSL Key white-listed for OCM API `phishstory.int.`)
 * `RESULT_BACKEND_HOSTNAME` (localhost)
 * `ZEUS_CLIENT_CERT` (The path to the Zeus Client Cert for communicating with CRM Alert, Mimir and Shoplocked `zeus.client.cset.int.`)
 * `ZEUS_CLIENT__KEY` (The path to the Zeus Client Key for communicating with CRM Alert, Mimir and Shoplocked `zeus.client.cset.int.`)
