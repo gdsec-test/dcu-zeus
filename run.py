@@ -111,7 +111,6 @@ def route_request(data, ticket_id, request_type, dual_suspension=False):
         else:
             result = ('Unable to route request', hosted_status)
 
-    celery.send_task('run.hubstream_sync', ({'ticketId': ticket_id},))
     return result
 
 
