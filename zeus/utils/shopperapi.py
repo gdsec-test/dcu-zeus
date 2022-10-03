@@ -13,10 +13,9 @@ class ShopperAPI:
     REDIS_EXPIRATION = timedelta(days=5)
 
     def __init__(self, app_settings):
-        self._shopper_url = app_settings.SHOPPER_URL
         self._customer_url = app_settings.CUSTOMER_URL
 
-        self.redis = Redis(app_settings.REDIS)
+        self._redis = Redis(app_settings.REDIS)
         self._cert = (app_settings.ZEUS_CLIENT_CERT, app_settings.ZEUS_CLIENT_KEY)
 
     def get_shopper_id_from_customer_id(self, customer_id):
@@ -43,22 +42,18 @@ class ShopperAPI:
         return
 
     def get_shopper_id_from_dict(self, data):
-        shopper_id = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('shopperId', None)
-        if not shopper_id:
-            customer_id = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('customerId', None)
-            if not customer_id:
-                shopper_id = self.get_shopper_id_from_customer_id(customer_id)
-        return shopper_id
+        customer_id = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('customerId', None)
+        if customer_id:
+            return self.get_shopper_id_from_customer_id(customer_id)
+        return data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('shopperId', None)
 
     def get_host_shopper_id_from_dict(self, data):
-        #  The host shopperId field currently appears in...
-        #    1: data->domainQuery->host->shopperId
-        shopper_id = data.get('data', {}).get('domainQuery', {}).get('host', {}).get('shopperId', None)
-        if not shopper_id:
-            customer_id = data.get('data', {}).get('domainQuery', {}).get('host', {}).get('customerId', None)
-            if not customer_id:
-                shopper_id = self.get_shopper_id_from_customer_id(customer_id)
-        return shopper_id
+        #  The host customerId / shopperId field currently appear in...
+        #    1: data->domainQuery->host->[shopperId or customerId]
+        customer_id = data.get('data', {}).get('domainQuery', {}).get('host', {}).get('customerId', None)
+        if customer_id:
+            return self.get_shopper_id_from_customer_id(customer_id)
+        return data.get('data', {}).get('domainQuery', {}).get('host', {}).get('shopperId', None)
 
     def get_list_of_ids_to_notify(self, data):
         # If the domain is associated with a parent/child API reseller
@@ -70,5 +65,6 @@ class ShopperAPI:
             if shopper_id:
                 account_number_list.append(shopper_id)
         else:
-            account_number_list = parent_child_list
+            for customer_id in parent_child_list:
+                account_number_list.append(self.get_shopper_id_from_customer_id(customer_id))
         return account_number_list
