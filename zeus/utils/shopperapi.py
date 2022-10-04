@@ -65,6 +65,9 @@ class ShopperAPI:
             if shopper_id:
                 account_number_list.append(shopper_id)
         else:
-            for customer_id in parent_child_list:
-                account_number_list.append(self.get_shopper_id_from_customer_id(customer_id))
+            # TODO: CMAPT-5231 - uncomment this code and remove line 72 because once apiReseller
+            #       has been updated to save customerID, we need to convert that to a shopperID
+            # for customer_id in parent_child_list:
+            #     account_number_list.append(self.get_shopper_id_from_customer_id(customer_id))
+            account_number_list = parent_child_list
         return account_number_list

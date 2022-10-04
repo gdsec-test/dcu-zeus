@@ -42,7 +42,8 @@ class TestShopperApi:
     def test_get_list_of_ids_to_notify(self, get_shopper_id_from_customer_id):
         data = {'data': {'domainQuery': {'apiReseller': {'parent': '1234', 'child': '4567'}}}}
         actual = self._shopperapi.get_list_of_ids_to_notify(data)
-        assert_equal(actual, ['7890', '7890'])
+        # TODO: CMAPT-5231 - once apiReseller has been updated to save customerID, update the expected value
+        assert_equal(actual, ['1234', '4567'])
 
     @patch.object(ShopperAPI, 'get_shopper_id_from_customer_id', return_value='7890')
     def test_get_list_of_ids_to_notify_no_api_reseller(self, get_shopper_id_from_customer_id):
