@@ -8,7 +8,7 @@ from zeus.utils.functions import get_parent_child_shopper_ids_from_dict
 
 
 class ShopperAPI:
-    SHOPPER_PARAMS = {'auditClientIp': 'cmap.service.int.godaddy.com'}
+    SHOPPER_PARAMS = {'auditClientIp': 'zeus.client.cest.int.gdcorp.tools'}
     KEY_SHOPPER_ID = 'shopperId'
     REDIS_EXPIRATION = timedelta(days=5)
 
