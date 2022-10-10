@@ -18,8 +18,6 @@ services:
       GOCENTRAL_SSL_CERT: '/tmp/certs/dcu.ecomm.dev.authclient.int.godaddy.com.crt'
       GOCENTRAL_SSL_KEY: '/tmp/certs/dcu.ecomm.dev.authclient.int.godaddy.com.key'
       GOCENTRAL_URL: 'https://services.orion.dev.sdl1.gdg/account/accountoperations.asmx'
-      OCM_SSL_CERT: '/tmp/certs/phishstory.int.dev-godaddy.com.crt'
-      OCM_SSL_KEY: '/tmp/certs/phishstory.int.dev-godaddy.com.key'
       PLESKPASS: ${PLESKPASS}
       PLESKUSER: ${PLESKUSER}
       REDIS: redis
