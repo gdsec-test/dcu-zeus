@@ -29,7 +29,7 @@ class AppConfig(object):
     DIABLO_URL = 'https://cpanelprovapi.prod.phx3.secureserver.net/v1/accounts/'
     GOCENTRAL_URL = os.getenv('GOCENTRAL_URL')
     MWPONE_URL = 'https://api.servicemanager.godaddy.com/v1/accounts/'
-    PLESK_URL = 'https://p3nwplskapp-v01.shr.prod.phx3.secureserver.net:8084/v1/accounts/'
+    PLESK_URL = 'https://gdapi.plesk-shared-app.int.gdcorp.tools/v1/accounts/'
     VERT_URL = ''
 
     # For SLACK notifications on suspension failures
@@ -194,7 +194,7 @@ class TestAppConfig(AppConfig):
     DIABLO_URL = 'https://diablo.api.test-godaddy.com/v1/accounts/'
     GOCENTRAL_URL = 'https://services.orion.test.glbt1.gdg/account/accountoperations.asmx'
     MWPONE_URL = 'https://api.servicemanager.test-godaddy.com/v1/accounts/'
-    PLESK_URL = 'https://p3nwplskapp.test-godaddy.com:8084/v1/accounts/'
+    PLESK_URL = 'https://gdapi.plesk-shared-app.int.test-gdcorp.tools/v1/accounts/'
     VERT_URL = ''
 
     SSO_URL = 'https://sso.test-gdcorp.tools'
