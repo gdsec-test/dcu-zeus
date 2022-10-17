@@ -13,6 +13,5 @@ configMapGenerator:
 - literals:
   - sysenv=ote
   - GOCENTRAL_URL=https://services.orion.test.glbt1.gdg/account/accountoperations.asmx
-  - RESULT_BACKEND_HOSTNAME=godaddy-service-redis.abuse-api-ote.svc.cluster.local
   - ELASTIC_APM_ENVIRONMENT=ote
   name: env-specific-values

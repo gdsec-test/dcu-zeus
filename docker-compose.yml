@@ -23,7 +23,6 @@ services:
       PLESKPASS: ${PLESKPASS}
       PLESKUSER: ${PLESKUSER}
       REDIS: redis
-      RESULT_BACKEND_HOSTNAME: redis
       sysenv: dev
       VPS4PASS: ${VPS4PASS}
       VPS4USER: ${VPS4USER}

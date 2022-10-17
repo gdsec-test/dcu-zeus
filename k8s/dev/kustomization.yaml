@@ -24,6 +24,5 @@ configMapGenerator:
 - literals:
   - sysenv=dev
   - GOCENTRAL_URL=https://services.orion.dev.sdl1.gdg/account/accountoperations.asmx
-  - RESULT_BACKEND_HOSTNAME=godaddy-service-redis.abuse-api-dev.svc.cluster.local
   - ELASTIC_APM_ENVIRONMENT=dev
   name: env-specific-values
