@@ -1,5 +1,4 @@
 import json
-import logging
 from datetime import timedelta
 
 import requests
@@ -12,14 +11,12 @@ class ShopperAPI:
     SHOPPER_PARAMS = {'auditClientIp': 'zeus.client.cest.int.gdcorp.tools'}
     KEY_SHOPPER_ID = 'shopperId'
     REDIS_EXPIRATION = timedelta(days=5)
-    REDIS_CUSTOMER_ID_PREFIX = 'customer-id-key'
 
     def __init__(self, app_settings):
         self._customer_url = app_settings.CUSTOMER_URL
 
         self._redis = Redis(app_settings.REDIS)
         self._cert = (app_settings.ZEUS_CLIENT_CERT, app_settings.ZEUS_CLIENT_KEY)
-        self._logger = logging.getLogger(__name__)
 
     def get_shopper_id_from_customer_id(self, customer_id):
         """
