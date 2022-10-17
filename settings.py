@@ -31,7 +31,6 @@ class AppConfig(object):
     MWPONE_URL = 'https://api.servicemanager.godaddy.com/v1/accounts/'
     PLESK_URL = 'https://gdapi.plesk-shared-app.int.gdcorp.tools/v1/accounts/'
     VERT_URL = ''
-    CUSTOMER_URL = 'https://shopper.api.int.godaddy.com/v1/customers/{}/shopper'
 
     # For SLACK notifications on suspension failures
     SLACK_URL = os.getenv('SLACK_HANDLER')
@@ -140,7 +139,6 @@ class OTEAppConfig(AppConfig):
     SSO_URL = 'https://sso.ote-gdcorp.tools'
     MIMIR_URL = 'https://mimir.cset.int.ote-gdcorp.tools'
     CRMALERT_URL = 'https://crm-alert.cset.int.ote-gdcorp.tools'
-    CUSTOMER_URL = 'https://shopper.api.int.ote-godaddy.com/v1/customers/{}/shopper'
 
     VPS4_URLS = OrderedDict([('IAD2', 'https://vps4.api.test-godaddy.com'),
                              ('SIN2', 'https://vps4.api.test-godaddy.com'),
@@ -170,7 +168,6 @@ class DevelopmentAppConfig(AppConfig):
     MIMIR_URL = 'https://mimir.cset.int.dev-gdcorp.tools'
     SHOPLOCKED_URL = 'http://localhost:8080/shoplocked'
     CRMALERT_URL = 'https://crm-alert.cset.int.dev-gdcorp.tools'
-    CUSTOMER_URL = 'https://shopper.api.int.dev-godaddy.com/v1/customers/{}/shopper'
 
     VPS4_URLS = OrderedDict([('IAD2', 'https://vps4.api.dev-godaddy.com'),
                              ('SIN2', 'https://vps4.api.dev-godaddy.com'),
@@ -199,7 +196,6 @@ class TestAppConfig(AppConfig):
     MWPONE_URL = 'https://api.servicemanager.test-godaddy.com/v1/accounts/'
     PLESK_URL = 'https://gdapi.plesk-shared-app.int.test-gdcorp.tools/v1/accounts/'
     VERT_URL = ''
-    CUSTOMER_URL = 'https://shopper.api.int.test-godaddy.com/v1/customers/{}/shopper'
 
     SSO_URL = 'https://sso.test-gdcorp.tools'
     MIMIR_URL = 'https://mimir.cset.int.test-gdcorp.tools'
