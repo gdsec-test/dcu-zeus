@@ -1,6 +1,7 @@
 import json
 import logging
 from datetime import timedelta
+from os import system
 
 import requests
 from redis import Redis
@@ -16,7 +17,6 @@ class ShopperAPI:
 
     def __init__(self, app_settings):
         self._customer_url = app_settings.CUSTOMER_URL
-
         self._redis = Redis(app_settings.REDIS)
         self._cert = (app_settings.ZEUS_CLIENT_CERT, app_settings.ZEUS_CLIENT_KEY)
         self._logger = logging.getLogger(__name__)
@@ -28,23 +28,17 @@ class ShopperAPI:
         if not customer_id:
             return
 
-        self._logger.info('Checking redis for shopper ID')
         redis_key = f'{self.REDIS_CUSTOMER_ID_PREFIX}-{customer_id}'
-        self._logger.info(f'Redis command is: {redis_key}')
         shopper_id = self._redis.get(redis_key)
-        self._logger.info(f'raw shopper ID from redis is: {shopper_id}')
         if shopper_id:
-            self._logger.info(f'decoded shopper ID from redis is {shopper_id.decode()}')
             return shopper_id.decode()
 
         try:
-            self._logger.info('Getting shopperID from shopper API')
             resp = requests.get(self._customer_url.format(customer_id), params=self.SHOPPER_PARAMS, cert=self._cert)
             resp.raise_for_status()
             data = json.loads(resp.text)
             shopper_id = data[self.KEY_SHOPPER_ID]
-            self._logger.info(f'Shopper ID from shopper API is {shopper_id}')
-            self._redis.setex(redis_key, self.REDIS_EXPIRATION, shopper_id)
+            self._redis.setex(redis_key, shopper_id, self.REDIS_EXPIRATION)
             return shopper_id
         except Exception as e:
             self._logger.error(f'Error in getting the shopperID: {e}')
@@ -52,11 +46,9 @@ class ShopperAPI:
 
     def get_shopper_id_from_dict(self, data):
         customer_id = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('customerId', None)
-        self._logger.info(f'In get_shopper_id_from_dict.  customer_id value from data was {customer_id}')
         if customer_id:
             return self.get_shopper_id_from_customer_id(customer_id)
         shopper_id = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('shopperId', None)
-        self._logger.info(f'No customer ID found, shopperId from data was {shopper_id}')
         return data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('shopperId', None)
 
     def get_host_shopper_id_from_dict(self, data):
