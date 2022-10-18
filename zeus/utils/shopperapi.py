@@ -30,9 +30,11 @@ class ShopperAPI:
 
         self._logger.info('Checking redis for shopper ID')
         redis_key = f'{self.REDIS_CUSTOMER_ID_PREFIX}-{customer_id}'
+        self._logger.info(f'Redis command is: {redis_key}')
         shopper_id = self._redis.get(redis_key)
+        self._logger.info(f'raw shopper ID from redis is: {shopper_id}')
         if shopper_id:
-            self._logger.info(f'shopper ID from redis is {shopper_id.decode()}')
+            self._logger.info(f'decoded shopper ID from redis is {shopper_id.decode()}')
             return shopper_id.decode()
 
         try:
@@ -50,8 +52,11 @@ class ShopperAPI:
 
     def get_shopper_id_from_dict(self, data):
         customer_id = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('customerId', None)
+        self._logger.info(f'In get_shopper_id_from_dict.  customer_id value from data was {customer_id}')
         if customer_id:
             return self.get_shopper_id_from_customer_id(customer_id)
+        shopper_id = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('shopperId', None)
+        self._logger.info(f'No customer ID found, shopperId from data was {shopper_id}')
         return data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('shopperId', None)
 
     def get_host_shopper_id_from_dict(self, data):
