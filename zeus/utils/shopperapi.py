@@ -28,16 +28,20 @@ class ShopperAPI:
         if not customer_id:
             return
 
+        self._logger.info('Checking redis for shopper ID')
         redis_key = f'{self.REDIS_CUSTOMER_ID_PREFIX}-{customer_id}'
         shopper_id = self._redis.get(redis_key)
         if shopper_id:
+            self._logger.info(f'shopper ID from redis is {shopper_id.decode()}')
             return shopper_id.decode()
 
         try:
+            self._logger.info('Getting shopperID from shopper API')
             resp = requests.get(self._customer_url.format(customer_id), params=self.SHOPPER_PARAMS, cert=self._cert)
             resp.raise_for_status()
             data = json.loads(resp.text)
             shopper_id = data[self.KEY_SHOPPER_ID]
+            self._logger.info(f'Shopper ID from shopper API is {shopper_id}')
             self._redis.setex(redis_key, self.REDIS_EXPIRATION, shopper_id)
             return shopper_id
         except Exception as e:
