@@ -1,7 +1,6 @@
 import json
 import logging
 from datetime import timedelta
-from os import system
 
 import requests
 from redis import Redis
@@ -48,7 +47,6 @@ class ShopperAPI:
         customer_id = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('customerId', None)
         if customer_id:
             return self.get_shopper_id_from_customer_id(customer_id)
-        shopper_id = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('shopperId', None)
         return data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('shopperId', None)
 
     def get_host_shopper_id_from_dict(self, data):
