@@ -16,6 +16,9 @@ class ShopperAPI:
 
     def __init__(self, app_settings):
         self._customer_url = app_settings.CUSTOMER_URL
+        # NOTE: if you switch this to StrictRedis, you MUST also update the call to 'setex' below.
+        # In the version of redis we are currently using, the 'time' and 'value' parameters for 'setex' were flipped:
+        #  value first, then time.  In other version of redis, as well as the StrictRedis the parameters are: time, then value.
         self._redis = Redis(app_settings.REDIS)
         self._cert = (app_settings.ZEUS_CLIENT_CERT, app_settings.ZEUS_CLIENT_KEY)
         self._logger = logging.getLogger(__name__)
