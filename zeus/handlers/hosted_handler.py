@@ -453,7 +453,7 @@ class HostedHandler(Handler):
         customer_id = get_host_info_from_dict(data).get('customerId')
         # TODO: figure out what we actually want to put for 'reason'
 
-        suspension_result = self.hosting_service.suspend_hosting(product, guid, customer_id, 'TODO: Add Reason')
+        suspension_result = self.hosting_service.suspend_hosting(product, guid, customer_id)
         if isinstance(suspension_result, str):
             self.slack.failed_hosting_suspension(guid, info=suspension_result)
         elif not suspension_result:

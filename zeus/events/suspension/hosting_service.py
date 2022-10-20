@@ -10,8 +10,8 @@ class ThrottledHostingService:
     def can_suspend_hosting_product(self, identifier):
         return self._throttle.can_suspend_hosting_product(identifier)
 
-    def suspend_hosting(self, product, identifier, customer_id, reason):
-        return self._decorated.suspend(product, identifier, customer_id, reason)
+    def suspend_hosting(self, product, identifier, customer_id):
+        return self._decorated.suspend(product, identifier, customer_id)
 
 
 class HostingService():
@@ -22,12 +22,12 @@ class HostingService():
         self._products = ['diablo', 'vertigo', 'mwp 1.0', 'plesk', 'vps4', 'gocentral']
         self.nes_helper = NESHelper(app_settings)
 
-    def suspend(self, product, identifier, customer_id, reason):
+    def suspend(self, product, identifier, customer_id):
         product = product.lower() if product else None
         if product not in self._products:
             return self.UNSUPPORTED_PRODUCT.format(product)
 
-        return self.nes_helper.suspend(identifier, customer_id, reason)
+        return self.nes_helper.suspend(identifier, customer_id)
 
     # TODO: LKM - figure out if we need to implement this or not.  If we do, we will probably want to add a 
     # 'reinstate_hosting' function in the Throttle above as well as a "can_reinstate_hosting_product" func

@@ -5,6 +5,7 @@ from settings import AppConfig
 
 class NESHelper():
     _headers = {'Content-Type': 'application/json'}
+    SUSPEND_REASON = "POLICY"  # POLICY - means it's being suspended for ABUSE
 
     def __init__(self, settings: AppConfig):
         self._logger = logging.getLogger(__name__)
@@ -14,11 +15,10 @@ class NESHelper():
         self._cert = (settings.ZEUS_CLIENT_CERT, settings.ZEUS_CLIENT_KEY)
         self._headers.update({'Authorization': f'sso-jwt {self._get_jwt(self._cert)}'})
 
-    def suspend(self, entitlement_id, customer_id, reason):
+    def suspend(self, entitlement_id, customer_id):
         try:
             url = self._url.format(customer_id)
-            body = {'entitlementId': entitlement_id, 'suspendReason': reason}
-
+            body = {'entitlementId': entitlement_id, 'suspendReason': self.SUSPEND_REASON}
             response = requests.post(url, json=body, headers=self._headers, verify=True)
 
             # If these credentials aren't accepted, update the JWT and try again
