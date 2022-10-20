@@ -26,11 +26,7 @@ class AppConfig(object):
     #  aren't being received by dcueng@, contact bxberry@ with questions.
     NON_PROD_EMAIL_ADDRESS = os.getenv('EMAIL_RECIPIENT', 'dcuinternal@godaddy.com')
 
-    DIABLO_URL = 'https://cpanelprovapi.prod.phx3.secureserver.net/v1/accounts/'
-    GOCENTRAL_URL = os.getenv('GOCENTRAL_URL')
-    MWPONE_URL = 'https://api.servicemanager.godaddy.com/v1/accounts/'
-    PLESK_URL = 'https://gdapi.plesk-shared-app.int.gdcorp.tools/v1/accounts/'
-    VERT_URL = ''
+    NES_URL = 'https://subscriptions-shim-ext.cp.api.test.godaddy.com/v2/customers/{}/suspendByEntitlementId'
 
     # For SLACK notifications on suspension failures
     SLACK_URL = os.getenv('SLACK_HANDLER')
@@ -47,8 +43,6 @@ class AppConfig(object):
     OCM_SSL_KEY = os.getenv('OCM_SSL_KEY')
     ZEUS_CLIENT_CERT = os.getenv('ZEUS_CLIENT_CERT')
     ZEUS_CLIENT_KEY = os.getenv('ZEUS_CLIENT_KEY')
-    GOCENTRAL_SSL_CERT = os.getenv('GOCENTRAL_SSL_CERT')
-    GOCENTRAL_SSL_KEY = os.getenv('GOCENTRAL_SSL_KEY')
     CMAP_API_CERT = os.getenv('CMAP_API_CERT', 'api.crt')
     CMAP_API_KEY = os.getenv('CMAP_API_KEY', 'api.key')
 
@@ -67,20 +61,6 @@ class AppConfig(object):
 
         self.DB_KELVIN_PASS = urllib.parse.quote(os.getenv('DB_KELVIN_PASS', 'password'))
         self.DB_KELVIN_URL = 'mongodb://{}:{}@{}/{}'.format(self.DB_KELVIN_USER, self.DB_KELVIN_PASS, self.DB_HOST, self.DB_KELVIN)
-
-        self.DIABLOUSER = os.getenv('DIABLOUSER', 'diablouser')
-        self.DIABLOPASS = os.getenv('DIABLOPASS', 'diablopass')
-        self.PLESKUSER = os.getenv('PLESKUSER', 'pleskuser')
-        self.PLESKPASS = os.getenv('PLESKPASS', 'pleskpass')
-
-        self.CMAP_PROXY_USER = os.getenv('CMAP_PROXY_USER', 'cmapproxyuser')
-        self.CMAP_PROXY_PASS = os.getenv('CMAP_PROXY_PASS', 'cmapproxypass')
-        self.CMAP_PROXY_CERT = os.getenv('CMAP_PROXY_CERT', 'cmapproxy.crt')
-        self.CMAP_PROXY_KEY = os.getenv('CMAP_PROXY_KEY', 'cmapproxy.key')
-
-        # VPS4 User/Pass are creds for a DCU Service account in the DCU-PHISHSTORY AD Group
-        self.VPS4USER = os.getenv('VPS4USER', 'vps4user')
-        self.VPS4PASS = os.getenv('VPS4PASS', 'vps4pass')
 
         self.CAN_FLOOD = os.getenv('sysenv', 'dev') in ['dev', 'test']
 
@@ -110,12 +90,10 @@ class ProductionAppConfig(AppConfig):
     SSO_URL = 'https://sso.gdcorp.tools'
     MIMIR_URL = 'https://mimir.cset.int.gdcorp.tools'
     SHOPLOCKED_URL = 'https://shoplocked.cset.int.gdcorp.tools'
-    VERT_URL = 'https://vertigo.cmap.proxy.int.godaddy.com/vertigo/v1/container/'
     CRMALERT_URL = 'https://crm-alert.cset.int.gdcorp.tools'
 
-    VPS4_URLS = OrderedDict([('IAD2', 'https://vps4.api.iad2.godaddy.com'),
-                             ('SIN2', 'https://vps4.api.sin2.godaddy.com'),
-                             ('AMS3', 'https://vps4.api.ams3.godaddy.com')])
+    # TODO: LKM - verify this is the correct URL for prod
+    NES_URL = 'https://subscriptions-shim-ext.cp.api.godaddy.com/v2/customers/{}/suspendByEntitlementId'
 
     GDBS_QUEUE = 'gdbrandservice'
 
@@ -140,9 +118,8 @@ class OTEAppConfig(AppConfig):
     MIMIR_URL = 'https://mimir.cset.int.ote-gdcorp.tools'
     CRMALERT_URL = 'https://crm-alert.cset.int.ote-gdcorp.tools'
 
-    VPS4_URLS = OrderedDict([('IAD2', 'https://vps4.api.test-godaddy.com'),
-                             ('SIN2', 'https://vps4.api.test-godaddy.com'),
-                             ('AMS3', 'https://vps4.api.test-godaddy.com')])
+    # TODO: LKM - verify this is the correct URL for ote
+    NES_URL = 'https://subscriptions-shim-ext.cp.api.ote.godaddy.com/v2/customers/{}/suspendByEntitlementId'
 
     GDBS_QUEUE = 'otegdbrandservice'
 
@@ -160,18 +137,15 @@ class DevelopmentAppConfig(AppConfig):
     DB_KELVIN_USER = 'devkelvin'
 
     DOMAIN_SERVICE = 'localhost:8080/domains'
-    GOCENTRAL_URL = 'http://localhost:8080/orion/account/accountoperations.asmx'
-    MWPONE_URL = 'http://localhost:8080/mwpone/v1/accounts/'
-    DIABLO_URL = 'http://localhost:8080/diablo/v1/accounts/'
 
     SSO_URL = 'https://sso.dev-gdcorp.tools'
     MIMIR_URL = 'https://mimir.cset.int.dev-gdcorp.tools'
     SHOPLOCKED_URL = 'http://localhost:8080/shoplocked'
     CRMALERT_URL = 'https://crm-alert.cset.int.dev-gdcorp.tools'
 
-    VPS4_URLS = OrderedDict([('IAD2', 'https://vps4.api.dev-godaddy.com'),
-                             ('SIN2', 'https://vps4.api.dev-godaddy.com'),
-                             ('AMS3', 'https://vps4.api.dev-godaddy.com')])
+    # TODO: LKM - verify this is the correct URL for ote
+    NES_URL = 'https://subscriptions-shim-ext.cp.api.dp.godaddy.com/v2/customers/{}/suspendByEntitlementId'
+
     GDBS_QUEUE = 'devgdbrandservice'
 
     def __init__(self):
@@ -191,20 +165,13 @@ class TestAppConfig(AppConfig):
 
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-test.svc.cluster.local:8080'
 
-    DIABLO_URL = 'https://diablo.api.test-godaddy.com/v1/accounts/'
-    GOCENTRAL_URL = 'https://services.orion.test.glbt1.gdg/account/accountoperations.asmx'
-    MWPONE_URL = 'https://api.servicemanager.test-godaddy.com/v1/accounts/'
-    PLESK_URL = 'https://gdapi.plesk-shared-app.int.test-gdcorp.tools/v1/accounts/'
-    VERT_URL = ''
+    NES_URL = 'https://subscriptions-shim-ext.cp.api.test.godaddy.com/v2/customers/{}/suspendByEntitlementId'
 
     SSO_URL = 'https://sso.test-gdcorp.tools'
     MIMIR_URL = 'https://mimir.cset.int.test-gdcorp.tools'
     SHOPLOCKED_URL = 'https://shoplocked.cset.int.test-gdcorp.tools'
     CRMALERT_URL = 'https://crm-alert.cset.int.test-gdcorp.tools'
 
-    VPS4_URLS = OrderedDict([('IAD2', 'https://vps4.api.test-godaddy.com'),
-                             ('SIN2', 'https://vps4.api.test-godaddy.com'),
-                             ('AMS3', 'https://vps4.api.test-godaddy.com')])
     GDBS_QUEUE = 'testgdbrandservice'
 
     HOLD_TIME = 1 * 60 * 30
@@ -228,19 +195,6 @@ class UnitTestConfig(AppConfig):
 
     CMAP_API_CERT = 'api.crt'
     CMAP_API_KEY = 'api.key'
-    DIABLOUSER = 'diablouser'
-    DIABLOPASS = 'diablopass'
-    PLESKUSER = 'pleskuser'
-    PLESKPASS = 'pleskpass'
-    VPS4USER = 'vps4user'
-    VPS4PASS = 'vps4pass'
-
-    CMAP_PROXY_USER = 'cmapproxyuser'
-    CMAP_PROXY_PASS = 'cmapproxypass'
-    CMAP_PROXY_CERT = 'cmapproxy.crt'
-    CMAP_PROXY_KEY = 'cmapproxy.key'
-    GOCENTRAL_SSL_CERT = 'cert'
-    GOCENTRAL_SSL_KEY = 'key'
 
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-dev.svc.cluster.local:8080'
 
@@ -251,11 +205,6 @@ class UnitTestConfig(AppConfig):
     SSO_URL = ''
     MIMIR_URL = ''
     CRMALERT_URL = ''
-    GOCENTRAL_URL = ''
-
-    VPS4_URLS = OrderedDict([('IAD2', ''),
-                             ('SIN2', ''),
-                             ('AMS3', '')])
 
 
 config_by_name = {'dev': DevelopmentAppConfig, 'prod': ProductionAppConfig, 'ote': OTEAppConfig, 'unit-test': UnitTestConfig, 'test': TestAppConfig}

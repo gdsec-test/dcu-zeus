@@ -46,60 +46,15 @@ spec:
               secretKeyRef:
                 name: db-kelvin-v2
                 key: password
-
-          - name: DIABLOUSER
-            valueFrom:
-              secretKeyRef:
-                name: auth-zeus-envs
-                key: diablouser
-          - name: DIABLOPASS
-            valueFrom:
-              secretKeyRef:
-                name: auth-zeus-envs
-                key: diablopass
-          - name: PLESKUSER
-            valueFrom:
-              secretKeyRef:
-                name: auth-zeus-envs
-                key: pleskuser
-          - name: PLESKPASS
-            valueFrom:
-              secretKeyRef:
-                name: auth-zeus-envs
-                key: pleskpass
           - name: CMAP_API_CERT
             value: /apicerts/tls.crt
           - name: CMAP_API_KEY
             value: /apicerts/tls.key
-          - name: VPS4USER
-            valueFrom:
-              secretKeyRef:
-                name: auth-vps4-api
-                key: vps4user
-          - name: VPS4PASS
-            valueFrom:
-              secretKeyRef:
-                name: auth-vps4-api
-                key: vps4pass
-          - name: CMAP_PROXY_USER
-            valueFrom:
-              secretKeyRef:
-                name: auth-cmap-proxy
-                key: username
-          - name: CMAP_PROXY_PASS
-            valueFrom:
-              secretKeyRef:
-                name: auth-cmap-proxy
-                key: password
           - name: SLACK_HANDLER
             valueFrom:
               secretKeyRef:
                 name: zeus-slack
                 key: handler
-          - name: CMAP_PROXY_CERT
-            value: /proxycerts/tls.crt
-          - name: CMAP_PROXY_KEY
-            value: /proxycerts/tls.key
           - name: OCM_SSL_CERT
             value: /ocm_certs/tls.crt
           - name: OCM_SSL_KEY
@@ -108,10 +63,6 @@ spec:
             value: /zeus_client_certs/tls.crt
           - name: ZEUS_CLIENT_KEY
             value: /zeus_client_certs/tls.key
-          - name: GOCENTRAL_SSL_CERT
-            value: /ecomm_certs/tls.crt
-          - name: GOCENTRAL_SSL_KEY
-            value: /ecomm_certs/tls.key
           - name: ELASTIC_APM_SERVER_URL
             valueFrom:
               secretKeyRef:
@@ -132,12 +83,6 @@ spec:
           - name: tls-zeus-client-cert-files
             mountPath: /zeus_client_certs
             readOnly: true
-          - name: tls-files-proxy
-            mountPath: /proxycerts
-            readOnly: true
-          - name: tls-ecomm-files
-            mountPath: /ecomm_certs
-            readOnly: true
 
         -
           name: "redis"
@@ -157,12 +102,6 @@ spec:
         - name: tls-zeus-client-cert-files
           secret:
             secretName: tls-zeus-client-cert
-        - name: tls-files-proxy
-          secret:
-            secretName: tls-cmap-auth
-        - name: tls-ecomm-files
-          secret:
-            secretName: tls-ecomm
         - name: tls-files-api
           secret:
             secretName: tls-cmap-api
