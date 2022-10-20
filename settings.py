@@ -43,8 +43,6 @@ class AppConfig(object):
                            'Website Security Ultimate']
 
     # Retrieve certs and keys for sending Customer Emails
-    OCM_SSL_CERT = os.getenv('OCM_SSL_CERT')
-    OCM_SSL_KEY = os.getenv('OCM_SSL_KEY')
     ZEUS_CLIENT_CERT = os.getenv('ZEUS_CLIENT_CERT')
     ZEUS_CLIENT_KEY = os.getenv('ZEUS_CLIENT_KEY')
     GOCENTRAL_SSL_CERT = os.getenv('GOCENTRAL_SSL_CERT')
