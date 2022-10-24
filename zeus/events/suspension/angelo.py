@@ -6,7 +6,7 @@ from requests.packages.urllib3.exceptions import (InsecurePlatformWarning,
                                                   InsecureRequestWarning)
 
 from zeus.events.suspension.interface import Product
-from zeus.utils.shopperapi import ShopperAPI
+from zeus.utils.functions import get_host_shopper_id_from_dict
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 requests.packages.urllib3.disable_warnings(InsecurePlatformWarning)
@@ -19,7 +19,6 @@ class Angelo(Product):
         self._logger = logging.getLogger('celery.tasks')
         self.auth = (app_settings.PLESKUSER, app_settings.PLESKPASS)
         self.url = app_settings.PLESK_URL
-        self.shopper_api = ShopperAPI(app_settings)
 
     def suspend(self, guid, data, **kwargs):
         """
@@ -56,7 +55,7 @@ class Angelo(Product):
         :param flag: ?suspend or ?reinstate
         :return: True if post succeeded or False if post failed
         """
-        url = self.url + self.shopper_api.get_host_shopper_id_from_dict(data) + '/' + guid + flag
+        url = self.url + get_host_shopper_id_from_dict(data) + '/' + guid + flag
 
         try:
             body = json.dumps({'disable_panel': 'true', 'reason': 'DCU Abuse', 'type': 'abuse'}, ensure_ascii=False)

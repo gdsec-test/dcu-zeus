@@ -18,13 +18,15 @@ from zeus.utils.functions import (get_domain_id_from_dict,
                                   get_host_abuse_email_from_dict,
                                   get_host_brand_from_dict,
                                   get_host_info_from_dict,
+                                  get_host_shopper_id_from_dict,
                                   get_kelvin_domain_id_from_dict,
+                                  get_list_of_ids_to_notify,
                                   get_parent_child_shopper_ids_from_dict,
+                                  get_shopper_id_from_dict,
                                   get_ssl_subscriptions_from_dict,
                                   get_sucuri_product_from_dict)
 from zeus.utils.mimir import InfractionTypes, Mimir, RecordTypes
 from zeus.utils.shoplocked import Shoplocked
-from zeus.utils.shopperapi import ShopperAPI
 from zeus.utils.slack import SlackFailures, ThrottledSlack
 
 
@@ -48,7 +50,6 @@ class RegisteredHandler(Handler):
         self.shoplocked = Shoplocked(app_settings)
         self.crmalert = CRMAlert(app_settings)
         self.mimir = Mimir(app_settings)
-        self.shopper_api = ShopperAPI(app_settings)
 
         self.basic_review = BasicReview(app_settings)
         self.sucuri_review = SucuriReview(app_settings)
@@ -86,8 +87,8 @@ class RegisteredHandler(Handler):
         ip = get_host_info_from_dict(data).get('ip')
         recipients = get_host_abuse_email_from_dict(data)
         report_type = data.get('type')
-        shopper_id = self.shopper_api.get_shopper_id_from_dict(data)
-        shopper_id_list = self.shopper_api.get_list_of_ids_to_notify(data)
+        shopper_id = get_shopper_id_from_dict(data)
+        shopper_id_list = get_list_of_ids_to_notify(data)
         sucuri_product = get_sucuri_product_from_dict(data)
         source = data.get('source')
         ticket_id = data.get('ticketId')
@@ -147,7 +148,7 @@ class RegisteredHandler(Handler):
     def forward_user_gen_complaint(self, data):
         domain = data.get('sourceDomainOrIp')
         domain_id = get_domain_id_from_dict(data)
-        shopper_id = self.shopper_api.get_shopper_id_from_dict(data)
+        shopper_id = get_shopper_id_from_dict(data)
         source = data.get('source')
         subdomain = data.get('sourceSubDomain')
         ticket_id = data.get('ticketId')
@@ -166,8 +167,8 @@ class RegisteredHandler(Handler):
         domain_id = get_domain_id_from_dict(data)
         hosted_status = data.get('hosted_status')
         report_type = data.get('type')
-        shopper_id = self.shopper_api.get_shopper_id_from_dict(data)
-        shopper_id_list = self.shopper_api.get_list_of_ids_to_notify(data)
+        shopper_id = get_shopper_id_from_dict(data)
+        shopper_id_list = get_list_of_ids_to_notify(data)
         source = data.get('source')
         target = data.get('target')
         ticket_id = data.get('ticketId')
@@ -177,7 +178,7 @@ class RegisteredHandler(Handler):
         intentionally malicious automation on an account we have not actually put eyes on'''
         hosted_same_shopper = None
         if hosted_status == self.HOSTED:
-            if shopper_id == self.shopper_api.get_host_shopper_id_from_dict(data):
+            if shopper_id == get_host_shopper_id_from_dict(data):
                 hosted_same_shopper = True
             else:
                 return self.suspend(data)
@@ -239,8 +240,8 @@ class RegisteredHandler(Handler):
         subdomain = data.get('sourceSubDomain')
         domain_id = get_domain_id_from_dict(data)
         report_type = data.get('type')
-        shopper_id = self.shopper_api.get_shopper_id_from_dict(data)
-        shopper_id_list = self.shopper_api.get_list_of_ids_to_notify(data)
+        shopper_id = get_shopper_id_from_dict(data)
+        shopper_id_list = get_list_of_ids_to_notify(data)
         source = data.get('source')
         target = data.get('target')
         ticket_id = data.get('ticketId')
@@ -285,8 +286,8 @@ class RegisteredHandler(Handler):
         subdomain = data.get('sourceSubDomain')
         domain_id = get_domain_id_from_dict(data)
         report_type = data.get('type')
-        shopper_id = self.shopper_api.get_shopper_id_from_dict(data)
-        shopper_id_list = self.shopper_api.get_list_of_ids_to_notify(data)
+        shopper_id = get_shopper_id_from_dict(data)
+        shopper_id_list = get_list_of_ids_to_notify(data)
         source = data.get('source')
         ticket_id = data.get('ticketId')
 
@@ -330,8 +331,8 @@ class RegisteredHandler(Handler):
         subdomain = data.get('sourceSubDomain')
         domain_id = get_domain_id_from_dict(data)
         report_type = data.get('type')
-        shopper_id = self.shopper_api.get_shopper_id_from_dict(data)
-        shopper_id_list = self.shopper_api.get_list_of_ids_to_notify(data)
+        shopper_id = get_shopper_id_from_dict(data)
+        shopper_id_list = get_list_of_ids_to_notify(data)
         source = data.get('source')
         ticket_id = data.get('ticketId')
 
@@ -371,7 +372,7 @@ class RegisteredHandler(Handler):
         return self._suspend_domain(domain, ticket_id, note)
 
     def suspend_csam(self, data):
-        shopper_id = self.shopper_api.get_host_shopper_id_from_dict(data)
+        shopper_id = get_shopper_id_from_dict(data)
         ticket_id = data.get('ticketID')
         domain = data.get('sourceDomainOrIP')
         subdomain = data.get('sourceSubDomain')
@@ -397,7 +398,7 @@ class RegisteredHandler(Handler):
         same customer account'''
         hosted_same_shopper = None
         if hosted_status == self.HOSTED:
-            if shopper_id == self.shopper_api.get_host_shopper_id_from_dict(data):
+            if shopper_id == get_host_shopper_id_from_dict(data):
                 hosted_same_shopper = True
 
         if not hosted_same_shopper:
@@ -464,7 +465,7 @@ class RegisteredHandler(Handler):
             self.slack.invalid_hosted_status(ticket_id)
         elif data.get('type') not in self.TYPES:
             self.slack.invalid_abuse_type(ticket_id)
-        elif not self.shopper_api.get_list_of_ids_to_notify(data):
+        elif not get_list_of_ids_to_notify(data):
             self.slack.failed_to_determine_shoppers(ticket_id)
         else:
             return True
