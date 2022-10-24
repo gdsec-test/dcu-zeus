@@ -16,7 +16,6 @@ from zeus.reviews.reviews import BasicReview, HighValueReview
 from zeus.utils.crmalert import CRMAlert
 from zeus.utils.mimir import Mimir
 from zeus.utils.shoplocked import Shoplocked
-from zeus.utils.shopperapi import ShopperAPI
 from zeus.utils.slack import SlackFailures
 
 
@@ -229,8 +228,7 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    @patch.object(ShopperAPI, 'get_shopper_id_from_customer_id', return_value='7890')
-    def test_intentionally_malicious_no_fraud_email(self, shopper_api, ssl_mailer, service, crm, fraud, registered, handler,
+    def test_intentionally_malicious_no_fraud_email(self, ssl_mailer, service, crm, fraud, registered, handler,
                                                     shoplocked, crmalert, mimir, mock_db):
         self._registered.intentionally_malicious(self.ticket_valid_api_reseller)
         fraud.assert_not_called()
@@ -245,8 +243,7 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    @patch.object(ShopperAPI, 'get_shopper_id_from_customer_id', return_value='7890')
-    def test_intentionally_malicious_success_fraud_email(self, shopper_api, ssl_mailer, service, crm, fraud,
+    def test_intentionally_malicious_success_fraud_email(self, ssl_mailer, service, crm, fraud,
                                                          registered, handler, shoplocked, crmalert,
                                                          mimir, mock_db):
         self._registered.intentionally_malicious(self.ticket_no_hold_or_reseller)
@@ -381,8 +378,7 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    @patch.object(ShopperAPI, 'get_shopper_id_from_customer_id', return_value=None)
-    def test_shopper_compromise_no_fraud_email(self, shopper_api, ssl_mailer, service, crm, registered, handler,
+    def test_shopper_compromise_no_fraud_email(self, ssl_mailer, service, crm, registered, handler,
                                                shoplocked, fraud, mimir, mock_db):
         self._registered.shopper_compromise(self.ticket_valid_api_reseller)
         fraud.assert_not_called()
@@ -396,8 +392,7 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
-    @patch.object(ShopperAPI, 'get_shopper_id_from_customer_id', return_value='7890')
-    def test_shopper_compromise_success_fraud_email(self, shopper_api, ssl_mailer, service, crm, fraud, registered,
+    def test_shopper_compromise_success_fraud_email(self, ssl_mailer, service, crm, fraud, registered,
                                                     handler, shoplocked, mimir, mock_db):
         self._registered.shopper_compromise(self.ticket_no_hold_or_reseller)
         fraud.assert_called()

@@ -13,13 +13,13 @@ from zeus.reviews.reviews import BasicReview, HighValueReview, SucuriReview
 from zeus.utils.crmalert import CRMAlert
 from zeus.utils.functions import (get_high_value_domain_from_dict,
                                   get_host_info_from_dict,
+                                  get_host_shopper_id_from_dict,
                                   get_parent_child_shopper_ids_from_dict,
                                   get_ssl_subscriptions_from_dict,
                                   get_sucuri_product_from_dict)
 from zeus.utils.mimir import InfractionTypes, Mimir, RecordTypes
 from zeus.utils.scribe import HostedScribe
 from zeus.utils.shoplocked import Shoplocked
-from zeus.utils.shopperapi import ShopperAPI
 from zeus.utils.slack import SlackFailures, ThrottledSlack
 
 
@@ -39,7 +39,6 @@ class HostedHandler(Handler):
         self.slack = SlackFailures(ThrottledSlack(app_settings))
         self.shoplocked = Shoplocked(app_settings)
         self.crmalert = CRMAlert(app_settings)
-        self.shopperapi = ShopperAPI(app_settings)
 
         self.basic_review = BasicReview(app_settings)
         self.sucuri_review = SucuriReview(app_settings)
@@ -461,7 +460,7 @@ class HostedHandler(Handler):
 
     def _validate_required_args(self, data):
         guid = get_host_info_from_dict(data).get('guid')
-        shopper_id = self.shopperapi.get_host_shopper_id_from_dict(data)
+        shopper_id = get_host_shopper_id_from_dict(data)
         # ticketId for Phishstory and ticketID for Kelvin
         ticket_id = data.get('ticketId', data.get('ticketID'))
         report_type = data.get('type')
