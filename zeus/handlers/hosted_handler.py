@@ -26,7 +26,6 @@ from zeus.utils.slack import SlackFailures, ThrottledSlack
 class HostedHandler(Handler):
     supported_types = ['PHISHING', 'MALWARE', 'CHILD_ABUSE']
     HOSTED = 'HOSTED'
-    
 
     def __init__(self, app_settings):
         self._logger = logging.getLogger('celery.tasks')
@@ -449,11 +448,8 @@ class HostedHandler(Handler):
 
     def _suspend_product(self, data, guid, product):
         guid = get_host_info_from_dict(data).get('mwpId') or guid
-        # TODO: LKM - figure out how to get customer ID here
-        customer_id = get_host_info_from_dict(data).get('customerId')
-        # TODO: figure out what we actually want to put for 'reason'
 
-        suspension_result = self.hosting_service.suspend_hosting(product, guid, customer_id)
+        suspension_result = self.hosting_service.suspend_hosting(product, guid, data)
         if isinstance(suspension_result, str):
             self.slack.failed_hosting_suspension(guid, info=suspension_result)
         elif not suspension_result:

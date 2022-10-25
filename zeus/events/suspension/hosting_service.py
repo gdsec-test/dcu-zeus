@@ -1,4 +1,10 @@
-from zeus.events.suspension.nes_helper import NESHelper
+from zeus.events.suspension.angelo import Angelo
+from zeus.events.suspension.diablo import Diablo
+from zeus.events.suspension.gocentral import GoCentral
+from zeus.events.suspension.interface import Product
+from zeus.events.suspension.mwp_one import MWPOne
+from zeus.events.suspension.vertigo import Vertigo
+from zeus.events.suspension.vps4 import VPS4
 from zeus.persist.notification_timeouts import Throttle
 
 
@@ -10,27 +16,29 @@ class ThrottledHostingService:
     def can_suspend_hosting_product(self, identifier):
         return self._throttle.can_suspend_hosting_product(identifier)
 
-    def suspend_hosting(self, product, identifier, customer_id):
-        return self._decorated.suspend(product, identifier, customer_id)
+    def suspend_hosting(self, product, identifier, data):
+        return self._decorated.suspend(product, identifier, data)
 
 
-class HostingService():
+class HostingService(Product):
     UNSUPPORTED_PRODUCT = "Unsupported Product: {}"
     UNSUPPORTED_OPERATION = "Unsupported Operation: {}"
 
     def __init__(self, app_settings):
-        self._products = ['diablo', 'vertigo', 'mwp 1.0', 'plesk', 'vps4', 'gocentral']
-        self.nes_helper = NESHelper(app_settings)
+        self._products = {'diablo': Diablo(app_settings),
+                          'vertigo': Vertigo(app_settings),
+                          'mwp 1.0': MWPOne(app_settings),
+                          'plesk': Angelo(app_settings),
+                          'vps4': VPS4(app_settings),
+                          'gocentral': GoCentral(app_settings)}
 
-    def suspend(self, product, identifier, customer_id):
+    def suspend(self, product, identifier, data):
         product = product.lower() if product else None
         if product not in self._products:
             return self.UNSUPPORTED_PRODUCT.format(product)
 
-        return self.nes_helper.suspend(identifier, customer_id)
+        return self._products.get(product).suspend(guid=identifier, data=data)
 
-    # TODO: LKM - figure out if we need to implement this or not.  If we do, we will probably want to add a 
-    # 'reinstate_hosting' function in the Throttle above as well as a "can_reinstate_hosting_product" func
     def reinstate(self, product, identifier, data):
         product = product.lower() if product else None
         if product not in self._products:

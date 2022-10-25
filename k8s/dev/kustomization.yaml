@@ -23,5 +23,6 @@ images:
 configMapGenerator:
 - literals:
   - sysenv=dev
+  - GOCENTRAL_URL=https://services.orion.dev.sdl1.gdg/account/accountoperations.asmx
   - ELASTIC_APM_ENVIRONMENT=dev
   name: env-specific-values
