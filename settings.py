@@ -26,6 +26,11 @@ class AppConfig(object):
     #  aren't being received by dcueng@, contact bxberry@ with questions.
     NON_PROD_EMAIL_ADDRESS = os.getenv('EMAIL_RECIPIENT', 'dcuinternal@godaddy.com')
 
+    # Note: first var is the customer ID and the second is the entitlement ID
+    ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.prod.godaddy.com/v2/customers/{}/entitlements/{}'
+    # Note: the first variable is the customerID and the second one is the suspend / reinstate command  (i.e. "suspendByEntitlementId")
+    NES_URL = 'https://subscriptions-shim-ext.cp.api.prod.godaddy.com/v2/customers/{}/{}'
+
     # TODO CMAPT-5272: remove all references to DIABLO_URL, GOCENTRAL_URL, MWPONE_URL, PLESK_URL, and VERT_URL variables
     DIABLO_URL = 'https://cpanelprovapi.prod.phx3.secureserver.net/v1/accounts/'
     GOCENTRAL_URL = os.getenv('GOCENTRAL_URL')
@@ -140,6 +145,9 @@ class OTEAppConfig(AppConfig):
 
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-ote.svc.cluster.local:8080'
 
+    ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.ote.godaddy.com/v2/customers/{}/entitlements/{}'
+    NES_URL = 'https://subscriptions-shim-ext.cp.api.ote.godaddy.com/v2/customers/{}/{}'
+
     SSO_URL = 'https://sso.ote-gdcorp.tools'
     MIMIR_URL = 'https://mimir.cset.int.ote-gdcorp.tools'
     CRMALERT_URL = 'https://crm-alert.cset.int.ote-gdcorp.tools'
@@ -167,6 +175,9 @@ class DevelopmentAppConfig(AppConfig):
     GOCENTRAL_URL = 'http://localhost:8080/orion/account/accountoperations.asmx'
     MWPONE_URL = 'http://localhost:8080/mwpone/v1/accounts/'
     DIABLO_URL = 'http://localhost:8080/diablo/v1/accounts/'
+
+    ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.dp.godaddy.com/v2/customers/{}/entitlements/{}'
+    NES_URL = 'https://subscriptions-shim-ext.cp.api.dp.godaddy.com/v2/customers/{}/{}'
 
     SSO_URL = 'https://sso.dev-gdcorp.tools'
     MIMIR_URL = 'https://mimir.cset.int.dev-gdcorp.tools'
@@ -200,6 +211,9 @@ class TestAppConfig(AppConfig):
     MWPONE_URL = 'https://api.servicemanager.test-godaddy.com/v1/accounts/'
     PLESK_URL = 'https://gdapi.plesk-shared-app.int.test-gdcorp.tools/v1/accounts/'
     VERT_URL = ''
+
+    ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.test.godaddy.com/v2/customers/{}/entitlements/{}'
+    NES_URL = 'https://subscriptions-shim-ext.cp.api.test.godaddy.com/v2/customers/{}/{}'
 
     SSO_URL = 'https://sso.test-gdcorp.tools'
     MIMIR_URL = 'https://mimir.cset.int.test-gdcorp.tools'
