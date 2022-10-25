@@ -25,6 +25,11 @@ class TestShopperApi:
         actual = self._shopperapi.get_shopper_id_from_dict({})
         assert_is_none(actual)
 
+    def test_get_shopper_id_from_dict_child(self):
+        data = {'data': {'domainQuery': {'apiReseller': {'parent': '1234', 'child': '5678'}}}}
+        actual = self._shopperapi.get_shopper_id_from_dict(data)
+        assert_equal(actual, '5678')
+
     @patch.object(ShopperAPI, 'get_shopper_id_from_customer_id', return_value='7890')
     def test_get_host_shopper_id_from_dict_customer_id(self, get_shopper_id_from_customer_id):
         actual = self._shopperapi.get_host_shopper_id_from_dict({'data': {'domainQuery': {'host': {'customerId': '1234-5678'}}}})

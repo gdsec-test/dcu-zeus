@@ -47,10 +47,16 @@ class ShopperAPI:
         return
 
     def get_shopper_id_from_dict(self, data):
-        customer_id = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('customerId', None)
-        if customer_id:
-            return self.get_shopper_id_from_customer_id(customer_id)
-        return data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('shopperId', None)
+        if isinstance(data, dict):
+            parent_child_list = get_parent_child_shopper_ids_from_dict(data)
+            if not parent_child_list:
+                customer_id = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('customerId', None)
+                if customer_id:
+                    return self.get_shopper_id_from_customer_id(customer_id)
+                return data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('shopperId', None)
+            else:
+                return parent_child_list[1]
+        return None
 
     def get_host_shopper_id_from_dict(self, data):
         #  The host customerId / shopperId field currently appear in...
