@@ -26,6 +26,7 @@ class AppConfig(object):
     #  aren't being received by dcueng@, contact bxberry@ with questions.
     NON_PROD_EMAIL_ADDRESS = os.getenv('EMAIL_RECIPIENT', 'dcuinternal@godaddy.com')
 
+    # TODO CMAPT-5272: remove all references to DIABLO_URL, GOCENTRAL_URL, MWPONE_URL, PLESK_URL, and VERT_URL variables
     DIABLO_URL = 'https://cpanelprovapi.prod.phx3.secureserver.net/v1/accounts/'
     GOCENTRAL_URL = os.getenv('GOCENTRAL_URL')
     MWPONE_URL = 'https://api.servicemanager.godaddy.com/v1/accounts/'
@@ -47,6 +48,7 @@ class AppConfig(object):
     OCM_SSL_KEY = os.getenv('OCM_SSL_KEY')
     ZEUS_CLIENT_CERT = os.getenv('ZEUS_CLIENT_CERT')
     ZEUS_CLIENT_KEY = os.getenv('ZEUS_CLIENT_KEY')
+    # TODO CMAPT-5272: remove GOCENTRAL_SSL_CERT and GOCENTRAL_SSL_KEY
     GOCENTRAL_SSL_CERT = os.getenv('GOCENTRAL_SSL_CERT')
     GOCENTRAL_SSL_KEY = os.getenv('GOCENTRAL_SSL_KEY')
     CMAP_API_CERT = os.getenv('CMAP_API_CERT', 'api.crt')
@@ -68,6 +70,7 @@ class AppConfig(object):
         self.DB_KELVIN_PASS = urllib.parse.quote(os.getenv('DB_KELVIN_PASS', 'password'))
         self.DB_KELVIN_URL = 'mongodb://{}:{}@{}/{}'.format(self.DB_KELVIN_USER, self.DB_KELVIN_PASS, self.DB_HOST, self.DB_KELVIN)
 
+        # TODO CMAPT-5272: Remove all DIABLO*, PLESK*, CMAP_PROXY*, VPS4* variables
         self.DIABLOUSER = os.getenv('DIABLOUSER', 'diablouser')
         self.DIABLOPASS = os.getenv('DIABLOPASS', 'diablopass')
         self.PLESKUSER = os.getenv('PLESKUSER', 'pleskuser')
@@ -113,6 +116,7 @@ class ProductionAppConfig(AppConfig):
     VERT_URL = 'https://vertigo.cmap.proxy.int.godaddy.com/vertigo/v1/container/'
     CRMALERT_URL = 'https://crm-alert.cset.int.gdcorp.tools'
 
+    # TODO CMAPT-5272: remove all references to VPS4_URLS variable
     VPS4_URLS = OrderedDict([('IAD2', 'https://vps4.api.iad2.godaddy.com'),
                              ('SIN2', 'https://vps4.api.sin2.godaddy.com'),
                              ('AMS3', 'https://vps4.api.ams3.godaddy.com')])

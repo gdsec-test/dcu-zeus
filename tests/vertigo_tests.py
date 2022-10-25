@@ -1,3 +1,4 @@
+# TODO CMAPT-5272: delete this entire file
 from mock import MagicMock, patch
 from nose.tools import assert_false, assert_true
 from requests.exceptions import Timeout

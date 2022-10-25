@@ -13,6 +13,7 @@ images:
 configMapGenerator:
 - literals:
   - sysenv=test
+  # TODO CMAPT-5272: remove GOCENTRAL_URL
   - GOCENTRAL_URL=https://services.orion.dev.sdl1.gdg/account/accountoperations.asmx
   - ELASTIC_APM_ENVIRONMENT=test
   name: env-specific-values

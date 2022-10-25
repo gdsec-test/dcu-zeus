@@ -46,7 +46,8 @@ spec:
               secretKeyRef:
                 name: db-kelvin-v2
                 key: password
-
+          # TODO CMAPT-5272: Remove DIABLOUSER, DIABLOPASS, PLESKUSER, PLESKPASS,
+          #     VPS4USER, VPS4PASS, CMAP_PROXY_USER and CMAP_PROXY_PASS
           - name: DIABLOUSER
             valueFrom:
               secretKeyRef:
@@ -96,6 +97,8 @@ spec:
               secretKeyRef:
                 name: zeus-slack
                 key: handler
+          # TODO CMAPT-5272: remove CMAP_PROXY_CERT, CMAP_PROXY_KEY, GOCENTRAL_SSL_CERT and GOCENTRAL_SSL_KEY
+          #    as well as the volume and volume mounts associated with those
           - name: CMAP_PROXY_CERT
             value: /proxycerts/tls.crt
           - name: CMAP_PROXY_KEY
