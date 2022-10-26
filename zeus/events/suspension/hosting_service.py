@@ -17,6 +17,7 @@ class ThrottledHostingService:
         self._decorated = HostingService(app_settings)
         self._throttle = Throttle(app_settings.REDIS, app_settings.SUSPEND_HOSTING_LOCK_TIME)
 
+    # TODO LKM: figure out if we need to do a similar thing for the reinstate endpoint
     def can_suspend_hosting_product(self, identifier):
         return self._throttle.can_suspend_hosting_product(identifier)
 
