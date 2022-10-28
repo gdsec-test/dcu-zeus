@@ -91,11 +91,14 @@ def get_host_brand_from_dict(dict_to_search):
         return _get_domain_query(dict_to_search).get('host', {}).get('brand')
     return None
 
+
 def get_host_customer_id_from_dict(dict_to_search):
+    # The host customerId field currently appears in
+    #   1: data->domainQuery->host->customerId
     if isinstance(dict_to_search, dict):
-        # TODO: I don't think the host currently has the 'customerID' in mongo....could be a problem!!! :O 
         return _get_domain_query(dict_to_search).get("host", {}).get('customerId', None)
     return None
+
 
 def get_host_shopper_id_from_dict(dict_to_search):
     #  The host shopperId field currently appears in...

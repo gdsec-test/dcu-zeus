@@ -17,12 +17,17 @@ class ThrottledHostingService:
         self._decorated = HostingService(app_settings)
         self._throttle = Throttle(app_settings.REDIS, app_settings.SUSPEND_HOSTING_LOCK_TIME)
 
-    # TODO LKM: figure out if we need to do a similar thing for the reinstate endpoint
     def can_suspend_hosting_product(self, identifier):
         return self._throttle.can_suspend_hosting_product(identifier)
 
     def suspend_hosting(self, product, identifier, data):
         return self._decorated.suspend(product, identifier, data)
+
+    def can_reinstate_hosting_product(self, identifier):
+        return self._throttle.can_reinstate_hosting_product(identifier)
+
+    def reinstate_hosting(self, product, identifier, data):
+        return self._decorated.reinstate(product, identifier, data)
 
 
 class HostingService(Product):
@@ -31,12 +36,12 @@ class HostingService(Product):
 
     # TODO CMAPT-5272: remove the NES selection flags
     PRODUCTS_USE_NES_FLAG = {
-        'diablo': os.getenv("DIABLO_USE_NES"),
-        'vertigo': os.getenv("VERTIGO_USE_NES"),
-        'mwp 1.0': os.getenv("MWPONE_USE_NES"),
-        'plesk': os.getenv("ANGELO_USE_NES"),
-        'vps4': os.getenv("VPS4_USE_NES"),
-        'gocentral': os.getenv("GOCENTRAL_USE_NES")
+        'diablo': os.getenv("DIABLO_USE_NES", False),
+        'vertigo': os.getenv("VERTIGO_USE_NES", False),
+        'mwp 1.0': os.getenv("MWPONE_USE_NES", False),
+        'plesk': os.getenv("ANGELO_USE_NES", False),
+        'vps4': os.getenv("VPS4_USE_NES", False),
+        'gocentral': os.getenv("GOCENTRAL_USE_NES", False)
     }
     ALL_USE_NES_FLAG = os.getenv("ALL_USE_NES")
 
@@ -49,12 +54,11 @@ class HostingService(Product):
                           'gocentral': GoCentral(app_settings)}
         self.nes_helper = NESHelper(app_settings)
 
-
     def suspend(self, product, identifier, data):
         product = product.lower() if product else None
         if product not in self._products:
             return self.UNSUPPORTED_PRODUCT.format(product)
-        
+
         # Use the correct API
         # TODO CMAPT-5272: remove the if statement and other return statement and just use NES
         if self.PRODUCTS_USE_NES_FLAG.get(product) or self.ALL_USE_NES_FLAG:
@@ -76,6 +80,7 @@ class HostingService(Product):
 
         return self._products.get(product).reinstate(guid=identifier, data=data)
 
+    # TODO CMAPT-5272: remove the rest of these functions.  They were never used
     def cancel(self, product, identifier):
         product = product.lower() if product else None
         if product not in self._products:
