@@ -7,6 +7,7 @@ from zeus.events.suspension.vps4 import VPS4
 
 
 class TestHostingService:
+    # TODO LKM: add tests for verifiying the NES flags call the expected function
 
     @classmethod
     @patch.object(VPS4, '_get_jwt', return_value='fake-jwt')
