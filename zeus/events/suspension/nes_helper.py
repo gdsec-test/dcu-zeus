@@ -12,35 +12,46 @@ class NESHelper():
     REINSTATE_CMD = 'reinstateByEntitlementId'
 
     VALID_ENTITLEMENT_STATUSES = ['ACTIVE', 'SUSPENDED', 'PEND_CANCEL', 'CANCELLED']
-    ENTITLEMENT_ERROR_MSG = 'Get entitlement returned error.  Status code: {}; Message: {}'
-    SUSPENSION_ERROR_MSG = 'Subsriptions API {} returned error.  Status code: {}; Message: {}'
 
     def __init__(self, settings: AppConfig):
         self._logger = logging.getLogger(__name__)
+
         # Note: the first variable is the customerID and the second one is the suspend / reinstate command  (i.e. "suspendByEntitlementId")
         self._nes_url = settings.SUBSCRIPTIONS_URL.format(f'customers/{}/{}')
         self._health_check_url = settings.SUBSCRIPTIONS_URL.format('subscriptions-shim/healthcheck')
         self._entitlement_url = settings.ENTITLEMENT_URL
         self._sso_endpoint = settings.SSO_URL
 
-        # TODO LKM: make sure these endpoints have the zeus cert whitelisted - requested in
+        # TODO LKM: make sure these endpoints have the zeus cert whitelisted - this was requested in
         #  https://godaddy-corp.atlassian.net/browse/EP-49428 and
         #  https://godaddy-corp.atlassian.net/browse/EP-49484
         self._cert = (settings.ZEUS_CLIENT_CERT, settings.ZEUS_CLIENT_KEY)
         self._headers.update({'Authorization': f'sso-jwt {self._get_jwt(self._cert)}'})
 
     def suspend(self, entitlement_id, customer_id):
-        return self._perform_request(entitlement_id, customer_id, self.SUSPEND_CMD)
+        response = self._do_suspend_reinstate(entitlement_id, customer_id, self.SUSPEND_CMD)
+        # If the response is a string, then we know there was an error in performing a suspension
+        if isinstance(response, str)
+            return response
+
+        # Otherwise, poll for the entitlement status to go to SUSPEND and return that response
+        return self._poll_for_entitlement_status(entitlement_id, customer_id, 'SUSPEND')
 
     def reinstate(self, entitlement_id, customer_id):
-        return self._perform_request(entitlement_id, customer_id, self.REINSTATE_CMD)
+        response = self._do_suspend_reinstate(entitlement_id, customer_id, self.REINSTATE_CMD)
+        # If the response is a string, then we know there was an error in performing a reinstatement
+        if isinstance(response, str)
+            return response
+        
+        # poll for the entitlement status to go to ACTIVE and return that response
+        return self._poll_for_entitlement_status(entitlement_id, customer_id, 'ACTIVE')
 
     def run_healthcheck(self):
         response = requests.post(self._health_check_url, headers=self._headers, verify=True)
         # TODO LKM: parse response!
         return True
 
-    def _perform_request(self, entitlement_id, customer_id, url_cmd):
+    def _do_suspend_reinstate(self, entitlement_id, customer_id, url_cmd):
         try:
             url = self._nes_url.format(customer_id, url_cmd)
             body = {'entitlementId': entitlement_id, 'suspendReason': self.SUSPEND_REASON}
@@ -53,17 +64,17 @@ class NESHelper():
 
             # process response and log errors and successes
             if response.status_code != 204:
-                self._logger.error(f'Failed to suspend customerId: {customer_id}; entitlementId: {entitlement_id}.\nResponse was: Status code = {response.status_code}\nMessage ={response.text}')
-                return self.SUSPENSION_ERROR_MSG.format(url_cmd, response.status_code, response.text)
+                error_msg = f'Failed to {url_cmd} for customerId: {customer_id} and entitlementId: {entitlement_id}.  Response was: Status code = {response.status_code};  Message ={response.text}
+                self._logger.error(error_msg)
+                return error_msg
             else:
-                self._logger.info(f'Successfully requested suspension for customerId: {customer_id}; entitlementId: {entitlement_id}')
+                self._logger.info(f'Successfully requested {url_cmd} for customerId: {customer_id}; entitlementId: {entitlement_id}')
+                return True
 
-            # Now, we need to poll for the entitlement status to be correct
-            expected_stauts = 'SUSPEND' if url_cmd == self._SUSPEND_CMD else 'ACTIVE'
-            return self._poll_for_entitlement_status(entitlement_id, customer_id, expected_stauts)
         except Exception as e:
-            self._logger.error(f'Failed to suspend customerId: {customer_id}; entitlementId: {entitlement_id} with exception: {e}')
-            return False
+            error_msg = f'Failed to {url_cmd} customerId: {customer_id} with entitlementId: {entitlement_id} with exception: {e}'
+            self._logger.error(error_msg)
+            return error_msg
 
     def _poll_for_entitlement_status(self, entitlement_id, customer_id, status):
         # TODO LKM: add some sort of timeout!!!  Need to first figure out how long it usually takes
@@ -78,24 +89,30 @@ class NESHelper():
                 return True
 
     def _check_entitlement_status(self, entitlement_id, customer_id):
-        url = self._entitlement_url.format(customer_id, entitlement_id)
-        response = requests.get(url, headers=self._headers, verify=True)
-
-        # If the credentials aren't accepted, update the JWT and try again
-        if response.status_code in [401, 403]:
-            self._headers.update({'Authorization': f'sso-jwt {self._get_jwt(self._cert)}'})
+        try:
+            url = self._entitlement_url.format(customer_id, entitlement_id)
             response = requests.get(url, headers=self._headers, verify=True)
 
-        # If the response is 200, parse the response for the desired status
-        if response.status_code == 200:
-            resp_dict = json.loads(response.text)
-            entitlement_status = resp_dict.get('status')
-            self._logger.info(f'Successfully got entitlement data for for customerId: {customer_id}; entitlementId: {entitlement_id}.  Status was: {entitlement_status}')
-            return entitlement_status
+            # If the credentials aren't accepted, update the JWT and try again
+            if response.status_code in [401, 403]:
+                self._headers.update({'Authorization': f'sso-jwt {self._get_jwt(self._cert)}'})
+                response = requests.get(url, headers=self._headers, verify=True)
 
-        # If the response is anything else, log the error, and return an error note to the user
-        self._logger.error(f'Failed to get entitlement data for customerId: {customer_id}; entitlementId: {entitlement_id}.\nResponse was: Status code = {response.status_code}\nMessage = {response.text}')
-        return self.ENTITLEMENT_ERROR_MSG.format(response.status_code, response.text)
+            # If the response is 200, parse the response for the desired status
+            if response.status_code == 200:
+                resp_dict = json.loads(response.text)
+                entitlement_status = resp_dict.get('status')
+                self._logger.info(f'Successfully got entitlement data for for customerId: {customer_id}; entitlementId: {entitlement_id}.  Status was: {entitlement_status}')
+                return entitlement_status
+
+            # If the response is anything else, log the error, and return an error note to the user
+            error_msg = f'Failed to get entitlement data for customerId: {customer_id}; entitlementId: {entitlement_id}.\nResponse was: Status code = {response.status_code}\nMessage = {response.text}'
+            self._logger.error(error_msg)
+            return error_msg
+        except Exception as e:
+            error_msg = f'Failed to get entitlement data for customerId: {customer_id}; entitlementId: {entitlement_id} with exception: {e}'
+            self._logger.error(error_msg)
+            return error_msg
 
     def _get_jwt(self, cert):
         """
