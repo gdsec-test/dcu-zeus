@@ -11,6 +11,13 @@ define deploy_k8s
 	cd k8s/$(1) && kustomize edit set image $(DOCKERREPO):$(1)
 endef
 
+define deploy_cset_k8s
+	docker push $(DOCKERREPO):$(2)
+	cd k8s/$(1) && kustomize edit set image $$(docker inspect --format='{{index .RepoDigests 0}}' $(DOCKERREPO):$(2))
+	kubectl --context $(1)-cset apply -k k8s/$(1)
+	cd k8s/$(1) && kustomize edit set image $(DOCKERREPO):$(1)
+endef
+
 all: env
 
 env:
@@ -89,13 +96,13 @@ ote-deploy: ote
 .PHONY: test-deploy
 test-deploy: test-env
 	@echo "----- deploying $(REPONAME) test -----"
-	$(call deploy_k8s,test,test)
+	$(call deploy_cset_k8s,test,test)
 
 
 .PHONY: dev-deploy
 dev-deploy: dev
 	@echo "----- deploying $(REPONAME) dev -----"
-	$(call deploy_k8s,dev,dev)
+	$(call deploy_cset_k8s,dev,dev)
 
 
 
