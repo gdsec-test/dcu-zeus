@@ -17,7 +17,9 @@ class NESHelper():
 
     def __init__(self, settings: AppConfig):
         self._logger = logging.getLogger(__name__)
-        self._subscriptions_url = settings.NES_URL
+        # Note: the first variable is the customerID and the second one is the suspend / reinstate command  (i.e. "suspendByEntitlementId")
+        self._nes_url = settings.SUBSCRIPTIONS_URL.format(f'customers/{}/{}')
+        self._health_check_url = settings.SUBSCRIPTIONS_URL.format('subscriptions-shim/healthcheck')
         self._entitlement_url = settings.ENTITLEMENT_URL
         self._sso_endpoint = settings.SSO_URL
 
@@ -33,9 +35,14 @@ class NESHelper():
     def reinstate(self, entitlement_id, customer_id):
         return self._perform_request(entitlement_id, customer_id, self.REINSTATE_CMD)
 
+    def run_healthcheck(self):
+        response = requests.post(self._health_check_url, headers=self._headers, verify=True)
+        # TODO LKM: parse response!
+        return True
+
     def _perform_request(self, entitlement_id, customer_id, url_cmd):
         try:
-            url = self._subscriptions_url.format(customer_id, url_cmd)
+            url = self._nes_url.format(customer_id, url_cmd)
             body = {'entitlementId': entitlement_id, 'suspendReason': self.SUSPEND_REASON}
             response = requests.post(url, json=body, headers=self._headers, verify=True)
 
@@ -59,7 +66,7 @@ class NESHelper():
             return False
 
     def _poll_for_entitlement_status(self, entitlement_id, customer_id, status):
-        # TODO LKM: add some sort of timeout!!!
+        # TODO LKM: add some sort of timeout!!!  Need to first figure out how long it usually takes
         while(1):
             status_resposne = self._check_entitlement_status(customer_id, entitlement_id)
             # If the response from 'check entitlement status' is not one of the valid statuses, then we know an error happened.  Return that error

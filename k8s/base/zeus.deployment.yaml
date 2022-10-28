@@ -100,37 +100,37 @@ spec:
           # TODO CMAPT-5272: remove the nes-on-flag variables
           - name: ANGELO_USE_NES
             valueFrom:
-              secretKeyRef:
+              configMapKeyRef:
                 name: nes-on-flag
                 key: angelo
           - name: DIABLO_USE_NES
             valueFrom:
-              secretKeyRef:
+              configMapKeyRef:
                 name: nes-on-flag
                 key: diablo
           - name: GOCENTRAL_USE_NES
             valueFrom:
-              secretKeyRef:
+              configMapKeyRef:
                 name: nes-on-flag
                 key: gocentral
           - name: MWPONE_USE_NES
             valueFrom:
-              secretKeyRef:
+              configMapKeyRef:
                 name: nes-on-flag
                 key: mwpone
           - name: VERTIGO_USE_NES
             valueFrom:
-              secretKeyRef:
+              configMapKeyRef:
                 name: nes-on-flag
                 key: vertigo
           - name: VPS4_USE_NES
             valueFrom:
-              secretKeyRef:
+              configMapKeyRef:
                 name: nes-on-flag
                 key: vps4
           - name: ALL_USE_NES
             valueFrom:
-              secretKeyRef:
+              configMapKeyRef:
                 name: nes-on-flag
                 key: all
           # TODO CMAPT-5272: remove CMAP_PROXY_CERT, CMAP_PROXY_KEY, GOCENTRAL_SSL_CERT and GOCENTRAL_SSL_KEY

@@ -28,8 +28,7 @@ class AppConfig(object):
 
     # Note: first var is the customer ID and the second is the entitlement ID
     ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.prod.godaddy.com/v2/customers/{}/entitlements/{}'
-    # Note: the first variable is the customerID and the second one is the suspend / reinstate command  (i.e. "suspendByEntitlementId")
-    NES_URL = 'https://subscriptions-shim-ext.cp.api.prod.godaddy.com/v2/customers/{}/{}'
+    SUBSCRIPTIONS_URL = 'https://subscriptions-shim-ext.cp.api.prod.godaddy.com/v2/{}'
 
     # TODO CMAPT-5272: remove all references to DIABLO_URL, GOCENTRAL_URL, MWPONE_URL, PLESK_URL, and VERT_URL variables
     DIABLO_URL = 'https://cpanelprovapi.prod.phx3.secureserver.net/v1/accounts/'
