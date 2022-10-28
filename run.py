@@ -17,7 +17,7 @@ from zeus.handlers.foreign_handler import ForeignHandler
 from zeus.handlers.fraud_handler import FraudHandler
 from zeus.handlers.hosted_handler import HostedHandler
 from zeus.handlers.registered_handler import RegisteredHandler
-from zeus.suspension.nes_helper import NESHelper;
+from zeus.suspension.nes_helper import NESHelper
 
 env = os.getenv('sysenv', 'dev')
 config = config_by_name[env]()
@@ -189,16 +189,18 @@ def suspend(ticket_id, investigator_id=None):
             shopper_id = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('shopperId', None)
             customer_id = data.get('data', {}).get('domainquery', {}).get('shopperInfo', {}).get('customerId', None)
             domain = data.get('sourceDomainOrIp', {})
-            appseclogger.info("suspending shopper", extra={"event": {"kind": "event",
-                                                                    "category": "process",
-                                                                    "type": ["change", "user"],
-                                                                    "outcome": "success",
-                                                                    "action": "suspend"},
-                                                        "user": {
-                                                            "domain": domain,
-                                                            "shopper_id": shopper_id,
-                                                            "customer_id": customer_id,
-                                                            "investigator_id": investigator_id}})
+            appseclogger.info("suspending shopper", extra={
+                "event": {
+                    "kind": "event",
+                    "category": "process",
+                    "type": ["change", "user"],
+                    "outcome": "success",
+                    "action": "suspend"},
+                "user": {
+                    "domain": domain,
+                    "shopper_id": shopper_id,
+                    "customer_id": customer_id,
+                    "investigator_id": investigator_id}})
         return result
     else:
         # health check failed, trigger a retry

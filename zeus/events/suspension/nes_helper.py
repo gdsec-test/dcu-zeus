@@ -17,7 +17,7 @@ class NESHelper():
         self._logger = logging.getLogger(__name__)
 
         # Note: the first variable is the customerID and the second one is the suspend / reinstate command  (i.e. "suspendByEntitlementId")
-        self._nes_url = settings.SUBSCRIPTIONS_URL.format(f'customers/{}/{}')
+        self._nes_url = settings.SUBSCRIPTIONS_URL.format('customers/{}/{}')
         self._health_check_url = settings.SUBSCRIPTIONS_URL.format('subscriptions-shim/healthcheck')
         self._entitlement_url = settings.ENTITLEMENT_URL
         self._sso_endpoint = settings.SSO_URL
@@ -31,7 +31,7 @@ class NESHelper():
     def suspend(self, entitlement_id, customer_id):
         response = self._do_suspend_reinstate(entitlement_id, customer_id, self.SUSPEND_CMD)
         # If the response is a string, then we know there was an error in performing a suspension
-        if isinstance(response, str)
+        if isinstance(response, str):
             return response
 
         # Otherwise, poll for the entitlement status to go to SUSPEND and return that response
@@ -40,9 +40,9 @@ class NESHelper():
     def reinstate(self, entitlement_id, customer_id):
         response = self._do_suspend_reinstate(entitlement_id, customer_id, self.REINSTATE_CMD)
         # If the response is a string, then we know there was an error in performing a reinstatement
-        if isinstance(response, str)
+        if isinstance(response, str):
             return response
-        
+
         # poll for the entitlement status to go to ACTIVE and return that response
         return self._poll_for_entitlement_status(entitlement_id, customer_id, 'ACTIVE')
 
@@ -64,7 +64,7 @@ class NESHelper():
 
             # process response and log errors and successes
             if response.status_code != 204:
-                error_msg = f'Failed to {url_cmd} for customerId: {customer_id} and entitlementId: {entitlement_id}.  Response was: Status code = {response.status_code};  Message ={response.text}
+                error_msg = f'Failed to {url_cmd} for customerId: {customer_id} and entitlementId: {entitlement_id}.  Response was: Status code = {response.status_code};  Message ={response.text}'
                 self._logger.error(error_msg)
                 return error_msg
             else:
