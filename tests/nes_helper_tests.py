@@ -24,11 +24,11 @@ class TestNESHelper:
 
     @patch('requests.post', side_effect=Timeout())
     def test_reinstate_fails(self, post):
-        assert_false(self._nes_helper.reinstate('test-accountid'))
+        assert_false(self._nes_helper.reinstate('test-accountid', 'test-customerid'))
 
     @patch('requests.post', return_value=MagicMock(text='true', status_code=204))
     def test_reinstate_success(self, post):
-        assert_true(self._nes_helper.reinstate('test-accountid'))
+        assert_true(self._nes_helper.reinstate('test-accountid', 'test-customerid'))
 
     # TODO LKM: also add tests for:
     #  - non-exception failure response in suspend / reinstate
