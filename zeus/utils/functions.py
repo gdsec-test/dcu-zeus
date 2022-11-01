@@ -11,21 +11,6 @@ def _get_domain_query(dict_to_search):
     return dict_to_search.get('data', {}).get('domainQuery', {})
 
 
-def get_shopper_id_from_dict(dict_to_search):
-    #  The shopperid field currently appears in two places.
-    #    1: data->domainQuery->host->shopperId
-    #    2: data->domainQuery->shopperInfo->shopperId
-    #  BUT SINCE THIS IS DMV, WE ONLY CARE ABOUT THE 2ND LOCATION
-    #  If there are an API reseller parent and child account, we want the child account
-    if isinstance(dict_to_search, dict):
-        parent_child_list = get_parent_child_shopper_ids_from_dict(dict_to_search)
-        if not parent_child_list:
-            return _get_domain_query(dict_to_search).get('shopperInfo', {}).get('shopperId')
-        else:
-            return parent_child_list[1]
-    return None
-
-
 def get_domain_id_from_dict(dict_to_search):
     #  The domainId field is located in...
     #    1: data->domainQuery->registrar->domainId
@@ -91,22 +76,12 @@ def get_host_brand_from_dict(dict_to_search):
         return _get_domain_query(dict_to_search).get('host', {}).get('brand')
     return None
 
-
 def get_host_customer_id_from_dict(dict_to_search):
     # The host customerId field currently appears in
     #   1: data->domainQuery->host->customerId
     if isinstance(dict_to_search, dict):
         return _get_domain_query(dict_to_search).get("host", {}).get('customerId', None)
     return None
-
-
-def get_host_shopper_id_from_dict(dict_to_search):
-    #  The host shopperId field currently appears in...
-    #    1: data->domainQuery->host->shopperId
-    if isinstance(dict_to_search, dict):
-        return _get_domain_query(dict_to_search).get('host', {}).get('shopperId')
-    return None
-
 
 def get_hosting_created_date_from_dict(dict_to_search):
     #  The hosting createdDate field currently appears in...
@@ -115,27 +90,12 @@ def get_hosting_created_date_from_dict(dict_to_search):
         return _get_domain_query(dict_to_search).get('host', {}).get('createdDate')
     return None
 
-
 def get_host_info_from_dict(dict_to_search):
     #  The hosting information currently appears in one place.
     #    1: data->domainQuery->host
     if isinstance(dict_to_search, dict):
         return _get_domain_query(dict_to_search).get('host', {})
     return {}
-
-
-def get_list_of_ids_to_notify(data):
-    # If the domain is associated with a parent/child API reseller
-    #  account, then email both the parent and child account
-    account_number_list = []
-    parent_child_list = get_parent_child_shopper_ids_from_dict(data)
-    if not parent_child_list:
-        shopper_id = get_shopper_id_from_dict(data)
-        if shopper_id:
-            account_number_list.append(shopper_id)
-    else:
-        account_number_list = parent_child_list
-    return account_number_list
 
 
 def get_ssl_subscriptions_from_dict(data):

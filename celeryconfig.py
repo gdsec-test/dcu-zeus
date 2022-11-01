@@ -21,6 +21,7 @@ class CeleryConfig:
     # Force kill a task if it takes longer than three minutes.
     task_time_limit = 180
     WORKER_ENABLE_REMOTE_CONTROL = True
+    result_expires = 3600
 
     def __init__(self, app_settings: AppConfig):
         self.broker_url = app_settings.BROKER_URL

@@ -18,6 +18,7 @@ from zeus.handlers.fraud_handler import FraudHandler
 from zeus.handlers.hosted_handler import HostedHandler
 from zeus.handlers.registered_handler import RegisteredHandler
 from zeus.suspension.nes_helper import NESHelper
+from zeus.utils.shopperapi import ShopperAPI
 
 env = os.getenv('sysenv', 'dev')
 config = config_by_name[env]()
@@ -84,6 +85,7 @@ foreign = ForeignHandler(config)
 utility_mailer = UtilityMailer(config)
 reporter_mailer = ReporterMailer(config)
 nes_helper = NESHelper(config)
+shopper_id = ShopperAPI(config)
 
 email_limit = 1000
 
@@ -186,7 +188,7 @@ def suspend(ticket_id, investigator_id=None):
         if result:
             appseclogger = get_logging(os.getenv("sysenv"), "zeus")
             # TODO LKM: figure out if this is supposed to look at host, not shopper info
-            shopper_id = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('shopperId', None)
+            shopper_id = ShopperAPI.get_shopper_id_from_dict(data)
             customer_id = data.get('data', {}).get('domainquery', {}).get('shopperInfo', {}).get('customerId', None)
             domain = data.get('sourceDomainOrIp', {})
             appseclogger.info("suspending shopper", extra={
@@ -286,7 +288,7 @@ def suspend_csam(ticket_id, investigator_id=None):
     result = route_request(data, ticket_id, 'suspend_csam', dual_suspension=True) if data else None
     if result:
         appseclogger = get_logging(os.getenv("sysenv"), "zeus")
-        shopper_id = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('shopperId')
+        shopper_id = ShopperAPI.get_shopper_id_from_dict(data)
         domain = data.get('sourceDomainOrIp', {})
         appseclogger.info("csam suspending shopper", extra={"event": {"kind": "event",
                                                                       "category": "process",

@@ -28,8 +28,8 @@ spec:
             exec:
               command:
                 - '/app/health.sh'
-            initialDelaySeconds: 10
-            periodSeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 10
           env:
           - name: MULTIPLE_BROKERS
             valueFrom:
@@ -139,10 +139,6 @@ spec:
             value: /proxycerts/tls.crt
           - name: CMAP_PROXY_KEY
             value: /proxycerts/tls.key
-          - name: OCM_SSL_CERT
-            value: /ocm_certs/tls.crt
-          - name: OCM_SSL_KEY
-            value: /ocm_certs/tls.key
           - name: ZEUS_CLIENT_CERT
             value: /zeus_client_certs/tls.crt
           - name: ZEUS_CLIENT_KEY
@@ -164,9 +160,6 @@ spec:
           volumeMounts:
           - name: tls-files-api
             mountPath: /apicerts
-            readOnly: true
-          - name: tls-ocm-files
-            mountPath: /ocm_certs
             readOnly: true
           - name: tls-zeus-client-cert-files
             mountPath: /zeus_client_certs
@@ -190,9 +183,6 @@ spec:
             timeoutSeconds: 5
 
       volumes:
-        - name: tls-ocm-files
-          secret:
-            secretName: tls-phishnet
         - name: tls-zeus-client-cert-files
           secret:
             secretName: tls-zeus-client-cert
