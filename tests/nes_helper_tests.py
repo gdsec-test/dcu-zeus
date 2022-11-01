@@ -79,7 +79,7 @@ class TestNESHelper:
         response = self._nes_helper.poll_for_entitlement_status('test-accountid', 'test-customerid', 'SUSPENDED')
         # Verify the response contains the word 'exception'
         assert_in('exception', response)
-    
+
     @patch('requests.get', return_value=MagicMock(status_code=200, text='{status: ACTIVE'))
     def test_entitlement_status_mismatch(self, post):
         response = self._nes_helper.poll_for_entitlement_status('test-accountid', 'test-customerid', 'SUSPENDED')
