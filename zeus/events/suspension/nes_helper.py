@@ -35,7 +35,7 @@ class NESHelper():
             return response
 
         # Otherwise, poll for the entitlement status to go to SUSPEND and return that response
-        return self._poll_for_entitlement_status(entitlement_id, customer_id, 'SUSPEND')
+        return self.poll_for_entitlement_status(entitlement_id, customer_id, 'SUSPEND')
 
     def reinstate(self, entitlement_id, customer_id):
         response = self._do_suspend_reinstate(entitlement_id, customer_id, self.REINSTATE_CMD)
@@ -44,12 +44,24 @@ class NESHelper():
             return response
 
         # poll for the entitlement status to go to ACTIVE and return that response
-        return self._poll_for_entitlement_status(entitlement_id, customer_id, 'ACTIVE')
+        return self.poll_for_entitlement_status(entitlement_id, customer_id, 'ACTIVE')
 
     def run_healthcheck(self):
         response = requests.post(self._health_check_url, headers=self._headers, verify=True)
         # TODO LKM: parse response!
         return True
+
+    def poll_for_entitlement_status(self, entitlement_id, customer_id, status):
+        # TODO LKM: add some sort of timeout!!!  Need to first figure out how long it usually takes
+        while(1):
+            status_resposne = self._check_entitlement_status(customer_id, entitlement_id)
+            # If the response from 'check entitlement status' is not one of the valid statuses, then we know an error happened.  Return that error
+            if status_resposne not in self.VALID_ENTITLEMENT_STATUSES:
+                return status_resposne
+            # If the resposne is the status we are looking for, return true
+            if status_resposne == status:
+                self._logger.info(f'Entitlement {entitlement_id} succesfully changed to status {status_resposne}')
+                return True
 
     def _do_suspend_reinstate(self, entitlement_id, customer_id, url_cmd):
         try:
@@ -75,18 +87,6 @@ class NESHelper():
             error_msg = f'Failed to {url_cmd} customerId: {customer_id} with entitlementId: {entitlement_id} with exception: {e}'
             self._logger.error(error_msg)
             return error_msg
-
-    def _poll_for_entitlement_status(self, entitlement_id, customer_id, status):
-        # TODO LKM: add some sort of timeout!!!  Need to first figure out how long it usually takes
-        while(1):
-            status_resposne = self._check_entitlement_status(customer_id, entitlement_id)
-            # If the response from 'check entitlement status' is not one of the valid statuses, then we know an error happened.  Return that error
-            if status_resposne not in self.VALID_ENTITLEMENT_STATUSES:
-                return status_resposne
-            # If the resposne is the status we are looking for, return true
-            if status_resposne == status:
-                self._logger.info(f'Entitlement {entitlement_id} succesfully changed to status {status_resposne}')
-                return True
 
     def _check_entitlement_status(self, entitlement_id, customer_id):
         try:

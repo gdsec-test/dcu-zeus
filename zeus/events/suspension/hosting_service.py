@@ -61,7 +61,7 @@ class HostingService(Product):
 
         # Use the correct API
         # TODO CMAPT-5272: remove the if statement and other return statement and just use NES
-        if self.PRODUCTS_USE_NES_FLAG.get(product) or self.ALL_USE_NES_FLAG:
+        if self.PRODUCTS_USE_NES_FLAG.get(product) == 'True' or self.ALL_USE_NES_FLAG == 'True':
             customer_id = get_host_customer_id_from_dict(data)
             return self.nes_helper.suspend(identifier, customer_id)
 

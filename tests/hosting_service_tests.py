@@ -1,5 +1,7 @@
-from mock import patch
-from nose.tools import assert_equal
+import os
+from mock import patch, MagicMock
+import mock
+from nose.tools import assert_equal, assert_true
 
 from settings import UnitTestConfig
 from zeus.events.suspension.hosting_service import HostingService
@@ -7,8 +9,6 @@ from zeus.events.suspension.vps4 import VPS4
 
 
 class TestHostingService:
-    # TODO LKM: add tests for verifiying the NES flags call the expected function
-
     @classmethod
     @patch.object(VPS4, '_get_jwt', return_value='fake-jwt')
     def setup(cls, mock_vps):
@@ -49,3 +49,26 @@ class TestHostingService:
 
         actual = self._hosting_service.delete_content('diablo', None)
         assert_equal(actual, 'Unsupported Operation: delete_content')
+
+    # TODO CMAPT-5272: remove these tests
+    @mock.patch.dict(os.environ, {"DIABLO_USE_NES": "True", "ALL_USE_NES": "False"})
+    @patch('requests.post', return_value=MagicMock(text='true', status_code=204))
+    @patch('zeus.events.suspension.nes_helper.NESHelper.poll_for_entitlement_status', return_value=True)
+    @patch('zeus.events.suspension.nes_helper.NESHelper.suspend')
+    def test_use_nes_product_true(self, post, poll_for_entitlement_status, suspend):
+        self._hosting_service.suspend("diablo", "test-entitlementID", "test_data")
+        assert_true(suspend.called)
+
+    @mock.patch.dict(os.environ, {"DIABLO_USE_NES": "False", "ALL_USE_NES": "True"})
+    @patch('requests.post', return_value=MagicMock(text='true', status_code=204))
+    @patch('zeus.events.suspension.nes_helper.NESHelper.poll_for_entitlement_status', return_value=True)
+    @patch('zeus.events.suspension.nes_helper.NESHelper.suspend')
+    def test_use_nes_all_true(self, post, poll_for_entitlement_status, suspend):
+        self._hosting_service.suspend("diablo", "test-entitlementID", "test_data")
+        assert_true(suspend.called)
+
+    @mock.patch.dict(os.environ, {"DIABLO_USE_NES": "False", "ALL_USE_NES": "False"})
+    @patch('zeus.events.suspension.diablo.Diablo.suspend', return_value=True)
+    def test_use_nes_product_false(self, suspend):
+        self._hosting_service.suspend("diablo", "test-entitlementID", "test_data")
+        assert_true(suspend.called)
