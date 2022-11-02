@@ -13,12 +13,14 @@ from celeryconfig import CeleryConfig
 from settings import config_by_name
 from zeus.events.email.reporter_mailer import ReporterMailer
 from zeus.events.email.utility_mailer import UtilityMailer
+from zeus.events.suspension.nes_helper import ThrottledNESHelper
 from zeus.handlers.foreign_handler import ForeignHandler
 from zeus.handlers.fraud_handler import FraudHandler
 from zeus.handlers.hosted_handler import HostedHandler
 from zeus.handlers.registered_handler import RegisteredHandler
-from zeus.suspension.nes_helper import NESHelper
+from zeus.suspension.nes_helper import (NESHelper, ThrottledNESHelper)
 from zeus.utils.shopperapi import ShopperAPI
+from zeus.utils.functions import get_host_info_from_dict
 
 env = os.getenv('sysenv', 'dev')
 config = config_by_name[env]()
@@ -85,6 +87,7 @@ foreign = ForeignHandler(config)
 utility_mailer = UtilityMailer(config)
 reporter_mailer = ReporterMailer(config)
 nes_helper = NESHelper(config)
+nes_throttle = ThrottledNESHelper(config)
 shopper_id = ShopperAPI(config)
 
 email_limit = 1000
@@ -180,33 +183,35 @@ def intentionally_malicious(ticket_id, investigator_id):
 
 
 # TODO LKM: figure out the delay and max retries.
-@celery.task(default_retry_delay=300, max_retries=10)
+@celery.task(default_retry_delay=300, acks_late=True)
 def suspend(ticket_id, investigator_id=None):
-    if nes_helper.run_healthcheck():
-        data = get_database_handle().get_incident(ticket_id)
-        result = route_request(data, ticket_id, 'suspend') if data else None
-        if result:
-            appseclogger = get_logging(os.getenv("sysenv"), "zeus")
-            # TODO LKM: figure out if this is supposed to look at host, not shopper info
-            shopper_id = ShopperAPI.get_shopper_id_from_dict(data)
-            customer_id = data.get('data', {}).get('domainquery', {}).get('shopperInfo', {}).get('customerId', None)
-            domain = data.get('sourceDomainOrIp', {})
-            appseclogger.info("suspending shopper", extra={
-                "event": {
-                    "kind": "event",
-                    "category": "process",
-                    "type": ["change", "user"],
-                    "outcome": "success",
-                    "action": "suspend"},
-                "user": {
-                    "domain": domain,
-                    "shopper_id": shopper_id,
-                    "customer_id": customer_id,
-                    "investigator_id": investigator_id}})
-        return result
-    else:
-        # health check failed, trigger a retry
-        suspend.retry()
+    # If we are using NES, check the nes status before trying the suspension
+    # TODO LKM : figure out if we want to retry on other status's or only 500s
+    if nes_throttle.get_use_nes(data):
+        if not nes_throttle.get_nes_state():
+            suspend.retry()
+
+    data = get_database_handle().get_incident(ticket_id)
+    result = route_request(data, ticket_id, 'suspend') if data else None
+    if result:
+        appseclogger = get_logging(os.getenv("sysenv"), "zeus")
+        # TODO LKM: figure out if this is supposed to look at host, not shopper info
+        shopper_id = ShopperAPI.get_shopper_id_from_dict(data)
+        customer_id = data.get('data', {}).get('domainquery', {}).get('shopperInfo', {}).get('customerId', None)
+        domain = data.get('sourceDomainOrIp', {})
+        appseclogger.info("suspending shopper", extra={
+            "event": {
+                "kind": "event",
+                "category": "process",
+                "type": ["change", "user"],
+                "outcome": "success",
+                "action": "suspend"},
+            "user": {
+                "domain": domain,
+                "shopper_id": shopper_id,
+                "customer_id": customer_id,
+                "investigator_id": investigator_id}})
+    return result
 
 
 @celery.task()

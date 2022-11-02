@@ -26,9 +26,8 @@ class AppConfig(object):
     #  aren't being received by dcueng@, contact bxberry@ with questions.
     NON_PROD_EMAIL_ADDRESS = os.getenv('EMAIL_RECIPIENT', 'dcuinternal@godaddy.com')
 
-    # Note: first var is the customer ID and the second is the entitlement ID
-    ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.prod.godaddy.com/v2/customers/{}/entitlements/{}'
-    SUBSCRIPTIONS_URL = 'https://subscriptions-shim-ext.cp.api.prod.godaddy.com/v2/{}'
+    ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.prod.godaddy.com/{}'
+    SUBSCRIPTIONS_URL = 'https://subscriptions-shim-ext.cp.api.prod.godaddy.com/{}'
 
     # TODO CMAPT-5272: remove all references to DIABLO_URL, GOCENTRAL_URL, MWPONE_URL, PLESK_URL, and VERT_URL variables
     DIABLO_URL = 'https://cpanelprovapi.prod.phx3.secureserver.net/v1/accounts/'
@@ -143,8 +142,8 @@ class OTEAppConfig(AppConfig):
 
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-ote.svc.cluster.local:8080'
 
-    ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.ote.godaddy.com/v2/customers/{}/entitlements/{}'
-    NES_URL = 'https://subscriptions-shim-ext.cp.api.ote.godaddy.com/v2/customers/{}/{}'
+    ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.ote.godaddy.com/{}'
+    NES_URL = 'https://subscriptions-shim-ext.cp.api.ote.godaddy.com/{}'
 
     SSO_URL = 'https://sso.ote-gdcorp.tools'
     MIMIR_URL = 'https://mimir.cset.int.ote-gdcorp.tools'
@@ -175,8 +174,8 @@ class DevelopmentAppConfig(AppConfig):
     MWPONE_URL = 'http://localhost:8080/mwpone/v1/accounts/'
     DIABLO_URL = 'http://localhost:8080/diablo/v1/accounts/'
 
-    ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.dp.godaddy.com/v2/customers/{}/entitlements/{}'
-    NES_URL = 'https://subscriptions-shim-ext.cp.api.dp.godaddy.com/v2/customers/{}/{}'
+    ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.dp.godaddy.com/{}'
+    NES_URL = 'https://subscriptions-shim-ext.cp.api.dp.godaddy.com/{}'
 
     SSO_URL = 'https://sso.dev-gdcorp.tools'
     MIMIR_URL = 'https://mimir.cset.int.dev-gdcorp.tools'
@@ -213,8 +212,8 @@ class TestAppConfig(AppConfig):
     VERT_URL = ''
     CUSTOMER_URL = 'https://shopper.api.int.test-godaddy.com/v1/customers/{}/shopper'
 
-    ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.test.godaddy.com/v2/customers/{}/entitlements/{}'
-    NES_URL = 'https://subscriptions-shim-ext.cp.api.test.godaddy.com/v2/customers/{}/{}'
+    ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.test.godaddy.com/{}'
+    NES_URL = 'https://subscriptions-shim-ext.cp.api.test.godaddy.com/{}'
 
     SSO_URL = 'https://sso.test-gdcorp.tools'
     MIMIR_URL = 'https://mimir.cset.int.test-gdcorp.tools'

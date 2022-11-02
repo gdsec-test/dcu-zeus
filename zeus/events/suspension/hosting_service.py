@@ -1,4 +1,5 @@
 import os
+from zeus.events.suspension import nes_helper
 
 from zeus.events.suspension.angelo import Angelo
 from zeus.events.suspension.diablo import Diablo
@@ -10,7 +11,6 @@ from zeus.events.suspension.vps4 import VPS4
 from zeus.persist.notification_timeouts import Throttle
 from zeus.events.suspension.nes_helper import NESHelper
 from zeus.utils.functions import get_host_customer_id_from_dict
-
 
 class ThrottledHostingService:
     def __init__(self, app_settings):
@@ -34,17 +34,6 @@ class HostingService(Product):
     UNSUPPORTED_PRODUCT = "Unsupported Product: {}"
     UNSUPPORTED_OPERATION = "Unsupported Operation: {}"
 
-    # TODO CMAPT-5272: remove the NES selection flags
-    PRODUCTS_USE_NES_FLAG = {
-        'diablo': os.getenv("DIABLO_USE_NES", False),
-        'vertigo': os.getenv("VERTIGO_USE_NES", False),
-        'mwp 1.0': os.getenv("MWPONE_USE_NES", False),
-        'plesk': os.getenv("ANGELO_USE_NES", False),
-        'vps4': os.getenv("VPS4_USE_NES", False),
-        'gocentral': os.getenv("GOCENTRAL_USE_NES", False)
-    }
-    ALL_USE_NES_FLAG = os.getenv("ALL_USE_NES")
-
     def __init__(self, app_settings):
         self._products = {'diablo': Diablo(app_settings),
                           'vertigo': Vertigo(app_settings),
@@ -61,7 +50,7 @@ class HostingService(Product):
 
         # Use the correct API
         # TODO CMAPT-5272: remove the if statement and other return statement and just use NES
-        if self.PRODUCTS_USE_NES_FLAG.get(product) == 'True' or self.ALL_USE_NES_FLAG == 'True':
+        if self.PRODUCTS_USE_NES_FLAG.get(product, 'False') == 'True' or self.ALL_USE_NES_FLAG == 'True':
             customer_id = get_host_customer_id_from_dict(data)
             return self.nes_helper.suspend(identifier, customer_id)
 
@@ -74,7 +63,7 @@ class HostingService(Product):
 
         # Use the correct API
         # TODO CMAPT-5272: remove the if statement and other return statement and just use NES
-        if self.PRODUCTS_USE_NES_FLAG.get(product) or self.ALL_USE_NES_FLAG:
+        if self.nes_helper.get_use_nes():
             customer_id = get_host_customer_id_from_dict(data)
             return self.nes_helper.reinstate(identifier, customer_id)
 
