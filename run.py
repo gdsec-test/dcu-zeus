@@ -13,14 +13,12 @@ from celeryconfig import CeleryConfig
 from settings import config_by_name
 from zeus.events.email.reporter_mailer import ReporterMailer
 from zeus.events.email.utility_mailer import UtilityMailer
-from zeus.events.suspension.nes_helper import ThrottledNESHelper
 from zeus.handlers.foreign_handler import ForeignHandler
 from zeus.handlers.fraud_handler import FraudHandler
 from zeus.handlers.hosted_handler import HostedHandler
 from zeus.handlers.registered_handler import RegisteredHandler
 from zeus.suspension.nes_helper import (NESHelper, ThrottledNESHelper)
 from zeus.utils.shopperapi import ShopperAPI
-from zeus.utils.functions import get_host_info_from_dict
 
 env = os.getenv('sysenv', 'dev')
 config = config_by_name[env]()
@@ -185,13 +183,14 @@ def intentionally_malicious(ticket_id, investigator_id):
 # TODO LKM: figure out the delay and max retries.
 @celery.task(default_retry_delay=300, acks_late=True)
 def suspend(ticket_id, investigator_id=None):
+    data = get_database_handle().get_incident(ticket_id)
+
     # If we are using NES, check the nes status before trying the suspension
     # TODO LKM : figure out if we want to retry on other status's or only 500s
     if nes_throttle.get_use_nes(data):
         if not nes_throttle.get_nes_state():
             suspend.retry()
 
-    data = get_database_handle().get_incident(ticket_id)
     result = route_request(data, ticket_id, 'suspend') if data else None
     if result:
         appseclogger = get_logging(os.getenv("sysenv"), "zeus")

@@ -76,6 +76,7 @@ def get_host_brand_from_dict(dict_to_search):
         return _get_domain_query(dict_to_search).get('host', {}).get('brand')
     return None
 
+
 def get_host_customer_id_from_dict(dict_to_search):
     # The host customerId field currently appears in
     #   1: data->domainQuery->host->customerId
@@ -83,12 +84,14 @@ def get_host_customer_id_from_dict(dict_to_search):
         return _get_domain_query(dict_to_search).get("host", {}).get('customerId', None)
     return None
 
+
 def get_hosting_created_date_from_dict(dict_to_search):
     #  The hosting createdDate field currently appears in...
     #    1: data->domainQuery->host->createdDate
     if isinstance(dict_to_search, dict):
         return _get_domain_query(dict_to_search).get('host', {}).get('createdDate')
     return None
+
 
 def get_host_info_from_dict(dict_to_search):
     #  The hosting information currently appears in one place.

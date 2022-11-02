@@ -1,6 +1,3 @@
-import os
-from zeus.events.suspension import nes_helper
-
 from zeus.events.suspension.angelo import Angelo
 from zeus.events.suspension.diablo import Diablo
 from zeus.events.suspension.gocentral import GoCentral
@@ -11,6 +8,7 @@ from zeus.events.suspension.vps4 import VPS4
 from zeus.persist.notification_timeouts import Throttle
 from zeus.events.suspension.nes_helper import NESHelper
 from zeus.utils.functions import get_host_customer_id_from_dict
+
 
 class ThrottledHostingService:
     def __init__(self, app_settings):

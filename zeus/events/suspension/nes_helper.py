@@ -8,6 +8,7 @@ from redis import Redis
 from datetime import timedelta
 from zeus.utils.functions import get_host_info_from_dict
 
+
 class ThrottledNESHelper():
     def __init__(self, app_settings):
         self._decorated = NESHelper(app_settings)
@@ -17,6 +18,7 @@ class ThrottledNESHelper():
 
     def get_use_nes(self, data):
         return self._decorated.get_use_nes(data)
+
 
 class NESHelper():
     _headers = {'Content-Type': 'application/json'}
@@ -44,14 +46,13 @@ class NESHelper():
     }
     ALL_USE_NES_FLAG = os.getenv("ALL_USE_NES")
 
-
     def __init__(self, settings: AppConfig):
         self._logger = logging.getLogger(__name__)
 
         # Note: the first variable is the customerID and the second one is the suspend / reinstate command  (i.e. "suspendByEntitlementId")
         self._nes_url = settings.SUBSCRIPTIONS_URL.format('v2/customers/{}/{}')
-         # Note: first var is the customer ID and the second is the entitlement ID
-        self._entitlement_url = settings.ENTITLEMENT_URL.formt('v2/customers/{}/entitlements/{}')
+        # Note: first var is the customer ID and the second is the entitlement ID
+        self._entitlement_url = settings.ENTITLEMENT_URL.format('v2/customers/{}/entitlements/{}')
         self._sso_endpoint = settings.SSO_URL
 
         # TODO LKM: make sure these endpoints have the zeus cert whitelisted - this was requested in
@@ -72,9 +73,9 @@ class NESHelper():
         return False
 
     def reinstate(self, entitlement_id, customer_id):
-        # If reinstatement succeeded, poll for entitlement status 
+        # If reinstatement succeeded, poll for entitlement status
         if(self._do_suspend_reinstate(entitlement_id, customer_id, self.REINSTATE_CMD)):
-            return self.poll_for_entitlement_status(entitlement_id, customer_id, 'ACTIVE')
+            return self.wait_for_entitlement_status(entitlement_id, customer_id, 'ACTIVE')
         return False
 
     def get_nes_state(self):
