@@ -13,11 +13,11 @@ from celeryconfig import CeleryConfig
 from settings import config_by_name
 from zeus.events.email.reporter_mailer import ReporterMailer
 from zeus.events.email.utility_mailer import UtilityMailer
+from zeus.events.suspension.nes_helper import NESHelper, ThrottledNESHelper
 from zeus.handlers.foreign_handler import ForeignHandler
 from zeus.handlers.fraud_handler import FraudHandler
 from zeus.handlers.hosted_handler import HostedHandler
 from zeus.handlers.registered_handler import RegisteredHandler
-from zeus.suspension.nes_helper import NESHelper, ThrottledNESHelper
 from zeus.utils.functions import get_host_customer_id_from_dict
 from zeus.utils.shopperapi import ShopperAPI
 

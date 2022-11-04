@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 import time
@@ -7,7 +6,7 @@ from datetime import datetime, timedelta
 import requests
 from redis import Redis
 
-from settings import AppConfig, UnitTestConfig
+from settings import AppConfig
 from zeus.utils.functions import get_host_info_from_dict
 
 
@@ -44,9 +43,9 @@ class NESHelper():
         self._nes_url = settings.SUBSCRIPTIONS_URL.format('v2/customers/{}/{}')
         # The first var is the customer ID and the second is the entitlement ID
         self._entitlement_url = settings.ENTITLEMENT_URL.format('v2/customers/{}/entitlements/{}')
-        self._sso_endpoint = settings.SSO_URL
-
+        self._sso_endpoint = settings.SSO_URL + '/v1/secure/api/token'
         self._cert = (settings.ZEUS_CLIENT_CERT, settings.ZEUS_CLIENT_KEY)
+
         self._headers.update({'Authorization': f'sso-jwt {self._get_jwt(self._cert)}'})
 
         # NOTE: if you switch this to StrictRedis, you MUST also update the call to 'setex' below.
@@ -57,7 +56,7 @@ class NESHelper():
     def suspend(self, entitlement_id, customer_id) -> bool:
         # If suspension succeeded, poll for entitlement status
         if(self._do_suspend_reinstate(entitlement_id, customer_id, self.SUSPEND_CMD)):
-            return self.wait_for_entitlement_status(entitlement_id, customer_id, 'SUSPEND')
+            return self.wait_for_entitlement_status(entitlement_id, customer_id, 'SUSPENDED')
         return False
 
     def reinstate(self, entitlement_id, customer_id) -> bool:
@@ -103,13 +102,13 @@ class NESHelper():
         current_time = datetime.now()
         time_diff = current_time - start_time
         while time_diff.total_seconds() < 600:
-            status_resposne = self._check_entitlement_status(customer_id, entitlement_id)
+            status_response = self._check_entitlement_status(entitlement_id, customer_id)
             # If the response from 'check entitlement status' is not one of the valid statuses, then we know an error happened.  Return False
-            if status_resposne not in self.VALID_ENTITLEMENT_STATUSES:
+            if status_response not in self.VALID_ENTITLEMENT_STATUSES:
                 return False
             # If the resposne is the status we are looking for, return true
-            if status_resposne == status:
-                self._logger.info(f'Entitlement {entitlement_id} succesfully changed to status {status_resposne}')
+            if status_response == status:
+                self._logger.info(f'Entitlement {entitlement_id} succesfully changed to status {status_response}')
                 self._logger.info(f'Entitlement status wait took {time_diff} seconds')
                 return True
             time.sleep(1)
@@ -163,7 +162,7 @@ class NESHelper():
 
             # 200 response is a success, 401 and 403 are auth issues, so most likely our fault.
             # SO, if we got any of those status codes, set NES to good
-            if response.status_code in [204, 401, 403]:
+            if response.status_code in [200, 401, 403]:
                 self.set_nes_state(self.REDIS_NES_STATE_GOOD)
             else:
                 # All otherstatus codes are due to NES having problems
@@ -171,7 +170,7 @@ class NESHelper():
 
             # If the response is 200, parse the response for the desired status
             if response.status_code == 200:
-                json_response = json.loads(response.text)
+                json_response = response.json()
                 entitlement_status = json_response.get('status')
                 self._logger.info(self.MESSAGE.format('entitlement data', entitlement_id, customer_id, 'Success!', f'status = {entitlement_status}'))
                 return entitlement_status
@@ -195,17 +194,7 @@ class NESHelper():
             response = requests.post(self._sso_endpoint, data={'realm': 'cert'}, cert=cert)
             response.raise_for_status()
 
-            body = json.loads(response.text)
+            body = response.json()
             return body.get('data')  # {'type': 'signed-jwt', 'id': 'XXX', 'code': 1, 'message': 'Success', 'data': JWT}
         except Exception as e:
             self._logger.exception(e)
-
-
-def Main():
-    nesHelper = NESHelper(UnitTestConfig)
-    test = nesHelper.suspend('a8916f93-ba2c-4e41-8efd-85d1dcf195d0', 'ff7c5d34-0147-11ed-8193-0050569a00bd')
-    return test
-
-
-if __name__ == "__main__":
-    Main()

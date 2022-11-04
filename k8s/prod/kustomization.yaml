@@ -9,10 +9,10 @@ images:
 - name: docker-dcu-local.artifactory.secureserver.net/zeus
   newTag: prod
 
+# TODO CMAPT-5272: remove GOCENTRAL_URL
 configMapGenerator:
 - literals:
   - sysenv=prod
-  # TODO CMAPT-5272: remove GOCENTRAL_URL
   - GOCENTRAL_URL=https://services.orion.prod.secureserver.net/account/accountoperations.asmx
   - ELASTIC_APM_ENVIRONMENT=prod
   name: env-specific-values

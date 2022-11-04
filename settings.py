@@ -275,9 +275,5 @@ class UnitTestConfig(AppConfig):
                              ('SIN2', ''),
                              ('AMS3', '')])
 
-    # TODO LKM: REMOVE THIS
-    ZEUS_CLIENT_CERT = '/Users/lmusel/certs/zeus.client.cset.int.test-gdcorp.tools.crt'
-    ZEUS_CLIENT_KEY = '/Users/lmusel/certs/zeus.client.cset.int.test-gdcorp.tools.key'
-
 
 config_by_name = {'dev': DevelopmentAppConfig, 'prod': ProductionAppConfig, 'ote': OTEAppConfig, 'unit-test': UnitTestConfig, 'test': TestAppConfig}
