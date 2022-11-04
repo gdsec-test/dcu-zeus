@@ -17,7 +17,8 @@ from zeus.handlers.foreign_handler import ForeignHandler
 from zeus.handlers.fraud_handler import FraudHandler
 from zeus.handlers.hosted_handler import HostedHandler
 from zeus.handlers.registered_handler import RegisteredHandler
-from zeus.suspension.nes_helper import (NESHelper, ThrottledNESHelper)
+from zeus.suspension.nes_helper import NESHelper, ThrottledNESHelper
+from zeus.utils.functions import get_host_customer_id_from_dict
 from zeus.utils.shopperapi import ShopperAPI
 
 env = os.getenv('sysenv', 'dev')
@@ -119,6 +120,11 @@ def route_request(data, ticket_id, request_type, dual_suspension=False):
     return result
 
 
+def get_is_hosted(data):
+    hosted_status = data.get('hosted_status') or data.get('hostedStatus')
+    return hosted_status == 'HOSTED'
+
+
 def get_database_handle():
     return PhishstoryMongo(config)
 
@@ -172,21 +178,27 @@ def customer_warning(ticket_id):
     return route_request(data, ticket_id, 'customer_warning') if data else None
 
 
-@celery.task()
+@celery.task(default_retry_delay=300, acks_late=True)
 def intentionally_malicious(ticket_id, investigator_id):
     data = get_database_handle().get_incident(ticket_id)
+
+    # TODO CMAPT-5272: call "get_is_hosted" instead of get_use_nes
+    # If we are using NES, check the nes status before trying the suspension
+    if nes_throttle.get_use_nes(data):
+        if not nes_throttle.get_nes_state():
+            intentionally_malicious.retry()
+
     # Add investigator user id to data so its available in _notify_fraud and ssl subscription check
     data['investigator_user_id'] = investigator_id
     return route_request(data, ticket_id, 'intentionally_malicious', dual_suspension=True) if data else None
 
 
-# TODO LKM: figure out the delay and max retries.
 @celery.task(default_retry_delay=300, acks_late=True)
 def suspend(ticket_id, investigator_id=None):
     data = get_database_handle().get_incident(ticket_id)
 
+    # TODO CMAPT-5272: call "get_is_hosted" instead of get_use_nes
     # If we are using NES, check the nes status before trying the suspension
-    # TODO LKM : figure out if we want to retry on other status's or only 500s
     if nes_throttle.get_use_nes(data):
         if not nes_throttle.get_nes_state():
             suspend.retry()
@@ -194,9 +206,15 @@ def suspend(ticket_id, investigator_id=None):
     result = route_request(data, ticket_id, 'suspend') if data else None
     if result:
         appseclogger = get_logging(os.getenv("sysenv"), "zeus")
-        # TODO LKM: figure out if this is supposed to look at host, not shopper info
-        shopper_id = ShopperAPI.get_shopper_id_from_dict(data)
-        customer_id = data.get('data', {}).get('domainquery', {}).get('shopperInfo', {}).get('customerId', None)
+
+        # Get the correct shopperID and customerID based on if it is HOSTED or not
+        if get_is_hosted(data):
+            shopper_id = ShopperAPI.get_host_shopper_id_from_dict(data)
+            customer_id = get_host_customer_id_from_dict(data)
+        else:
+            shopper_id = ShopperAPI.get_shopper_id_from_dict(data)
+            customer_id = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('customerId', None)
+
         domain = data.get('sourceDomainOrIp', {})
         appseclogger.info("suspending shopper", extra={
             "event": {
@@ -219,21 +237,42 @@ def content_removed(ticket_id):
     return route_request(data, ticket_id, 'content_removed') if data else None
 
 
-@celery.task()
+@celery.task(default_retry_delay=300, acks_late=True)
 def repeat_offender(ticket_id):
     data = get_database_handle().get_incident(ticket_id)
+
+    # TODO CMAPT-5272: call "get_is_hosted" instead of get_use_nes
+    # If we are using NES, check the nes status before trying the suspension
+    if nes_throttle.get_use_nes(data):
+        if not nes_throttle.get_nes_state():
+            repeat_offender.retry()
+
     return route_request(data, ticket_id, 'repeat_offender') if data else None
 
 
-@celery.task()
+@celery.task(default_retry_delay=300, acks_late=True)
 def extensive_compromise(ticket_id):
     data = get_database_handle().get_incident(ticket_id)
+
+    # TODO CMAPT-5272: call "get_is_hosted" instead of get_use_nes
+    # If we are using NES, check the nes status before trying the suspension
+    if nes_throttle.get_use_nes(data):
+        if not nes_throttle.get_nes_state():
+            extensive_compromise.retry()
+
     return route_request(data, ticket_id, 'extensive_compromise') if data else None
 
 
-@celery.task()
+@celery.task(default_retry_delay=300, acks_late=True)
 def shopper_compromise(ticket_id, investigator_id):
     data = get_database_handle().get_incident(ticket_id)
+
+    # TODO CMAPT-5272: call "get_is_hosted" instead of get_use_nes
+    # If we are using NES, check the nes status before trying the suspension
+    if nes_throttle.get_use_nes(data):
+        if not nes_throttle.get_nes_state():
+            shopper_compromise.retry()
+
     # Add investigator user id to data so its available in _notify_fraud()
     data['investigator_user_id'] = investigator_id
     return route_request(data, ticket_id, 'shopper_compromise') if data else None
@@ -286,9 +325,16 @@ def submitted_to_ncmec(ticket_id):
     return route_request(data, ticket_id, 'ncmec_submitted') if data else None
 
 
-@celery.task()
+@celery.task(default_retry_delay=300, acks_late=True)
 def suspend_csam(ticket_id, investigator_id=None):
     data = get_kelvin_database_handle().get_incident(ticket_id)
+
+    # TODO CMAPT-5272: call "get_is_hosted" instead of get_use_nes
+    # If we are using NES, check the nes status before trying the suspension
+    if nes_throttle.get_use_nes(data):
+        if not nes_throttle.get_nes_state():
+            suspend_csam.retry()
+
     result = route_request(data, ticket_id, 'suspend_csam', dual_suspension=True) if data else None
     if result:
         appseclogger = get_logging(os.getenv("sysenv"), "zeus")

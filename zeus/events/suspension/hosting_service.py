@@ -3,10 +3,10 @@ from zeus.events.suspension.diablo import Diablo
 from zeus.events.suspension.gocentral import GoCentral
 from zeus.events.suspension.interface import Product
 from zeus.events.suspension.mwp_one import MWPOne
+from zeus.events.suspension.nes_helper import NESHelper
 from zeus.events.suspension.vertigo import Vertigo
 from zeus.events.suspension.vps4 import VPS4
 from zeus.persist.notification_timeouts import Throttle
-from zeus.events.suspension.nes_helper import NESHelper
 from zeus.utils.functions import get_host_customer_id_from_dict
 
 
@@ -48,7 +48,7 @@ class HostingService(Product):
 
         # Use the correct API
         # TODO CMAPT-5272: remove the if statement and other return statement and just use NES
-        if self.PRODUCTS_USE_NES_FLAG.get(product, 'False') == 'True' or self.ALL_USE_NES_FLAG == 'True':
+        if self.nes_helper.get_use_nes():
             customer_id = get_host_customer_id_from_dict(data)
             return self.nes_helper.suspend(identifier, customer_id)
 

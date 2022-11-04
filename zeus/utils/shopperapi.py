@@ -58,7 +58,7 @@ class ShopperAPI:
                 return parent_child_list[1]
         return None
 
-    def get_host_shopper_id_from_dict(self, data):
+    def get_host_shopper_id_from_dict(self, data) -> str:
         #  The host customerId / shopperId field currently appear in...
         #    1: data->domainQuery->host->[shopperId or customerId]
         customer_id = data.get('data', {}).get('domainQuery', {}).get('host', {}).get('customerId', None)
