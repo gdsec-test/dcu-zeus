@@ -19,7 +19,6 @@ class NESHelper():
     REINSTATE_CMD = 'reinstateByEntitlementId'
 
     VALID_ENTITLEMENT_STATUSES = ['ACTIVE', 'SUSPENDED', 'PEND_CANCEL', 'CANCELLED']
-    MESSAGE = 'Requested {} on entitlement ID: {}, customer ID: {}.  Status = {}.  Message = {}'
 
     REDIS_EXPIRATION = timedelta(minutes=10)
     REDIS_NES_STATE_KEY = 'nes-state'
@@ -100,7 +99,7 @@ class NESHelper():
                 return False
             # If the resposne is the status we are looking for, return true
             if status_response == status:
-                self._logger.info(f'Entitlement {entitlement_id} succesfully changed to status {status_response}')
+                self._log_info('Entitlement status successfully updated', entitlement_id, customer_id)
                 self._logger.info(f'Entitlement status wait took {time_diff} seconds')
                 return True
             time.sleep(1)
@@ -114,7 +113,7 @@ class NESHelper():
             status = self._check_entitlement_status(entitlement_id, customer_id)
             expected_status = 'SUSPENDED' if url_cmd == self.SUSPEND_CMD else 'ACTIVE'
             if status == expected_status:
-                self._logger.info('Account already in correct state.')
+                self._log_info(f'Account already has correct status of {status}', entitlement_id, customer_id)
                 return True
 
             url = f'{self._nes_url}v2/customers/{customer_id}/{url_cmd}'
@@ -136,16 +135,14 @@ class NESHelper():
 
             # process response and log errors and successes
             if response.status_code != 204:
-                error_msg = self.MESSAGE.format(url_cmd, entitlement_id, customer_id, f'POST request returned error {response.status_code}', response.text)
-                self._logger.error(error_msg)
+                self._log_error(f'Failed to perform {url_cmd}', entitlement_id, customer_id, response.status_code, response.text)
                 return False
             else:
-                self._logger.info(self.MESSAGE.format(url_cmd, entitlement_id, customer_id, 'Success!', 'N/A'))
+                self._log_info(f'Successfully performed {url_cmd}', entitlement_id, customer_id)
                 return True
 
         except Exception as e:
-            error_msg = self.MESSAGE.format(url_cmd, entitlement_id, customer_id, 'EXCEPTION thrown', e)
-            self._logger.exception(error_msg)
+            self._log_exception(f'Exception thrown while trying to perform {url_cmd}', e, entitlement_id, customer_id)
             self.set_nes_state(self.REDIS_NES_STATE_BAD)
             return False
 
@@ -171,17 +168,38 @@ class NESHelper():
             if response.status_code == 200:
                 json_response = response.json()
                 entitlement_status = json_response.get('status')
-                self._logger.info(self.MESSAGE.format('entitlement data', entitlement_id, customer_id, 'Success!', f'status = {entitlement_status}'))
+                self._log_info(f'Succesfully got entitlement status {entitlement_status}', entitlement_id, customer_id)
                 return entitlement_status
 
             # If the response is anything else, log the error, and return that error
-            error_msg = self.MESSAGE.format('entitlement data', entitlement_id, customer_id, f'POST request returned error {response.status_code}', response.text)
-            self._logger.error(error_msg)
+            error_msg = 'Failed to get entitlement status'
+            self._log_error(error_msg, entitlement_id, customer_id, response.status_code, response.text)
             return error_msg
         except Exception as e:
-            error_msg = self.MESSAGE.format('entitlement data', entitlement_id, customer_id, 'Exception thrown!', e)
-            self._logger.exception(error_msg)
+            error_msg = 'Exception thrown while trying to get entitlement status'
+            self._log_exception(error_msg, e, entitlement_id, customer_id)
             return error_msg
+
+    def _log_error(self, message: str, entitlement_id: str, customer_id: str, status_code: int, response_msg: str) -> None:
+        self._logger.error(message, extra={
+            'entitlementId': entitlement_id,
+            'customerId': customer_id,
+            'statusCode': status_code,
+            'responseMsg': response_msg
+            })
+
+    def _log_info(self, message: str, entitlement_id: str, customer_id: str) -> None:
+        self._logger.info(message, extra={
+            'entitlementId': entitlement_id,
+            'customerId': customer_id
+        })
+
+    def _log_exception(self, message: str, e: Exception, entitlement_id: str, customer_id: str) -> None:
+        self._logger.exception(message, extra={
+            'exception': e,
+            'entitlement_id': entitlement_id,
+            'customer_id': customer_id
+        })
 
     def _get_jwt(self, cert: List[str]) -> str:
         """
