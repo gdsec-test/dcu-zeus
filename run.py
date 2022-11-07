@@ -1,7 +1,5 @@
 import logging
 import os
-from subprocess import call
-from tabnanny import check
 
 import yaml
 from celery import Celery, bootsteps
