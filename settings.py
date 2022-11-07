@@ -212,8 +212,8 @@ class TestAppConfig(AppConfig):
     VERT_URL = ''
     CUSTOMER_URL = 'https://shopper.api.int.test-godaddy.com/v1/customers/{}/shopper'
 
-    ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.test.godaddy.com/{}'
-    NES_URL = 'https://subscriptions-shim-ext.cp.api.test.godaddy.com/{}'
+    ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.test.godaddy.com/'
+    NES_URL = 'https://subscriptions-shim-ext.cp.api.test.godaddy.com/'
 
     SSO_URL = 'https://sso.test-gdcorp.tools'
     MIMIR_URL = 'https://mimir.cset.int.test-gdcorp.tools'

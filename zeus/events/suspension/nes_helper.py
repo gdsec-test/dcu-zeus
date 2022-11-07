@@ -2,23 +2,13 @@ import logging
 import os
 import time
 from datetime import datetime, timedelta
+from typing import List
 
 import requests
 from redis import Redis
 
 from settings import AppConfig
 from zeus.utils.functions import get_host_info_from_dict
-
-
-class ThrottledNESHelper():
-    def __init__(self, app_settings):
-        self._decorated = NESHelper(app_settings)
-
-    def get_nes_state(self):
-        return self._decorated.get_nes_state()
-
-    def get_use_nes(self, data):
-        return self._decorated.get_use_nes(data)
 
 
 class NESHelper():
@@ -31,7 +21,7 @@ class NESHelper():
     VALID_ENTITLEMENT_STATUSES = ['ACTIVE', 'SUSPENDED', 'PEND_CANCEL', 'CANCELLED']
     MESSAGE = 'Requested {} on entitlement ID: {}, customer ID: {}.  Status = {}.  Message = {}'
 
-    REDIS_EXPIRATION = timedelta(days=5)
+    REDIS_EXPIRATION = timedelta(minutes=10)
     REDIS_NES_STATE_KEY = 'nes-state'
     REDIS_NES_STATE_GOOD = 'UP'
     REDIS_NES_STATE_BAD = 'DOWN'
@@ -39,10 +29,8 @@ class NESHelper():
     def __init__(self, settings: AppConfig):
         self._logger = logging.getLogger(__name__)
 
-        # The first variable is the customerID and the second one is the suspend / reinstate command  (i.e. "suspendByEntitlementId")
-        self._nes_url = settings.SUBSCRIPTIONS_URL.format('v2/customers/{}/{}')
-        # The first var is the customer ID and the second is the entitlement ID
-        self._entitlement_url = settings.ENTITLEMENT_URL.format('v2/customers/{}/entitlements/{}')
+        self._nes_url = settings.SUBSCRIPTIONS_URL
+        self._entitlement_url = settings.ENTITLEMENT_URL
         self._sso_endpoint = settings.SSO_URL + '/v1/secure/api/token'
         self._cert = (settings.ZEUS_CLIENT_CERT, settings.ZEUS_CLIENT_KEY)
 
@@ -53,13 +41,13 @@ class NESHelper():
         #  value first, then time.  In other version of redis, as well as the StrictRedis the parameters are: time, then value.
         self._redis = Redis(settings.REDIS)
 
-    def suspend(self, entitlement_id, customer_id) -> bool:
+    def suspend(self, entitlement_id: str, customer_id: str) -> bool:
         # If suspension succeeded, poll for entitlement status
         if(self._do_suspend_reinstate(entitlement_id, customer_id, self.SUSPEND_CMD)):
             return self.wait_for_entitlement_status(entitlement_id, customer_id, 'SUSPENDED')
         return False
 
-    def reinstate(self, entitlement_id, customer_id) -> bool:
+    def reinstate(self, entitlement_id: str, customer_id: str) -> bool:
         # If reinstatement succeeded, poll for entitlement status
         if(self._do_suspend_reinstate(entitlement_id, customer_id, self.REINSTATE_CMD)):
             return self.wait_for_entitlement_status(entitlement_id, customer_id, 'ACTIVE')
@@ -73,11 +61,15 @@ class NESHelper():
         # If the nes-state isn't set, assume that it is good
         return True
 
-    def set_nes_state(self, state):
+    def set_nes_state(self, state: str) -> None:
+        if state == self.REDIS_NES_STATE_BAD:
+            self._logger.error('NES State is bad')
+        else:
+            self._logger.info('NES state is good')
         self._redis.setex(self.REDIS_NES_STATE_KEY, state, self.REDIS_EXPIRATION)
 
     # TODO CMAPT-5272: remove this function and all calls to it
-    def get_use_nes(self, data) -> bool:
+    def get_use_nes(self, data: dict) -> bool:
         # TODO CMAPT-5272: remove the NES selection flags
         products_use_nes_flag = {
             'diablo': os.environ.get('DIABLO_USE_NES', None),
@@ -97,7 +89,7 @@ class NESHelper():
                 return products_use_nes_flag.get(product) == 'True' or all_use_nes_flag == 'True'
         return False
 
-    def wait_for_entitlement_status(self, entitlement_id, customer_id, status) -> bool:
+    def wait_for_entitlement_status(self, entitlement_id: str, customer_id: str, status: str) -> bool:
         start_time = datetime.now()
         current_time = datetime.now()
         time_diff = current_time - start_time
@@ -116,9 +108,16 @@ class NESHelper():
             time_diff = current_time - start_time
         return False
 
-    def _do_suspend_reinstate(self, entitlement_id, customer_id, url_cmd) -> bool:
+    def _do_suspend_reinstate(self, entitlement_id: str, customer_id: str, url_cmd: str) -> bool:
         try:
-            url = self._nes_url.format(customer_id, url_cmd)
+            # Only perform the suspend / reinstate if it isn't already in that state
+            status = self._check_entitlement_status(entitlement_id, customer_id)
+            expected_status = 'SUSPENDED' if url_cmd == self.SUSPEND_CMD else 'ACTIVE'
+            if status == expected_status:
+                self._logger.info('Account already in correct state.')
+                return True
+
+            url = f'{self._nes_url}v2/customers/{customer_id}/{url_cmd}'
             body = {'entitlementId': entitlement_id, 'suspendReason': self.SUSPEND_REASON}
             response = requests.post(url, json=body, headers=self._headers, timeout=30)
 
@@ -150,9 +149,9 @@ class NESHelper():
             self.set_nes_state(self.REDIS_NES_STATE_BAD)
             return False
 
-    def _check_entitlement_status(self, entitlement_id, customer_id) -> str:
+    def _check_entitlement_status(self, entitlement_id: str, customer_id: str) -> str:
         try:
-            url = self._entitlement_url.format(customer_id, entitlement_id)
+            url = f'{self._entitlement_url}v2/customers/{customer_id}/entitlements/{entitlement_id}'
             response = requests.get(url, headers=self._headers, timeout=30)
 
             # If the credentials aren't accepted, update the JWT and try again
@@ -184,7 +183,7 @@ class NESHelper():
             self._logger.exception(error_msg)
             return error_msg
 
-    def _get_jwt(self, cert) -> str:
+    def _get_jwt(self, cert: List[str]) -> str:
         """
         Attempt to retrieve the JWT associated with the cert/key pair from SSO
         :param cert: tuple of cert, key

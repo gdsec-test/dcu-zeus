@@ -77,7 +77,7 @@ def get_host_brand_from_dict(dict_to_search):
     return None
 
 
-def get_host_customer_id_from_dict(dict_to_search):
+def get_host_customer_id_from_dict(dict_to_search: dict) -> str:
     # The host customerId field currently appears in
     #   1: data->domainQuery->host->customerId
     if isinstance(dict_to_search, dict):
