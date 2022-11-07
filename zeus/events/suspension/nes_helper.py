@@ -127,7 +127,7 @@ class NESHelper():
 
             # 200 and 204 responses are a success, 401 and 403 will show up when it's our fault that things aren't
             # working (auth issues), SO, if we got any of those, set NES to good
-            if response.status_code in 200, [204, 401, 403]:
+            if response.status_code in [200, 204, 401, 403]:
                 self.set_nes_state(self.REDIS_NES_STATE_GOOD)
             else:
                 # All otherstatus codes are due to NES having problems
