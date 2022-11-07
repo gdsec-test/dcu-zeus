@@ -186,7 +186,7 @@ class NESHelper():
             'customerId': customer_id,
             'statusCode': status_code,
             'responseMsg': response_msg
-            })
+        })
 
     def _log_info(self, message: str, entitlement_id: str, customer_id: str) -> None:
         self._logger.info(message, extra={
