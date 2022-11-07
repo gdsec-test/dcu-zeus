@@ -125,16 +125,16 @@ class NESHelper():
                 self._headers.update({'Authorization': f'sso-jwt {self._get_jwt(self._cert)}'})
                 response = requests.post(url, json=body, headers=self._headers, timeout=30)
 
-            # 204 response is a success, 401 and 403 will show up when it's our fault that things aren't
+            # 200 and 204 responses are a success, 401 and 403 will show up when it's our fault that things aren't
             # working (auth issues), SO, if we got any of those, set NES to good
-            if response.status_code in [204, 401, 403]:
+            if response.status_code in 200, [204, 401, 403]:
                 self.set_nes_state(self.REDIS_NES_STATE_GOOD)
             else:
                 # All otherstatus codes are due to NES having problems
                 self.set_nes_state(self.REDIS_NES_STATE_BAD)
 
             # process response and log errors and successes
-            if response.status_code != 204:
+            if response.status_code not in [200, 204]:
                 self._log_error(f'Failed to perform {url_cmd}', entitlement_id, customer_id, response.status_code, response.text)
                 return False
             else:
