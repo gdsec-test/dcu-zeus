@@ -30,6 +30,14 @@ class TestNESHelper:
     def test_suspend_fail(self, post, wait_for_entitlement_status):
         assert_false(self._nes_helper.suspend('test-accountid', 'test-customerid'))
 
+    @patch('zeus.events.suspension.nes_helper.NESHelper._get_jwt', return_value='testJWT')
+    @patch('zeus.events.suspension.nes_helper.NESHelper._check_entitlement_status', return_value='SUSPENDED')
+    @patch('requests.post', return_value=MagicMock(status_code=204))
+    def test_suspend_already_suspended(self, _get_jwt, _check_entitlement_status, post):
+        # Verify suspension returns true AND that post was not called
+        assert_true(self._nes_helper.suspend('test-accountid', 'test-customerid'))
+        assert_false(post.called)
+
     @patch('requests.post', return_value=MagicMock(status_code=204))
     @patch('zeus.events.suspension.nes_helper.NESHelper.wait_for_entitlement_status', return_value=False)
     def test_suspend_entitlement_error(self, post, wait_for_entitlement_status):
@@ -49,6 +57,14 @@ class TestNESHelper:
     @patch('zeus.events.suspension.nes_helper.NESHelper.wait_for_entitlement_status', return_value=True)
     def test_reinstate_fail(self, post, wait_for_entitlement_status):
         assert_false(self._nes_helper.reinstate('test-accountid', 'test-customerid'))
+
+    @patch('zeus.events.suspension.nes_helper.NESHelper._get_jwt', return_value='testJWT')
+    @patch('zeus.events.suspension.nes_helper.NESHelper._check_entitlement_status', return_value='ACTIVE')
+    @patch('requests.post', return_value=MagicMock(status_code=204))
+    def test_reinstate_already_active(self, _get_jwt, _check_entitlement_status, post):
+        # Verify suspension returns true AND that post was not called
+        assert_true(self._nes_helper.reinstate('test-accountid', 'test-customerid'))
+        assert_false(post.called)
 
     @patch('requests.post', return_value=MagicMock(status_code=204))
     @patch('zeus.events.suspension.nes_helper.NESHelper.wait_for_entitlement_status', return_value=False)
