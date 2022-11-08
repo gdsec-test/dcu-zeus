@@ -26,7 +26,15 @@ class TestFunctions:
     def test_get_parent_child_shopper_ids_from_dict(self):
         data = {'data': {'domainQuery': {'apiReseller': {'parent': '1234', 'child': '5678'}}}}
         actual = get_parent_child_shopper_ids_from_dict(data)
-        assert_equal(actual, ['1234', '5678'])
+        assert_equal(actual, {'parent_shopper_id': '1234', 'child_shopper_id': '5678',
+                              'parent_customer_id': None, 'child_customer_id': None})
+
+    def test_get_parent_child_customer_ids_from_dict(self):
+        data = {'data': {'domainQuery': {'apiReseller': {'parent': '1234', 'child': '5678',
+                                                         'parentCustomerId': 'abc', 'childCustomerId': 'def'}}}}
+        actual = get_parent_child_shopper_ids_from_dict(data)
+        assert_equal(actual, {'parent_shopper_id': '1234', 'child_shopper_id': '5678',
+                              'parent_customer_id': 'abc', 'child_customer_id': 'def'})
 
     def test_get_domain_create_date_from_dict_none(self):
         actual = get_domain_create_date_from_dict(None)

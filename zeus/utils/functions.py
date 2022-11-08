@@ -23,12 +23,16 @@ def get_parent_child_shopper_ids_from_dict(dict_to_search):
     #  The parent/child API reseller fields currently appears in...
     #    1: data->domainQuery->apiReseller->parent
     #    2: data->domainQuery->apiReseller->child
+    #    3: data->domainQuery->apiReseller->parentCustomerId
+    #    4: data->domainQuery->apiReseller->childCustomerId
     if isinstance(dict_to_search, dict):
-        parent = _get_domain_query(dict_to_search).get('apiReseller', {}).get('parent')
-        if not parent:
+        parent_child_accounts = {'parent_shopper_id': _get_domain_query(dict_to_search).get('apiReseller', {}).get('parent'),
+                                 'child_shopper_id': _get_domain_query(dict_to_search).get('apiReseller', {}).get('child'),
+                                 'parent_customer_id': _get_domain_query(dict_to_search).get('apiReseller', {}).get('parentCustomerId'),
+                                 'child_customer_id': _get_domain_query(dict_to_search).get('apiReseller', {}).get('childCustomerId')}
+        if not parent_child_accounts.get('parent_shopper_id') and not parent_child_accounts.get('parent_customer_id'):
             return None
-        child = _get_domain_query(dict_to_search).get('apiReseller', {}).get('child')
-        return [parent, child]
+        return parent_child_accounts
     return None
 
 

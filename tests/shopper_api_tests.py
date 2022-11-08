@@ -31,6 +31,13 @@ class TestShopperApi:
         assert_equal(actual, '5678')
 
     @patch.object(ShopperAPI, 'get_shopper_id_from_customer_id', return_value='7890')
+    def test_get_shopper_id_from_dict_child_customer_id(self, get_shopper_id_from_customer_id):
+        data = {'data': {'domainQuery': {'apiReseller': {'parentCustomerId': 'abc', 'childCustomerId': 'def'}}}}
+        actual = self._shopperapi.get_shopper_id_from_dict(data)
+        assert_equal(actual, '7890')
+        assert get_shopper_id_from_customer_id.called
+
+    @patch.object(ShopperAPI, 'get_shopper_id_from_customer_id', return_value='7890')
     def test_get_host_shopper_id_from_dict_customer_id(self, get_shopper_id_from_customer_id):
         actual = self._shopperapi.get_host_shopper_id_from_dict({'data': {'domainQuery': {'host': {'customerId': '1234-5678'}}}})
         assert_equal(actual, '7890')
@@ -44,11 +51,17 @@ class TestShopperApi:
         assert_is_none(actual)
 
     @patch.object(ShopperAPI, 'get_shopper_id_from_customer_id', return_value='7890')
-    def test_get_list_of_ids_to_notify(self, get_shopper_id_from_customer_id):
+    def test_get_list_of_shopper_ids_to_notify(self, get_shopper_id_from_customer_id):
         data = {'data': {'domainQuery': {'apiReseller': {'parent': '1234', 'child': '4567'}}}}
         actual = self._shopperapi.get_list_of_ids_to_notify(data)
-        # TODO: CMAPT-5231 - once apiReseller has been updated to save customerID, update the expected value
         assert_equal(actual, ['1234', '4567'])
+
+    @patch.object(ShopperAPI, 'get_shopper_id_from_customer_id', return_value='1234')
+    def test_get_list_of_ids_to_notify_convert_customer_to_shopper(self, get_shopper_id_from_customer_id):
+        data = {'data': {'domainQuery': {'apiReseller': {'parentCustomerId': 'abc', 'childCustomerId': 'def'}}}}
+        actual = self._shopperapi.get_list_of_ids_to_notify(data)
+        assert_equal(actual, ['1234', '1234'])
+        assert get_shopper_id_from_customer_id.called
 
     @patch.object(ShopperAPI, 'get_shopper_id_from_customer_id', return_value='7890')
     def test_get_list_of_ids_to_notify_no_api_reseller(self, get_shopper_id_from_customer_id):
