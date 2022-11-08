@@ -128,3 +128,8 @@ def get_high_value_domain_from_dict(data):
     if isinstance(data, dict):
         return _get_domain_query(data).get('isDomainHighValue')
     return None
+
+
+def get_is_hosted(data: dict) -> bool:
+    hosted_status = data.get('hosted_status') or data.get('hostedStatus')
+    return hosted_status == 'HOSTED'

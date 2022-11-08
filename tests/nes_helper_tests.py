@@ -71,8 +71,15 @@ class TestNESHelper:
     def test_reinstate_entitlement_error(self, post, wait_for_entitlement_status):
         assert_false(self._nes_helper.suspend('test-accountid', 'test-entitlementid'))
 
-    @patch('zeus.events.suspension.nes_helper.NESHelper._check_entitlement_status', return_value='SUSPENDED')
-    def test_entitlement_status_sucess(self, check_entitlement_status):
+    @patch('requests.get')
+    # @patch('zeus.events.suspension.nes_helper.NESHelper._check_entitlement_status', return_value='SUSPENDED')
+    def test_entitlement_status_sucess(self, get):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            'status': 'SUSPENDED',
+        }
+        get.return_value = mock_response
         assert_true(self._nes_helper.wait_for_entitlement_status('test-accountid', 'test-customerid', 'SUSPENDED'))
 
     @patch('requests.get', return_value=MagicMock(status_code=404))

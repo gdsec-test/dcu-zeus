@@ -4,6 +4,7 @@ import time
 from datetime import datetime, timedelta
 from typing import List
 
+import elasticapm
 import requests
 from redis import Redis
 
@@ -61,10 +62,9 @@ class NESHelper():
         return True
 
     def set_nes_state(self, state: str) -> None:
-        if state == self.REDIS_NES_STATE_BAD:
-            self._logger.error('NES State is bad')
-        else:
-            self._logger.info('NES state is good')
+        client = elasticapm.get_client()
+        if client:
+            client.capture_message(f'NES state is {state}')
         self._redis.setex(self.REDIS_NES_STATE_KEY, state, self.REDIS_EXPIRATION)
 
     # TODO CMAPT-5272: remove this function and all calls to it
@@ -93,6 +93,7 @@ class NESHelper():
         current_time = datetime.now()
         time_diff = current_time - start_time
         while time_diff.total_seconds() < 600:
+            time.sleep(1)
             status_response = self._check_entitlement_status(entitlement_id, customer_id)
             # If the response from 'check entitlement status' is not one of the valid statuses, then we know an error happened.  Return False
             if status_response not in self.VALID_ENTITLEMENT_STATUSES:
@@ -102,7 +103,6 @@ class NESHelper():
                 self._log_info('Entitlement status successfully updated', entitlement_id, customer_id)
                 self._logger.info(f'Entitlement status wait took {time_diff} seconds')
                 return True
-            time.sleep(1)
             current_time = datetime.now()
             time_diff = current_time - start_time
         return False
@@ -125,19 +125,13 @@ class NESHelper():
                 self._headers.update({'Authorization': f'sso-jwt {self._get_jwt(self._cert)}'})
                 response = requests.post(url, json=body, headers=self._headers, timeout=30)
 
-            # 200 and 204 responses are a success, 401 and 403 will show up when it's our fault that things aren't
-            # working (auth issues), SO, if we got any of those, set NES to good
-            if response.status_code in [200, 204, 401, 403]:
-                self.set_nes_state(self.REDIS_NES_STATE_GOOD)
-            else:
-                # All otherstatus codes are due to NES having problems
-                self.set_nes_state(self.REDIS_NES_STATE_BAD)
-
             # process response and log errors and successes
             if response.status_code not in [200, 204]:
+                self.set_nes_state(self.REDIS_NES_STATE_BAD)
                 self._log_error(f'Failed to perform {url_cmd}', entitlement_id, customer_id, response.status_code, response.text)
                 return False
             else:
+                self.set_nes_state(self.REDIS_NES_STATE_GOOD)
                 self._log_info(f'Successfully performed {url_cmd}', entitlement_id, customer_id)
                 return True
 
@@ -156,22 +150,16 @@ class NESHelper():
                 self._headers.update({'Authorization': f'sso-jwt {self._get_jwt(self._cert)}'})
                 response = requests.get(url, headers=self._headers, timeout=30)
 
-            # 200 response is a success, 401 and 403 are auth issues, so most likely our fault.
-            # SO, if we got any of those status codes, set NES to good
-            if response.status_code in [200, 401, 403]:
-                self.set_nes_state(self.REDIS_NES_STATE_GOOD)
-            else:
-                # All otherstatus codes are due to NES having problems
-                self.set_nes_state(self.REDIS_NES_STATE_BAD)
-
             # If the response is 200, parse the response for the desired status
             if response.status_code == 200:
+                self.set_nes_state(self.REDIS_NES_STATE_GOOD)
                 json_response = response.json()
                 entitlement_status = json_response.get('status')
                 self._log_info(f'Succesfully got entitlement status {entitlement_status}', entitlement_id, customer_id)
                 return entitlement_status
 
             # If the response is anything else, log the error, and return that error
+            self.set_nes_state(self.REDIS_NES_STATE_BAD)
             error_msg = 'Failed to get entitlement status'
             self._log_error(error_msg, entitlement_id, customer_id, response.status_code, response.text)
             return error_msg

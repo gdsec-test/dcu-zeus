@@ -18,7 +18,7 @@ from zeus.handlers.foreign_handler import ForeignHandler
 from zeus.handlers.fraud_handler import FraudHandler
 from zeus.handlers.hosted_handler import HostedHandler
 from zeus.handlers.registered_handler import RegisteredHandler
-from zeus.utils.functions import get_host_customer_id_from_dict
+from zeus.utils.functions import get_host_customer_id_from_dict, get_is_hosted
 from zeus.utils.shopperapi import ShopperAPI
 
 env = os.getenv('sysenv', 'dev')
@@ -117,11 +117,6 @@ def route_request(data, ticket_id, request_type, dual_suspension=False):
             result = ('Unable to route request', hosted_status)
 
     return result
-
-
-def get_is_hosted(data: dict) -> bool:
-    hosted_status = data.get('hosted_status') or data.get('hostedStatus')
-    return hosted_status == 'HOSTED'
 
 
 def get_database_handle():
