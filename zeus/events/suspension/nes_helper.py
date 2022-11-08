@@ -83,7 +83,7 @@ class NESHelper():
         # Only check if we should use NES if this is a hosted product
         hosted_status = data.get('hosted_status') or data.get('hostedStatus')
         if hosted_status == 'HOSTED':
-            product = get_host_info_from_dict(data).get('product', None)
+            product = get_host_info_from_dict(data).get('product', '').lower()
             if product:
                 return products_use_nes_flag.get(product) == 'True' or all_use_nes_flag == 'True'
         return False

@@ -42,26 +42,26 @@ class HostingService(Product):
         self.nes_helper = NESHelper(app_settings)
 
     def suspend(self, product, identifier, data):
-        product = product.lower() if product else None
+        product = product.lower() if product else ''
         if product not in self._products:
             return self.UNSUPPORTED_PRODUCT.format(product)
 
         # Use the correct API
         # TODO CMAPT-5272: remove the if statement and other return statement and just use NES
-        if self.nes_helper.get_use_nes():
+        if self.nes_helper.get_use_nes(data):
             customer_id = get_host_customer_id_from_dict(data)
             return self.nes_helper.suspend(identifier, customer_id)
 
         return self._products.get(product).suspend(guid=identifier, data=data)
 
     def reinstate(self, product, identifier, data):
-        product = product.lower() if product else None
+        product = product.lower() if product else ''
         if product not in self._products:
             return self.UNSUPPORTED_PRODUCT.format(product)
 
         # Use the correct API
         # TODO CMAPT-5272: remove the if statement and other return statement and just use NES
-        if self.nes_helper.get_use_nes():
+        if self.nes_helper.get_use_nes(data):
             customer_id = get_host_customer_id_from_dict(data)
             return self.nes_helper.reinstate(identifier, customer_id)
 
