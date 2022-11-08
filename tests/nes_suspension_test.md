@@ -1,7 +1,10 @@
 # NES Suspsension Test #
 In order to verify NES suspesnion is working, run the following steps.
 
-## Set up GD Test account and WM Product
+## Setup
+1. Make sure that the 'nes_on_flag' ConfigMap has the product type you are testing set to 'True'
+
+### Set up GD Test account and WM Product
 Skip these steps if you already have a GoDaddy test account and a WM test product
 1. Create a GoDaddy test account
     1. Go to https://www.test-godaddy.com/
