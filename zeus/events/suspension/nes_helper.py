@@ -27,7 +27,7 @@ class NESHelper():
     def __init__(self, settings: AppConfig):
         self._logger = logging.getLogger(__name__)
 
-        self._nes_url = settings.SUBSCRIPTIONS_URL
+        self._subscriptions_url = settings.SUBSCRIPTIONS_URL
         self._entitlement_url = settings.ENTITLEMENT_URL
         self._sso_endpoint = settings.SSO_URL + '/v1/secure/api/token'
         self._cert = (settings.ZEUS_CLIENT_CERT, settings.ZEUS_CLIENT_KEY)
@@ -89,7 +89,7 @@ class NESHelper():
                 self._log_info(f'Account already has correct status of {status}', entitlement_id, customer_id)
                 return True
 
-            url = f'{self._nes_url}v2/customers/{customer_id}/{url_cmd}'
+            url = f'{self._subscriptions_url}v2/customers/{customer_id}/{url_cmd}'
             self._logger.info(f'url is {url}')
             self._logger.info(f'header is {self._headers}')
             body = {'entitlementId': entitlement_id, 'suspendReason': self.SUSPEND_REASON}

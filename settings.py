@@ -270,6 +270,8 @@ class UnitTestConfig(AppConfig):
     MIMIR_URL = ''
     CRMALERT_URL = ''
     GOCENTRAL_URL = ''
+    ENTITLEMENT_URL = 'localhost/'
+    SUBSCRIPTIONS_URL = 'localhost/'
 
     VPS4_URLS = OrderedDict([('IAD2', ''),
                              ('SIN2', ''),
