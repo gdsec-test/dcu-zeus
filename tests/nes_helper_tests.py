@@ -1,7 +1,7 @@
 import os
 
 from mock import MagicMock, patch
-from nose.tools import assert_false, assert_true
+from nose.tools import assert_equal, assert_false, assert_true
 from requests.exceptions import Timeout
 
 from settings import UnitTestConfig
@@ -10,90 +10,84 @@ from zeus.events.suspension.nes_helper import NESHelper
 
 class TestNESHelper:
     HOSTED_DIABLO_DATA = {'hosted_status': 'HOSTED', 'data': {'domainQuery': {'host': {'product': 'diablo'}}}}
+    MOCK_ENTITLEMENT_SUSPENDED_RESPONSE = MagicMock()
+    MOCK_ENTITLEMENT_SUSPENDED_RESPONSE.status_code = 200
+    MOCK_ENTITLEMENT_SUSPENDED_RESPONSE.json.return_value = {
+        'status': 'SUSPENDED',
+    }
 
     @classmethod
     def setup(cls):
         cls._nes_helper = NESHelper(UnitTestConfig)
 
     @patch('requests.post', side_effect=Timeout())
-    @patch('zeus.events.suspension.nes_helper.NESHelper.wait_for_entitlement_status', return_value=True)
-    def test_suspend_exception(self, post, wait_for_entitlement_status):
+    def test_suspend_exception(self, post):
         assert_false(self._nes_helper.suspend('test-accountid', 'test-customerid'))
 
     @patch('requests.post', return_value=MagicMock(status_code=204))
-    @patch('zeus.events.suspension.nes_helper.NESHelper.wait_for_entitlement_status', return_value=True)
-    def test_suspend_success(self, post, wait_for_entitlement_status):
+    def test_suspend_success(self, post):
         assert_true(self._nes_helper.suspend('test-accountid', 'test-customerid'))
 
     @patch('requests.post', return_value=MagicMock(status_code=404))
-    @patch('zeus.events.suspension.nes_helper.NESHelper.wait_for_entitlement_status', return_value=True)
-    def test_suspend_fail(self, post, wait_for_entitlement_status):
+    def test_suspend_fail(self, post):
         assert_false(self._nes_helper.suspend('test-accountid', 'test-customerid'))
 
-    @patch('zeus.events.suspension.nes_helper.NESHelper._get_jwt', return_value='testJWT')
-    @patch('zeus.events.suspension.nes_helper.NESHelper._check_entitlement_status', return_value='SUSPENDED')
     @patch('requests.post', return_value=MagicMock(status_code=204))
-    def test_suspend_already_suspended(self, _get_jwt, _check_entitlement_status, post):
+    @patch('requests.get')
+    @patch('zeus.events.suspension.nes_helper.NESHelper._get_jwt', return_value='testJWT')
+    def test_suspend_already_suspended(self, post, get, get_jwt):
+        get.return_value = self.MOCK_ENTITLEMENT_SUSPENDED_RESPONSE
         # Verify suspension returns true AND that post was not called
         assert_true(self._nes_helper.suspend('test-accountid', 'test-customerid'))
         assert_false(post.called)
-
-    @patch('requests.post', return_value=MagicMock(status_code=204))
-    @patch('zeus.events.suspension.nes_helper.NESHelper.wait_for_entitlement_status', return_value=False)
-    def test_suspend_entitlement_error(self, post, wait_for_entitlement_status):
-        assert_false(self._nes_helper.suspend('test-accountid', 'test-entitlementid'))
 
     @patch('requests.post', side_effect=Timeout())
-    @patch('zeus.events.suspension.nes_helper.NESHelper.wait_for_entitlement_status', return_value=True)
-    def test_reinstate_exception(self, post, wait_for_entitlement_status):
+    def test_reinstate_exception(self, post):
         assert_false(self._nes_helper.reinstate('test-accountid', 'test-customerid'))
 
     @patch('requests.post', return_value=MagicMock(status_code=204))
-    @patch('zeus.events.suspension.nes_helper.NESHelper.wait_for_entitlement_status', return_value=True)
-    def test_reinstate_success(self, post, wait_for_entitlement_status):
+    def test_reinstate_success(self, post):
         assert_true(self._nes_helper.reinstate('test-accountid', 'test-customerid'))
 
     @patch('requests.post', return_value=MagicMock(status_code=404))
-    @patch('zeus.events.suspension.nes_helper.NESHelper.wait_for_entitlement_status', return_value=True)
-    def test_reinstate_fail(self, post, wait_for_entitlement_status):
+    def test_reinstate_fail(self, post):
         assert_false(self._nes_helper.reinstate('test-accountid', 'test-customerid'))
 
-    @patch('zeus.events.suspension.nes_helper.NESHelper._get_jwt', return_value='testJWT')
-    @patch('zeus.events.suspension.nes_helper.NESHelper._check_entitlement_status', return_value='ACTIVE')
     @patch('requests.post', return_value=MagicMock(status_code=204))
-    def test_reinstate_already_active(self, _get_jwt, _check_entitlement_status, post):
+    @patch('requests.get')
+    @patch('zeus.events.suspension.nes_helper.NESHelper._get_jwt', return_value='testJWT')
+    def test_reinstate_already_active(self, post, get, get_jwt):
+        mock_entitlement_active_response = MagicMock()
+        mock_entitlement_active_response.status_code = 200
+        mock_entitlement_active_response.json.return_value = {
+            'status': 'ACTIVE'
+        }
+        get.return_value = mock_entitlement_active_response
+
         # Verify suspension returns true AND that post was not called
         assert_true(self._nes_helper.reinstate('test-accountid', 'test-customerid'))
         assert_false(post.called)
 
-    @patch('requests.post', return_value=MagicMock(status_code=204))
-    @patch('zeus.events.suspension.nes_helper.NESHelper.wait_for_entitlement_status', return_value=False)
-    def test_reinstate_entitlement_error(self, post, wait_for_entitlement_status):
-        assert_false(self._nes_helper.suspend('test-accountid', 'test-entitlementid'))
-
     @patch('requests.get')
-    # @patch('zeus.events.suspension.nes_helper.NESHelper._check_entitlement_status', return_value='SUSPENDED')
-    def test_entitlement_status_sucess(self, get):
-        mock_response = MagicMock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {
-            'status': 'SUSPENDED',
+    @patch('zeus.events.suspension.nes_helper.NESHelper._get_jwt', return_value='testJWT')
+    def test_entitlement_status_success(self, get, _get_jwt):
+        mock_entitlement_suspended_response = MagicMock()
+        mock_entitlement_suspended_response.status_code = 200
+        mock_entitlement_suspended_response.json.return_value = {
+            'status': 'ACTIVE'
         }
-        get.return_value = mock_response
-        assert_true(self._nes_helper.wait_for_entitlement_status('test-accountid', 'test-customerid', 'SUSPENDED'))
+        get.return_value = mock_entitlement_suspended_response
+        assert_equal(self._nes_helper._check_entitlement_status('test-accountid', 'test-customerid'), 'SUSPENDED')
 
-    @patch('requests.get', return_value=MagicMock(status_code=404))
-    def test_entitlement_status_fail(self, get):
-        assert_false(self._nes_helper.wait_for_entitlement_status('test-accountid', 'test-customerid', 'SUSPENDED'))
+    # @patch('requests.get', return_value=MagicMock(status_code=404))
+    # @patch('zeus.events.suspension.nes_helper.NESHelper._get_jwt', return_value='testJWT')
+    # def test_entitlement_status_error(self, get, get_jwt):
+    #     assert_equal('Failed to get entitlement status', self._nes_helper._check_entitlement_status('test-accountid', 'test-customerid'))
 
-    @patch('requests.get', side_effect=Timeout())
-    def test_entitlement_status_exception(self, get):
-        assert_false(self._nes_helper.wait_for_entitlement_status('test-accountid', 'test-customerid', 'SUSPENDED'))
-
-    # TODO LKM: figure out what to do for this test - right now, as written, it's going to take TEN MINUTES to run, which we probably don't want...
-    # @patch('requests.get', return_value=MagicMock(status_code=200, text=json.dumps({"status": "ACTIVE"})))
-    # def test_entitlement_status_mismatch(self, get):
-    #     assert_false(self._nes_helper.wait_for_entitlement_status('test-accountid', 'test-customerid', 'SUSPENDED'))
+    # @patch('requests.get', sideEffect=Timeout())
+    # @patch('zeus.events.suspension.nes_helper.NESHelper._get_jwt', return_value='testJWT')
+    # def test_entitlement_status_exception(self, get, get_jwt):
+    #     assert_equal('Exception thrown while trying to get entitlement status', self._nes_helper._check_entitlement_status('test-accountid', 'test-customerid'))
 
     @patch.dict(os.environ, {"DIABLO_USE_NES": "False", "ALL_USE_NES": "False"})
     def test_get_use_nes_none(self):

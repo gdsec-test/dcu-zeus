@@ -1,8 +1,6 @@
 import logging
 import os
-import time
-from datetime import datetime, timedelta
-from typing import List
+from datetime import timedelta
 
 import elasticapm
 import requests
@@ -42,16 +40,10 @@ class NESHelper():
         self._redis = Redis(settings.REDIS)
 
     def suspend(self, entitlement_id: str, customer_id: str) -> bool:
-        # If suspension succeeded, poll for entitlement status
-        if(self._do_suspend_reinstate(entitlement_id, customer_id, self.SUSPEND_CMD)):
-            return self.wait_for_entitlement_status(entitlement_id, customer_id, 'SUSPENDED')
-        return False
+        return self._do_suspend_reinstate(entitlement_id, customer_id, self.SUSPEND_CMD)
 
     def reinstate(self, entitlement_id: str, customer_id: str) -> bool:
-        # If reinstatement succeeded, poll for entitlement status
-        if(self._do_suspend_reinstate(entitlement_id, customer_id, self.REINSTATE_CMD)):
-            return self.wait_for_entitlement_status(entitlement_id, customer_id, 'ACTIVE')
-        return False
+        return self._do_suspend_reinstate(entitlement_id, customer_id, self.REINSTATE_CMD)
 
     def get_nes_state(self) -> bool:
         nes_state = self._redis.get(self.REDIS_NES_STATE_KEY)
@@ -88,25 +80,6 @@ class NESHelper():
                 return products_use_nes_flag.get(product) == 'True' or all_use_nes_flag == 'True'
         return False
 
-    def wait_for_entitlement_status(self, entitlement_id: str, customer_id: str, status: str) -> bool:
-        start_time = datetime.now()
-        current_time = datetime.now()
-        time_diff = current_time - start_time
-        while time_diff.total_seconds() < 600:
-            time.sleep(1)
-            status_response = self._check_entitlement_status(entitlement_id, customer_id)
-            # If the response from 'check entitlement status' is not one of the valid statuses, then we know an error happened.  Return False
-            if status_response not in self.VALID_ENTITLEMENT_STATUSES:
-                return False
-            # If the resposne is the status we are looking for, return true
-            if status_response == status:
-                self._log_info('Entitlement status successfully updated', entitlement_id, customer_id)
-                self._logger.info(f'Entitlement status wait took {time_diff} seconds')
-                return True
-            current_time = datetime.now()
-            time_diff = current_time - start_time
-        return False
-
     def _do_suspend_reinstate(self, entitlement_id: str, customer_id: str, url_cmd: str) -> bool:
         try:
             # Only perform the suspend / reinstate if it isn't already in that state
@@ -117,6 +90,8 @@ class NESHelper():
                 return True
 
             url = f'{self._nes_url}v2/customers/{customer_id}/{url_cmd}'
+            self._logger.info(f'url is {url}')
+            self._logger.info(f'header is {self._headers}')
             body = {'entitlementId': entitlement_id, 'suspendReason': self.SUSPEND_REASON}
             response = requests.post(url, json=body, headers=self._headers, timeout=30)
 
@@ -189,7 +164,7 @@ class NESHelper():
             'customer_id': customer_id
         })
 
-    def _get_jwt(self, cert: List[str]) -> str:
+    def _get_jwt(self, cert: tuple) -> str:
         """
         Attempt to retrieve the JWT associated with the cert/key pair from SSO
         :param cert: tuple of cert, key
@@ -203,3 +178,4 @@ class NESHelper():
             return body.get('data')  # {'type': 'signed-jwt', 'id': 'XXX', 'code': 1, 'message': 'Success', 'data': JWT}
         except Exception as e:
             self._logger.exception(e)
+            return ''

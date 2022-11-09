@@ -86,7 +86,7 @@ foreign = ForeignHandler(config)
 utility_mailer = UtilityMailer(config)
 reporter_mailer = ReporterMailer(config)
 nes_helper = NESHelper(config)
-shopper_id = ShopperAPI(config)
+shopper_api = ShopperAPI(config)
 
 email_limit = 1000
 
@@ -201,10 +201,10 @@ def suspend(ticket_id, investigator_id=None):
 
         # Get the correct shopperID and customerID based on if it is HOSTED or not
         if get_is_hosted(data):
-            shopper_id = ShopperAPI.get_host_shopper_id_from_dict(data)
+            shopper_id = shopper_api.get_host_shopper_id_from_dict(data)
             customer_id = get_host_customer_id_from_dict(data)
         else:
-            shopper_id = ShopperAPI.get_shopper_id_from_dict(data)
+            shopper_id = shopper_api.get_shopper_id_from_dict(data)
             customer_id = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('customerId', None)
 
         domain = data.get('sourceDomainOrIp', {})

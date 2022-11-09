@@ -143,7 +143,7 @@ class OTEAppConfig(AppConfig):
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-ote.svc.cluster.local:8080'
 
     ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.ote.godaddy.com/'
-    NES_URL = 'https://subscriptions-shim-ext.cp.api.ote.godaddy.com/'
+    SUBSCRIPTIONS_URL = 'https://subscriptions-shim-ext.cp.api.ote.godaddy.com/'
 
     SSO_URL = 'https://sso.ote-gdcorp.tools'
     MIMIR_URL = 'https://mimir.cset.int.ote-gdcorp.tools'
@@ -175,7 +175,7 @@ class DevelopmentAppConfig(AppConfig):
     DIABLO_URL = 'http://localhost:8080/diablo/v1/accounts/'
 
     ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.dp.godaddy.com/'
-    NES_URL = 'https://subscriptions-shim-ext.cp.api.dp.godaddy.com/'
+    SUBSCRIPTIONS_URL = 'https://subscriptions-shim-ext.cp.api.dp.godaddy.com/'
 
     SSO_URL = 'https://sso.dev-gdcorp.tools'
     MIMIR_URL = 'https://mimir.cset.int.dev-gdcorp.tools'
@@ -213,7 +213,7 @@ class TestAppConfig(AppConfig):
     CUSTOMER_URL = 'https://shopper.api.int.test-godaddy.com/v1/customers/{}/shopper'
 
     ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.test.godaddy.com/'
-    NES_URL = 'https://subscriptions-shim-ext.cp.api.test.godaddy.com/'
+    SUBSCRIPTIONS_URL = 'https://subscriptions-shim-ext.cp.api.test.godaddy.com/'
 
     SSO_URL = 'https://sso.test-gdcorp.tools'
     MIMIR_URL = 'https://mimir.cset.int.test-gdcorp.tools'
