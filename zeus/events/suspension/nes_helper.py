@@ -83,7 +83,7 @@ class NESHelper():
     def _do_suspend_reinstate(self, entitlement_id: str, customer_id: str, url_cmd: str) -> bool:
         try:
             # Only perform the suspend / reinstate if it isn't already in that state
-            status = self._check_entitlement_status(entitlement_id, customer_id)
+            status = self._get_entitlement_status(entitlement_id, customer_id)
             expected_status = 'SUSPENDED' if url_cmd == self.SUSPEND_CMD else 'ACTIVE'
             if status == expected_status:
                 self._log_info(f'Account already has correct status of {status}', entitlement_id, customer_id)
@@ -115,7 +115,7 @@ class NESHelper():
             self.set_nes_state(self.REDIS_NES_STATE_BAD)
             return False
 
-    def _check_entitlement_status(self, entitlement_id: str, customer_id: str) -> str:
+    def _get_entitlement_status(self, entitlement_id: str, customer_id: str) -> str:
         try:
             url = f'{self._entitlement_url}v2/customers/{customer_id}/entitlements/{entitlement_id}'
             response = requests.get(url, headers=self._headers, timeout=30)
