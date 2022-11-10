@@ -55,7 +55,9 @@ class ShopperAPI:
                     return self.get_shopper_id_from_customer_id(customer_id)
                 return data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('shopperId', None)
             else:
-                return parent_child_list[1]
+                if parent_child_list.get('child_shopper_id'):
+                    return parent_child_list.get('child_shopper_id')
+                return self.get_shopper_id_from_customer_id(parent_child_list.get('child_customer_id'))
         return None
 
     def get_host_shopper_id_from_dict(self, data):
@@ -67,18 +69,20 @@ class ShopperAPI:
         return data.get('data', {}).get('domainQuery', {}).get('host', {}).get('shopperId', None)
 
     def get_list_of_ids_to_notify(self, data):
-        # If the domain is associated with a parent/child API reseller
-        #  account, then email both the parent and child account
-        account_number_list = []
+        # If the domain is associated with a parent/child API reseller account, then email both the parent and child
+        # shopperIDs after converting from customerIDs, if needed.
+        shopper_id_list = []
         parent_child_list = get_parent_child_shopper_ids_from_dict(data)
         if not parent_child_list:
             shopper_id = self.get_shopper_id_from_dict(data)
             if shopper_id:
-                account_number_list.append(shopper_id)
+                shopper_id_list.append(shopper_id)
         else:
-            # TODO: CMAPT-5231 - uncomment this code and remove line 72 because once apiReseller
-            #       has been updated to save customerID, we need to convert that to a shopperID
-            # for customer_id in parent_child_list:
-            #     account_number_list.append(self.get_shopper_id_from_customer_id(customer_id))
-            account_number_list = parent_child_list
-        return account_number_list
+            if parent_child_list.get('parent_customer_id'):
+                shopper_id_list.append(
+                    self.get_shopper_id_from_customer_id(parent_child_list.get('parent_customer_id')))
+                shopper_id_list.append(self.get_shopper_id_from_customer_id(parent_child_list.get('child_customer_id')))
+            else:
+                shopper_id_list.append(parent_child_list.get('parent_shopper_id'))
+                shopper_id_list.append(parent_child_list.get('child_shopper_id'))
+        return shopper_id_list
