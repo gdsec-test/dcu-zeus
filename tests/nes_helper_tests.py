@@ -1,10 +1,10 @@
 import os
+from unittest import TestCase
 
 from mock import MagicMock, patch
 from requests.exceptions import Timeout
 
 from settings import UnitTestConfig
-from unittest import TestCase
 from zeus.events.suspension.nes_helper import NESHelper
 
 
