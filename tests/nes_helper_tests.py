@@ -3,9 +3,9 @@ from datetime import timedelta
 from unittest import TestCase
 
 from mock import MagicMock, patch
+from mockredis import mock_redis_client
 from requests.exceptions import Timeout
 
-from mockredis import mock_redis_client
 from settings import UnitTestConfig
 from zeus.events.suspension.nes_helper import NESHelper
 
@@ -151,7 +151,7 @@ class TestNESHelper(TestCase):
             timeout=30
         )
         setex.assert_called_with('nes-state', 'DOWN', timedelta(minutes=10))
-        
+
     @patch.dict(os.environ, {"DIABLO_USE_NES": "False", "ALL_USE_NES": "False"})
     def test_get_use_nes_none(self):
         self.assertFalse(self._nes_helper.get_use_nes({'hosted_status': 'HOSTED', 'data': {'domainQuery': {'host': {'product': 'diablo'}}}}))
