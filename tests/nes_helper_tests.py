@@ -3,7 +3,6 @@ from datetime import timedelta
 from unittest import TestCase
 
 from mock import MagicMock, patch
-from mockredis import mock_redis_client
 from requests.exceptions import Timeout
 
 from settings import UnitTestConfig
