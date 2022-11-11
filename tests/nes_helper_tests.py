@@ -16,7 +16,6 @@ class TestNESHelper(TestCase):
     def setUp(self):
         NESHelper._get_jwt = MagicMock(return_value='testJWT')
         self._nes_helper = NESHelper(UnitTestConfig())
-        self.redis = mock_redis_client(host='0.0.0.0', port=6379, db=0)
 
     @patch('zeus.events.suspension.nes_helper.Redis.setex')
     @patch('zeus.events.suspension.nes_helper.requests.get', return_value=MagicMock(status_code=200, json=MagicMock(return_value={'status': 'ACTIVE'})))
