@@ -90,8 +90,6 @@ class NESHelper():
                 return True
 
             url = f'{self._subscriptions_url}v2/customers/{customer_id}/{url_cmd}'
-            self._logger.info(f'url is {url}')
-            self._logger.info(f'header is {self._headers}')
             body = {'entitlementId': entitlement_id, 'suspendReason': self.SUSPEND_REASON}
             response = requests.post(url, json=body, headers=self._headers, timeout=30)
 
@@ -139,6 +137,7 @@ class NESHelper():
             self._log_error(error_msg, entitlement_id, customer_id, response.status_code, response.text)
             return error_msg
         except Exception as e:
+            self.set_nes_state(self.REDIS_NES_STATE_BAD)
             error_msg = 'Exception thrown while trying to get entitlement status'
             self._log_exception(error_msg, e, entitlement_id, customer_id)
             return error_msg
