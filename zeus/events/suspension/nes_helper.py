@@ -8,6 +8,7 @@ from redis import Redis
 
 from settings import AppConfig
 from zeus.utils.functions import get_host_info_from_dict
+from typing import Optional
 
 
 class NESHelper():
@@ -54,6 +55,8 @@ class NESHelper():
         return True
 
     def set_nes_state(self, state: str) -> None:
+        # TODO : apparently 'capture_message' automatically logs an ERROR, which we don't want to do
+        # when we are setting the state GOOD, so figure out how to log info, but not error in elastic apm
         client = elasticapm.get_client()
         if client:
             client.capture_message(f'NES state is {state}')
@@ -105,7 +108,7 @@ class NESHelper():
                 return False
             else:
                 self.set_nes_state(self.REDIS_NES_STATE_GOOD)
-                self._log_info(f'Successfully performed {url_cmd}', entitlement_id, customer_id)
+                self._log_info(f'Successfully performed {url_cmd}', entitlement_id, customer_id, status_code=response.status_code)
                 return True
 
         except Exception as e:
@@ -128,7 +131,7 @@ class NESHelper():
                 self.set_nes_state(self.REDIS_NES_STATE_GOOD)
                 json_response = response.json()
                 entitlement_status = json_response.get('status')
-                self._log_info(f'Succesfully got entitlement status {entitlement_status}', entitlement_id, customer_id)
+                self._log_info(f'Got entitlement status {entitlement_status}', entitlement_id, customer_id, status_code=response.status_code)
                 return entitlement_status
 
             # If the response is anything else, log the error, and return that error
@@ -150,11 +153,13 @@ class NESHelper():
             'responseMsg': response_msg
         })
 
-    def _log_info(self, message: str, entitlement_id: str, customer_id: str) -> None:
-        self._logger.info(message, extra={
+    def _log_info(self, message: str, entitlement_id: str, customer_id: str, status_code: Optional[int] = None) -> None:
+        extraData = {
             'entitlementId': entitlement_id,
-            'customerId': customer_id
-        })
+            'customerId': customer_id}
+        if status_code:
+            extraData.update({'statusCode': str(status_code)})
+        self._logger.info(message, extra=extraData)
 
     def _log_exception(self, message: str, e: Exception, entitlement_id: str, customer_id: str) -> None:
         self._logger.exception(message, extra={
