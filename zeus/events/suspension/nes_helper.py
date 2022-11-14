@@ -1,6 +1,7 @@
 import logging
 import os
 from datetime import timedelta
+from typing import Optional
 
 import elasticapm
 import requests
@@ -8,7 +9,6 @@ from redis import Redis
 
 from settings import AppConfig
 from zeus.utils.functions import get_host_info_from_dict
-from typing import Optional
 
 
 class NESHelper():

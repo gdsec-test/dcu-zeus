@@ -1,6 +1,5 @@
 import logging
 import os
-import elasticapm
 
 import yaml
 from celery import Celery, bootsteps
@@ -19,7 +18,7 @@ from zeus.handlers.foreign_handler import ForeignHandler
 from zeus.handlers.fraud_handler import FraudHandler
 from zeus.handlers.hosted_handler import HostedHandler
 from zeus.handlers.registered_handler import RegisteredHandler
-from zeus.utils.functions import get_host_customer_id_from_dict, get_is_hosted, get_host_info_from_dict
+from zeus.utils.functions import get_host_customer_id_from_dict, get_is_hosted
 from zeus.utils.shopperapi import ShopperAPI
 
 env = os.getenv('sysenv', 'dev')
@@ -134,13 +133,6 @@ def check_nes_retry(data: dict, retry_function: callable) -> None:
     if nes_helper.get_use_nes(data):
         if not nes_helper.get_nes_state():
             retry_function.retry()
-
-
-def logApmProductType(data):
-    # Only log this is we are using a hosted product
-    if get_is_hosted(data):
-        product = get_host_info_from_dict(data).get('product')
-        elasticapm.label(productType=product)
 
 
 ''' Fraud Tasks '''
