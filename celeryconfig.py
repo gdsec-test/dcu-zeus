@@ -1,8 +1,12 @@
 import os
 
+from celery import Celery
 from kombu import Exchange, Queue
 
-from settings import AppConfig
+from settings import AppConfig, config_by_name
+
+env = os.getenv('sysenv', 'dev')
+config = config_by_name[env]()
 
 
 class CeleryConfig:
@@ -31,3 +35,7 @@ class CeleryConfig:
             Queue(app_settings.ZEUSQUEUE, Exchange(app_settings.ZEUSQUEUE), routing_key=app_settings.ZEUSQUEUE,
                   queue_arguments=queue_args),
         )
+
+
+app = Celery()
+app.config_from_object(CeleryConfig(config))
