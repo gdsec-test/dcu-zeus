@@ -9,6 +9,7 @@ images:
 - name: docker-dcu-local.artifactory.secureserver.net/zeus
   newTag: ote
 
+# TODO CMAPT-5272: remove GOCENTRAL_URL
 configMapGenerator:
 - literals:
   - sysenv=ote

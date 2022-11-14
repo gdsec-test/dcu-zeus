@@ -20,6 +20,7 @@ images:
 - name: docker-dcu-local.artifactory.secureserver.net/zeus
   newTag: dev
 
+# TODO CMAPT-5272: remove GOCENTRAL_URL
 configMapGenerator:
 - literals:
   - sysenv=dev

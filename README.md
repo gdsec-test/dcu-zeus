@@ -61,6 +61,7 @@ The following certs are required to run this project, must include proper ENV do
 Environment variables for docker-compose.yml file:
 1. `DB_PASS` (Password for dev MongoDB)
 1. `BROKER_PASS` (Broker Password)
+TODO CMAPT-5272: Remove all DIABLO*, PLESK* and VPS4* variables
 1. `DIABLOUSER` & `DIABLOPASS` (Account credentials to access the diablo API)
 1. `PLESKUSER` & `PLESKPASS` (Account credentials to access the plesk API)
 1. `VPS4USER` & `VPS4PASS` (Account credentials to access the vps4 API)
@@ -82,6 +83,7 @@ If you would like to run Zeus locally you will need to specify the following env
 * `DB_PASS` (MongoDB password for Phishstory database)
 * `BROKER_PASS` (The Broker Pass for the RabbitMQ server to connect to)
 * `BROKER_URL` (amqp://guest@localhost:5672//)
+TODO CMAPT-5272: remove all diablo, plesk, vps4, gocentral, and cmap proxy varaibles
 * `DIABLOUSER` & `DIABLOPASS` (Account credentials to access the diablo API)
 * `PLESKUSER` & `PLESKPASS` (Account credentials to access the plesk API)
 * `VPS4USER` & `VPS4PASS` (Account credentials to access the vps4 API)

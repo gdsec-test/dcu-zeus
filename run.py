@@ -13,10 +13,12 @@ from celeryconfig import CeleryConfig
 from settings import config_by_name
 from zeus.events.email.reporter_mailer import ReporterMailer
 from zeus.events.email.utility_mailer import UtilityMailer
+from zeus.events.suspension.nes_helper import NESHelper
 from zeus.handlers.foreign_handler import ForeignHandler
 from zeus.handlers.fraud_handler import FraudHandler
 from zeus.handlers.hosted_handler import HostedHandler
 from zeus.handlers.registered_handler import RegisteredHandler
+from zeus.utils.functions import get_host_customer_id_from_dict, get_is_hosted
 from zeus.utils.shopperapi import ShopperAPI
 
 env = os.getenv('sysenv', 'dev')
@@ -83,7 +85,8 @@ registered = RegisteredHandler(config)
 foreign = ForeignHandler(config)
 utility_mailer = UtilityMailer(config)
 reporter_mailer = ReporterMailer(config)
-shopper_id = ShopperAPI(config)
+nes_helper = NESHelper(config)
+shopper_api = ShopperAPI(config)
 
 email_limit = 1000
 
@@ -122,6 +125,14 @@ def get_database_handle():
 
 def get_kelvin_database_handle():
     return KelvinMongo(config.DB_KELVIN, config.DB_KELVIN_URL, config.COLLECTION)
+
+
+def check_nes_retry(data: dict, retry_function: callable) -> None:
+    # TODO CMAPT-5272: call "get_is_hosted" instead of get_use_nes
+    # If we are using NES, check the nes status before trying the suspension
+    if nes_helper.get_use_nes(data):
+        if not nes_helper.get_nes_state():
+            retry_function.retry()
 
 
 ''' Fraud Tasks '''
@@ -169,31 +180,46 @@ def customer_warning(ticket_id):
     return route_request(data, ticket_id, 'customer_warning') if data else None
 
 
-@celery.task()
+@celery.task(default_retry_delay=300, acks_late=True)
 def intentionally_malicious(ticket_id, investigator_id):
     data = get_database_handle().get_incident(ticket_id)
+    check_nes_retry(data, intentionally_malicious)
+
     # Add investigator user id to data so its available in _notify_fraud and ssl subscription check
     data['investigator_user_id'] = investigator_id
     return route_request(data, ticket_id, 'intentionally_malicious', dual_suspension=True) if data else None
 
 
-@celery.task()
+@celery.task(default_retry_delay=300, acks_late=True)
 def suspend(ticket_id, investigator_id=None):
     data = get_database_handle().get_incident(ticket_id)
+    check_nes_retry(data, suspend)
+
     result = route_request(data, ticket_id, 'suspend') if data else None
     if result:
         appseclogger = get_logging(os.getenv("sysenv"), "zeus")
-        shopper_id = ShopperAPI.get_shopper_id_from_dict(data)
+
+        # Get the correct shopperID and customerID based on if it is HOSTED or not
+        if get_is_hosted(data):
+            shopper_id = shopper_api.get_host_shopper_id_from_dict(data)
+            customer_id = get_host_customer_id_from_dict(data)
+        else:
+            shopper_id = shopper_api.get_shopper_id_from_dict(data)
+            customer_id = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('customerId', None)
+
         domain = data.get('sourceDomainOrIp', {})
-        appseclogger.info("suspending shopper", extra={"event": {"kind": "event",
-                                                                 "category": "process",
-                                                                 "type": ["change", "user"],
-                                                                 "outcome": "success",
-                                                                 "action": "suspend"},
-                                                       "user": {
-                                                           "domain": domain,
-                                                           "shopper_id": shopper_id,
-                                                           "investigator_id": investigator_id}})
+        appseclogger.info("suspending shopper", extra={
+            "event": {
+                "kind": "event",
+                "category": "process",
+                "type": ["change", "user"],
+                "outcome": "success",
+                "action": "suspend"},
+            "user": {
+                "domain": domain,
+                "shopper_id": shopper_id,
+                "customer_id": customer_id,
+                "investigator_id": investigator_id}})
     return result
 
 
@@ -203,21 +229,27 @@ def content_removed(ticket_id):
     return route_request(data, ticket_id, 'content_removed') if data else None
 
 
-@celery.task()
+@celery.task(default_retry_delay=300, acks_late=True)
 def repeat_offender(ticket_id):
     data = get_database_handle().get_incident(ticket_id)
+    check_nes_retry(data, repeat_offender)
+
     return route_request(data, ticket_id, 'repeat_offender') if data else None
 
 
-@celery.task()
+@celery.task(default_retry_delay=300, acks_late=True)
 def extensive_compromise(ticket_id):
     data = get_database_handle().get_incident(ticket_id)
+    check_nes_retry(data, extensive_compromise)
+
     return route_request(data, ticket_id, 'extensive_compromise') if data else None
 
 
-@celery.task()
+@celery.task(default_retry_delay=300, acks_late=True)
 def shopper_compromise(ticket_id, investigator_id):
     data = get_database_handle().get_incident(ticket_id)
+    check_nes_retry(data, shopper_compromise)
+
     # Add investigator user id to data so its available in _notify_fraud()
     data['investigator_user_id'] = investigator_id
     return route_request(data, ticket_id, 'shopper_compromise') if data else None
@@ -270,9 +302,11 @@ def submitted_to_ncmec(ticket_id):
     return route_request(data, ticket_id, 'ncmec_submitted') if data else None
 
 
-@celery.task()
+@celery.task(default_retry_delay=300, acks_late=True)
 def suspend_csam(ticket_id, investigator_id=None):
     data = get_kelvin_database_handle().get_incident(ticket_id)
+    check_nes_retry(data, suspend_csam)
+
     result = route_request(data, ticket_id, 'suspend_csam', dual_suspension=True) if data else None
     if result:
         appseclogger = get_logging(os.getenv("sysenv"), "zeus")

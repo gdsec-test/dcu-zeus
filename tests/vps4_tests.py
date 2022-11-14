@@ -1,3 +1,4 @@
+# TODO CMAPT-5272: delete this entire file
 import requests
 from mock import MagicMock, patch
 from nose.tools import assert_false, assert_true

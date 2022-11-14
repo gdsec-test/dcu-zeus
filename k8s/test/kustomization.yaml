@@ -10,6 +10,7 @@ images:
   newTag: test
 
 
+  # TODO CMAPT-5272: remove GOCENTRAL_URL
 configMapGenerator:
 - literals:
   - sysenv=test
