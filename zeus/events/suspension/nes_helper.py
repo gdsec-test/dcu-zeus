@@ -22,7 +22,6 @@ class NESHelper():
 
     REDIS_EXPIRATION = timedelta(minutes=10)
     REDIS_NES_STATE_KEY = 'nes-state'
-    REDIS_NES_STATE_GOOD = 'UP'
     REDIS_NES_STATE_BAD = 'DOWN'
 
     def __init__(self, settings: AppConfig):
@@ -50,7 +49,7 @@ class NESHelper():
         nes_state = self._redis.get(self.REDIS_NES_STATE_KEY)
         if nes_state:
             state = nes_state.decode()
-            return state == self.REDIS_NES_STATE_GOOD
+            return state != self.REDIS_NES_STATE_BAD
         # If the nes-state isn't set, assume that it is good
         return True
 
@@ -106,7 +105,6 @@ class NESHelper():
                 self._log_error(f'Failed to perform {url_cmd}', entitlement_id, customer_id, response.status_code, response.text, product_type=product)
                 return False
             else:
-                self.set_nes_state(self.REDIS_NES_STATE_GOOD)
                 self._log_info(f'Successfully performed {url_cmd}', entitlement_id, customer_id, product_type=product, status_code=response.status_code)
                 return True
 
@@ -127,7 +125,6 @@ class NESHelper():
 
             # If the response is 200, parse the response for the desired status
             if response.status_code == 200:
-                self.set_nes_state(self.REDIS_NES_STATE_GOOD)
                 json_response = response.json()
                 entitlement_status = json_response.get('status')
                 self._log_info(f'Got entitlement status {entitlement_status}', entitlement_id, customer_id, product_type=product, status_code=response.status_code)
