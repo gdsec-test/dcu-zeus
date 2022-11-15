@@ -115,7 +115,7 @@ class TestNESHelper(TestCase):
     @patch('zeus.events.suspension.nes_helper.Redis.setex')
     @patch('zeus.events.suspension.nes_helper.requests.get', return_value=MagicMock(status_code=200, json=MagicMock(return_value={'status': 'SUSPENDED'})))
     def test_entitlement_status_success(self, get, setex):
-        status = self._nes_helper._get_entitlement_status('test-accountid', 'test-customerid', 'test-product')
+        status = self._nes_helper._get_entitlement_status('test-accountid', 'test-customerid')
         self.assertEqual('SUSPENDED', status)
         get.assert_called_with(
             'localhost/v2/customers/test-customerid/entitlements/test-accountid',
@@ -127,7 +127,7 @@ class TestNESHelper(TestCase):
     @patch('zeus.events.suspension.nes_helper.Redis.setex')
     @patch('zeus.events.suspension.nes_helper.requests.get', return_value=MagicMock(status_code=404))
     def test_entitlement_status_error(self, get, setex):
-        status = self._nes_helper._get_entitlement_status('test-accountid', 'test-customerid', 'test-product')
+        status = self._nes_helper._get_entitlement_status('test-accountid', 'test-customerid')
         self.assertEqual('Failed to get entitlement status', status)
         get.assert_called_with(
             'localhost/v2/customers/test-customerid/entitlements/test-accountid',
@@ -139,7 +139,7 @@ class TestNESHelper(TestCase):
     @patch('zeus.events.suspension.nes_helper.Redis.setex')
     @patch('zeus.events.suspension.nes_helper.requests.get', side_effect=Exception('exception thrown'))
     def test_entitlement_status_exception(self, get, setex):
-        status = self._nes_helper._get_entitlement_status('test-accountid', 'test-customerid', 'test-product')
+        status = self._nes_helper._get_entitlement_status('test-accountid', 'test-customerid')
         self.assertEqual('Exception thrown while trying to get entitlement status', status)
         get.assert_called_with(
             'localhost/v2/customers/test-customerid/entitlements/test-accountid',
