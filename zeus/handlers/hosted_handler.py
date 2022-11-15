@@ -1,7 +1,6 @@
 import logging.config
 from datetime import datetime, timedelta
 
-import elasticapm
 from dcdatabase.phishstorymongo import PhishstoryMongo
 
 from zeus.events.email.fraud_mailer import FraudMailer
@@ -173,7 +172,6 @@ class HostedHandler(Handler):
         source = data.get('source')
         target = data.get('target')
         ticket_id = data.get('ticketId')
-        elasticapm.label(productType=product)
 
         report_type, guid, shopper_id = self._validate_required_args(data)
         if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
@@ -227,7 +225,6 @@ class HostedHandler(Handler):
         source = data.get('source')
         target = data.get('target')
         ticket_id = data.get('ticketId')
-        elasticapm.label(productType=product)
 
         report_type, guid, shopper_id = self._validate_required_args(data)
         if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
@@ -267,7 +264,6 @@ class HostedHandler(Handler):
         product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
         ticket_id = data.get('ticketId')
-        elasticapm.label(productType=product)
 
         report_type, guid, shopper_id = self._validate_required_args(data)
         if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
@@ -304,7 +300,6 @@ class HostedHandler(Handler):
         product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
         ticket_id = data.get('ticketId')
-        elasticapm.label(productType=product)
 
         report_type, guid, shopper_id = self._validate_required_args(data)
         if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
@@ -342,7 +337,6 @@ class HostedHandler(Handler):
         product = get_host_info_from_dict(data).get('product')
         source = data.get('source')
         ticket_id = data.get('ticketId')
-        elasticapm.label(productType=product)
 
         report_type, guid, shopper_id = self._validate_required_args(data)
         if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
@@ -405,7 +399,6 @@ class HostedHandler(Handler):
         source = data.get('source')
         ticket_id = data.get('ticketID')
         product = get_host_info_from_dict(data).get('product')
-        elasticapm.label(productType=product)
 
         report_type, guid, shopper_id = self._validate_required_args(data)
         if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None

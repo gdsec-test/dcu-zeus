@@ -55,13 +55,10 @@ class NESHelper():
         return True
 
     def set_nes_state(self, state: str) -> None:
-        # TODO : apparently 'capture_message' automatically logs an ERROR, which we don't want to do
-        # when we are setting the state GOOD, so figure out how to log info, but not error in elastic apm
         if state == self.REDIS_NES_STATE_BAD:
             client = elasticapm.get_client()
             if client:
                 client.capture_message(f'NES state is {state}')
-        # TODO: figure out how to just log info, not an error
         self._redis.setex(self.REDIS_NES_STATE_KEY, state, self.REDIS_EXPIRATION)
 
     # TODO CMAPT-5272: remove this function and all calls to it
