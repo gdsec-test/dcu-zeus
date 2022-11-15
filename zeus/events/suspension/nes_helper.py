@@ -39,11 +39,9 @@ class NESHelper():
         self._redis = Redis(settings.REDIS)
 
     def suspend(self, entitlement_id: str, customer_id: str, product: str) -> bool:
-        elasticapm.label(productType=product)
         return self._do_suspend_reinstate(entitlement_id, customer_id, self.SUSPEND_CMD)
 
     def reinstate(self, entitlement_id: str, customer_id: str, product: str) -> bool:
-        elasticapm.label(productType=product)
         return self._do_suspend_reinstate(entitlement_id, customer_id, self.REINSTATE_CMD)
 
     def get_nes_state(self) -> bool:
@@ -58,7 +56,7 @@ class NESHelper():
         if state == self.REDIS_NES_STATE_BAD:
             client = elasticapm.get_client()
             if client:
-                client.capture_message(f'NES state is {state}')
+                client.capture_message('NES DOWN')
         self._redis.setex(self.REDIS_NES_STATE_KEY, state, self.REDIS_EXPIRATION)
 
     # TODO CMAPT-5272: remove this function and all calls to it

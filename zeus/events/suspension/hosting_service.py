@@ -1,5 +1,3 @@
-# import elasticapm
-
 from zeus.events.suspension.angelo import Angelo
 from zeus.events.suspension.diablo import Diablo
 from zeus.events.suspension.gocentral import GoCentral
@@ -47,7 +45,6 @@ class HostingService(Product):
         product = product.lower() if product else ''
         if product not in self._products:
             return self.UNSUPPORTED_PRODUCT.format(product)
-        # elasticapm.label(productType=product)
 
         # Use the correct API
         # TODO CMAPT-5272: remove the if statement and other return statement and just use NES

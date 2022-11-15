@@ -1,5 +1,4 @@
 import logging.config
-# import elasticapm
 from datetime import datetime, timedelta
 
 from dcdatabase.phishstorymongo import PhishstoryMongo
@@ -68,8 +67,6 @@ class HostedHandler(Handler):
     def process(self, data, request_type):
         if request_type not in self.mapping:
             return False
-        # product = get_host_info_from_dict(data).get('product')
-        # elasticapm.label(productType=product)
 
         return self.mapping[request_type](data)
 
