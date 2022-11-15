@@ -20,7 +20,7 @@ class TestNESHelper(TestCase):
     @patch('zeus.events.suspension.nes_helper.requests.get', return_value=MagicMock(status_code=200, json=MagicMock(return_value={'status': 'ACTIVE'})))
     @patch('zeus.events.suspension.nes_helper.requests.post', side_effect=Timeout())
     def test_suspend_exception(self, post, get, setex):
-        self.assertFalse(self._nes_helper.suspend('test-accountid', 'test-customerid'))
+        self.assertFalse(self._nes_helper.suspend('test-accountid', 'test-customerid', 'test-product'))
         post.assert_called_with(
             'localhost/v2/customers/test-customerid/suspendByEntitlementId',
             headers={'Content-Type': 'application/json', 'x-app-key': 'zeus', 'Authorization': 'sso-jwt testJWT'},
@@ -33,7 +33,7 @@ class TestNESHelper(TestCase):
     @patch('zeus.events.suspension.nes_helper.requests.get', return_value=MagicMock(status_code=200, json=MagicMock(return_value={'status': 'ACTIVE'})))
     @patch('zeus.events.suspension.nes_helper.requests.post', return_value=MagicMock(status_code=204))
     def test_suspend_success(self, post, get, setex):
-        self.assertTrue(self._nes_helper.suspend('test-accountid', 'test-customerid'))
+        self.assertTrue(self._nes_helper.suspend('test-accountid', 'test-customerid', 'test-product'))
         post.assert_called_with(
             'localhost/v2/customers/test-customerid/suspendByEntitlementId',
             headers={'Content-Type': 'application/json', 'x-app-key': 'zeus', 'Authorization': 'sso-jwt testJWT'},
@@ -46,7 +46,7 @@ class TestNESHelper(TestCase):
     @patch('zeus.events.suspension.nes_helper.requests.get', return_value=MagicMock(status_code=200, json=MagicMock(return_value={'status': 'ACTIVE'})))
     @patch('zeus.events.suspension.nes_helper.requests.post', return_value=MagicMock(status_code=404))
     def test_suspend_fail(self, post, get, setex):
-        self.assertFalse(self._nes_helper.suspend('test-accountid', 'test-customerid'))
+        self.assertFalse(self._nes_helper.suspend('test-accountid', 'test-customerid', 'test-product'))
         post.assert_called_with(
             'localhost/v2/customers/test-customerid/suspendByEntitlementId',
             headers={'Content-Type': 'application/json', 'x-app-key': 'zeus', 'Authorization': 'sso-jwt testJWT'},
@@ -60,7 +60,7 @@ class TestNESHelper(TestCase):
     @patch('zeus.events.suspension.nes_helper.requests.post', return_value=MagicMock(status_code=204))
     def test_suspend_already_suspended(self, post, get, setex):
         # Verify suspension returns true AND that post was not called
-        self.assertTrue(self._nes_helper.suspend('test-accountid', 'test-customerid'))
+        self.assertTrue(self._nes_helper.suspend('test-accountid', 'test-customerid', 'test-product'))
         self.assertFalse(post.called)
         # We still will call setex because the get entitlement status function will be successful
         setex.assert_called_with('nes-state', 'UP', timedelta(minutes=10))
@@ -69,7 +69,7 @@ class TestNESHelper(TestCase):
     @patch('zeus.events.suspension.nes_helper.requests.get', return_value=MagicMock(status_code=200, json=MagicMock(return_value={'status': 'SUSPENDED'})))
     @patch('zeus.events.suspension.nes_helper.requests.post', side_effect=Timeout())
     def test_reinstate_exception(self, post, get, setex):
-        self.assertFalse(self._nes_helper.reinstate('test-accountid', 'test-customerid'))
+        self.assertFalse(self._nes_helper.reinstate('test-accountid', 'test-customerid', 'test-product'))
         post.assert_called_with(
             'localhost/v2/customers/test-customerid/reinstateByEntitlementId',
             headers={'Content-Type': 'application/json', 'x-app-key': 'zeus', 'Authorization': 'sso-jwt testJWT'},
@@ -82,7 +82,7 @@ class TestNESHelper(TestCase):
     @patch('zeus.events.suspension.nes_helper.requests.get', return_value=MagicMock(status_code=200, json=MagicMock(return_value={'status': 'SUSPENDED'})))
     @patch('zeus.events.suspension.nes_helper.requests.post', return_value=MagicMock(status_code=204))
     def test_reinstate_success(self, post, get, setex):
-        self.assertTrue(self._nes_helper.reinstate('test-accountid', 'test-customerid'))
+        self.assertTrue(self._nes_helper.reinstate('test-accountid', 'test-customerid', 'test-product'))
         post.assert_called_with(
             'localhost/v2/customers/test-customerid/reinstateByEntitlementId',
             headers={'Content-Type': 'application/json', 'x-app-key': 'zeus', 'Authorization': 'sso-jwt testJWT'},
@@ -95,7 +95,7 @@ class TestNESHelper(TestCase):
     @patch('zeus.events.suspension.nes_helper.requests.get', return_value=MagicMock(status_code=200, json=MagicMock(return_value={'status': 'SUSPENDED'})))
     @patch('zeus.events.suspension.nes_helper.requests.post', return_value=MagicMock(status_code=404))
     def test_reinstate_fail(self, post, get, setex):
-        self.assertFalse(self._nes_helper.reinstate('test-accountid', 'test-customerid'))
+        self.assertFalse(self._nes_helper.reinstate('test-accountid', 'test-customerid', 'test-product'))
         post.assert_called_with(
             'localhost/v2/customers/test-customerid/reinstateByEntitlementId',
             headers={'Content-Type': 'application/json', 'x-app-key': 'zeus', 'Authorization': 'sso-jwt testJWT'},
@@ -109,7 +109,7 @@ class TestNESHelper(TestCase):
     @patch('zeus.events.suspension.nes_helper.requests.post', return_value=MagicMock(status_code=204))
     def test_reinstate_already_active(self, post, get, setex):
         # Verify suspension returns true AND that post was not called
-        self.assertTrue(self._nes_helper.reinstate('test-accountid', 'test-customerid'))
+        self.assertTrue(self._nes_helper.reinstate('test-accountid', 'test-customerid', 'test-product'))
         self.assertFalse(post.called)
         # We still will call setex because the get entitlement status function will be successful
         setex.assert_called_with('nes-state', 'UP', timedelta(minutes=10))
@@ -117,7 +117,7 @@ class TestNESHelper(TestCase):
     @patch('zeus.events.suspension.nes_helper.Redis.setex')
     @patch('zeus.events.suspension.nes_helper.requests.get', return_value=MagicMock(status_code=200, json=MagicMock(return_value={'status': 'SUSPENDED'})))
     def test_entitlement_status_success(self, get, setex):
-        status = self._nes_helper._get_entitlement_status('test-accountid', 'test-customerid')
+        status = self._nes_helper._get_entitlement_status('test-accountid', 'test-customerid', 'test-product')
         self.assertEqual('SUSPENDED', status)
         get.assert_called_with(
             'localhost/v2/customers/test-customerid/entitlements/test-accountid',
@@ -129,7 +129,7 @@ class TestNESHelper(TestCase):
     @patch('zeus.events.suspension.nes_helper.Redis.setex')
     @patch('zeus.events.suspension.nes_helper.requests.get', return_value=MagicMock(status_code=404))
     def test_entitlement_status_error(self, get, setex):
-        status = self._nes_helper._get_entitlement_status('test-accountid', 'test-customerid')
+        status = self._nes_helper._get_entitlement_status('test-accountid', 'test-customerid', 'test-product')
         self.assertEqual('Failed to get entitlement status', status)
         get.assert_called_with(
             'localhost/v2/customers/test-customerid/entitlements/test-accountid',
@@ -141,7 +141,7 @@ class TestNESHelper(TestCase):
     @patch('zeus.events.suspension.nes_helper.Redis.setex')
     @patch('zeus.events.suspension.nes_helper.requests.get', side_effect=Exception('exception thrown'))
     def test_entitlement_status_exception(self, get, setex):
-        status = self._nes_helper._get_entitlement_status('test-accountid', 'test-customerid')
+        status = self._nes_helper._get_entitlement_status('test-accountid', 'test-customerid', 'test-product')
         self.assertEqual('Exception thrown while trying to get entitlement status', status)
         get.assert_called_with(
             'localhost/v2/customers/test-customerid/entitlements/test-accountid',

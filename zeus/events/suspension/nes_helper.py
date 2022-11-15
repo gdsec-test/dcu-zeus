@@ -40,11 +40,11 @@ class NESHelper():
         #  value first, then time.  In other version of redis, as well as the StrictRedis the parameters are: time, then value.
         self._redis = Redis(settings.REDIS)
 
-    def suspend(self, entitlement_id: str, customer_id: str) -> bool:
-        return self._do_suspend_reinstate(entitlement_id, customer_id, self.SUSPEND_CMD)
+    def suspend(self, entitlement_id: str, customer_id: str, product: str) -> bool:
+        return self._do_suspend_reinstate(entitlement_id, customer_id, self.SUSPEND_CMD, product)
 
-    def reinstate(self, entitlement_id: str, customer_id: str) -> bool:
-        return self._do_suspend_reinstate(entitlement_id, customer_id, self.REINSTATE_CMD)
+    def reinstate(self, entitlement_id: str, customer_id: str, product: str) -> bool:
+        return self._do_suspend_reinstate(entitlement_id, customer_id, self.REINSTATE_CMD, product)
 
     def get_nes_state(self) -> bool:
         nes_state = self._redis.get(self.REDIS_NES_STATE_KEY)
@@ -85,13 +85,13 @@ class NESHelper():
                 return products_use_nes_flag.get(product) == 'True' or all_use_nes_flag == 'True'
         return False
 
-    def _do_suspend_reinstate(self, entitlement_id: str, customer_id: str, url_cmd: str) -> bool:
+    def _do_suspend_reinstate(self, entitlement_id: str, customer_id: str, url_cmd: str, product: str) -> bool:
         try:
             # Only perform the suspend / reinstate if it isn't already in that state
-            status = self._get_entitlement_status(entitlement_id, customer_id)
+            status = self._get_entitlement_status(entitlement_id, customer_id, product)
             expected_status = 'SUSPENDED' if url_cmd == self.SUSPEND_CMD else 'ACTIVE'
             if status == expected_status:
-                self._log_info(f'Account already has correct status of {status}', entitlement_id, customer_id)
+                self._log_info(f'Account already has correct status of {status}', entitlement_id, customer_id, product_type=product)
                 return True
 
             url = f'{self._subscriptions_url}v2/customers/{customer_id}/{url_cmd}'
@@ -106,19 +106,19 @@ class NESHelper():
             # process response and log errors and successes
             if response.status_code not in [200, 204]:
                 self.set_nes_state(self.REDIS_NES_STATE_BAD)
-                self._log_error(f'Failed to perform {url_cmd}', entitlement_id, customer_id, response.status_code, response.text)
+                self._log_error(f'Failed to perform {url_cmd}', entitlement_id, customer_id, response.status_code, response.text, product_type=product)
                 return False
             else:
                 self.set_nes_state(self.REDIS_NES_STATE_GOOD)
-                self._log_info(f'Successfully performed {url_cmd}', entitlement_id, customer_id, status_code=response.status_code)
+                self._log_info(f'Successfully performed {url_cmd}', entitlement_id, customer_id, product_type=product, status_code=response.status_code)
                 return True
 
         except Exception as e:
-            self._log_exception(f'Exception thrown while trying to perform {url_cmd}', e, entitlement_id, customer_id)
+            self._log_exception(f'Exception thrown while trying to perform {url_cmd}', e, entitlement_id, customer_id, product)
             self.set_nes_state(self.REDIS_NES_STATE_BAD)
             return False
 
-    def _get_entitlement_status(self, entitlement_id: str, customer_id: str) -> str:
+    def _get_entitlement_status(self, entitlement_id: str, customer_id: str, product: str) -> str:
         try:
             url = f'{self._entitlement_url}v2/customers/{customer_id}/entitlements/{entitlement_id}'
             response = requests.get(url, headers=self._headers, timeout=30)
@@ -133,42 +133,50 @@ class NESHelper():
                 self.set_nes_state(self.REDIS_NES_STATE_GOOD)
                 json_response = response.json()
                 entitlement_status = json_response.get('status')
-                self._log_info(f'Got entitlement status {entitlement_status}', entitlement_id, customer_id, status_code=response.status_code)
+                self._log_info(f'Got entitlement status {entitlement_status}', entitlement_id, customer_id, product_type=product, status_code=response.status_code)
                 return entitlement_status
 
             # If the response is anything else, log the error, and return that error
             self.set_nes_state(self.REDIS_NES_STATE_BAD)
             error_msg = 'Failed to get entitlement status'
-            self._log_error(error_msg, entitlement_id, customer_id, response.status_code, response.text)
+            self._log_error(error_msg, entitlement_id, customer_id, response.status_code, response.text, product)
             return error_msg
         except Exception as e:
             self.set_nes_state(self.REDIS_NES_STATE_BAD)
             error_msg = 'Exception thrown while trying to get entitlement status'
-            self._log_exception(error_msg, e, entitlement_id, customer_id)
+            self._log_exception(error_msg, e, entitlement_id, customer_id, product_type=product)
             return error_msg
 
-    def _log_error(self, message: str, entitlement_id: str, customer_id: str, status_code: int, response_msg: str) -> None:
-        self._logger.error(message, extra={
+    def _log_error(self, message: str, entitlement_id: str, customer_id: str, status_code: int, response_msg: str, product_type: Optional[str]) -> None:
+        extraData = {
             'entitlementId': entitlement_id,
             'customerId': customer_id,
             'statusCode': status_code,
             'responseMsg': response_msg
-        })
+        }
+        if product_type:
+            extraData.update({'productType': product_type})
+        self._logger.error(message, extra=extraData)
 
-    def _log_info(self, message: str, entitlement_id: str, customer_id: str, status_code: Optional[int] = None) -> None:
+    def _log_info(self, message: str, entitlement_id: str, customer_id: str, product_type: Optional[str], status_code: Optional[int] = None) -> None:
         extraData = {
             'entitlementId': entitlement_id,
             'customerId': customer_id}
         if status_code:
             extraData.update({'statusCode': str(status_code)})
+        if product_type:
+            extraData.update({'productType': product_type})
         self._logger.info(message, extra=extraData)
 
-    def _log_exception(self, message: str, e: Exception, entitlement_id: str, customer_id: str) -> None:
-        self._logger.exception(message, extra={
+    def _log_exception(self, message: str, e: Exception, entitlement_id: str, customer_id: str, product_type: Optional[str]) -> None:
+        extraData = {
             'exception': e,
             'entitlement_id': entitlement_id,
             'customer_id': customer_id
-        })
+        }
+        if product_type:
+            extraData.update({'productType': product_type})
+        self._logger.exception(message, extra=extraData)
 
     def _get_jwt(self, cert: tuple) -> str:
         """

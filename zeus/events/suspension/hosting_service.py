@@ -50,7 +50,7 @@ class HostingService(Product):
         # TODO CMAPT-5272: remove the if statement and other return statement and just use NES
         if self.nes_helper.get_use_nes(data):
             customer_id = get_host_customer_id_from_dict(data)
-            return self.nes_helper.suspend(identifier, customer_id)
+            return self.nes_helper.suspend(identifier, customer_id, product)
 
         return self._products.get(product).suspend(guid=identifier, data=data)
 
