@@ -38,10 +38,10 @@ class NESHelper():
         #  value first, then time.  In other version of redis, as well as the StrictRedis the parameters are: time, then value.
         self._redis = Redis(settings.REDIS)
 
-    def suspend(self, entitlement_id: str, customer_id: str, product: str) -> bool:
+    def suspend(self, entitlement_id: str, customer_id: str) -> bool:
         return self._do_suspend_reinstate(entitlement_id, customer_id, self.SUSPEND_CMD)
 
-    def reinstate(self, entitlement_id: str, customer_id: str, product: str) -> bool:
+    def reinstate(self, entitlement_id: str, customer_id: str) -> bool:
         return self._do_suspend_reinstate(entitlement_id, customer_id, self.REINSTATE_CMD)
 
     def get_nes_state(self) -> bool:
