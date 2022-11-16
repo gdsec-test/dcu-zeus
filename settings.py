@@ -250,6 +250,8 @@ class UnitTestConfig(AppConfig):
     PLESKPASS = 'pleskpass'
     VPS4USER = 'vps4user'
     VPS4PASS = 'vps4pass'
+    VERTIGO_USER = 'vertigouser'
+    VERTIGO_PASS = 'vertigopass'
 
     GOCENTRAL_SSL_CERT = 'cert'
     GOCENTRAL_SSL_KEY = 'key'
