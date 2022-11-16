@@ -67,6 +67,7 @@ class HostedHandler(Handler):
     def process(self, data, request_type):
         if request_type not in self.mapping:
             return False
+
         return self.mapping[request_type](data)
 
     def customer_warning(self, data):

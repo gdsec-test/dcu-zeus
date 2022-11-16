@@ -21,7 +21,6 @@ class NESHelper():
 
     REDIS_EXPIRATION = timedelta(minutes=10)
     REDIS_NES_STATE_KEY = 'nes-state'
-    REDIS_NES_STATE_GOOD = 'UP'
     REDIS_NES_STATE_BAD = 'DOWN'
 
     def __init__(self, settings: AppConfig):
@@ -49,14 +48,15 @@ class NESHelper():
         nes_state = self._redis.get(self.REDIS_NES_STATE_KEY)
         if nes_state:
             state = nes_state.decode()
-            return state == self.REDIS_NES_STATE_GOOD
+            return state != self.REDIS_NES_STATE_BAD
         # If the nes-state isn't set, assume that it is good
         return True
 
     def set_nes_state(self, state: str) -> None:
-        client = elasticapm.get_client()
-        if client:
-            client.capture_message(f'NES state is {state}')
+        if state == self.REDIS_NES_STATE_BAD:
+            client = elasticapm.get_client()
+            if client:
+                client.capture_message('NES DOWN')
         self._redis.setex(self.REDIS_NES_STATE_KEY, state, self.REDIS_EXPIRATION)
 
     # TODO CMAPT-5272: remove this function and all calls to it
@@ -104,7 +104,6 @@ class NESHelper():
                 self._log_error(f'Failed to perform {url_cmd}', entitlement_id, customer_id, response.status_code, response.text)
                 return False
             else:
-                self.set_nes_state(self.REDIS_NES_STATE_GOOD)
                 self._log_info(f'Successfully performed {url_cmd}', entitlement_id, customer_id)
                 return True
 
@@ -125,10 +124,9 @@ class NESHelper():
 
             # If the response is 200, parse the response for the desired status
             if response.status_code == 200:
-                self.set_nes_state(self.REDIS_NES_STATE_GOOD)
                 json_response = response.json()
                 entitlement_status = json_response.get('status')
-                self._log_info(f'Succesfully got entitlement status {entitlement_status}', entitlement_id, customer_id)
+                self._log_info(f'Got entitlement status {entitlement_status}', entitlement_id, customer_id)
                 return entitlement_status
 
             # If the response is anything else, log the error, and return that error
@@ -153,8 +151,7 @@ class NESHelper():
     def _log_info(self, message: str, entitlement_id: str, customer_id: str) -> None:
         self._logger.info(message, extra={
             'entitlementId': entitlement_id,
-            'customerId': customer_id
-        })
+            'customerId': customer_id})
 
     def _log_exception(self, message: str, e: Exception, entitlement_id: str, customer_id: str) -> None:
         self._logger.exception(message, extra={

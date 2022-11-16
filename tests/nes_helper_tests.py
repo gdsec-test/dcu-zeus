@@ -40,7 +40,7 @@ class TestNESHelper(TestCase):
             json={'entitlementId': 'test-accountid', 'suspendReason': 'POLICY'},
             timeout=30
         )
-        setex.assert_called_with('nes-state', 'UP', timedelta(minutes=10))
+        self.assertFalse(setex.called)
 
     @patch('zeus.events.suspension.nes_helper.Redis.setex')
     @patch('zeus.events.suspension.nes_helper.requests.get', return_value=MagicMock(status_code=200, json=MagicMock(return_value={'status': 'ACTIVE'})))
@@ -62,8 +62,7 @@ class TestNESHelper(TestCase):
         # Verify suspension returns true AND that post was not called
         self.assertTrue(self._nes_helper.suspend('test-accountid', 'test-customerid'))
         self.assertFalse(post.called)
-        # We still will call setex because the get entitlement status function will be successful
-        setex.assert_called_with('nes-state', 'UP', timedelta(minutes=10))
+        self.assertFalse(setex.called)
 
     @patch('zeus.events.suspension.nes_helper.Redis.setex')
     @patch('zeus.events.suspension.nes_helper.requests.get', return_value=MagicMock(status_code=200, json=MagicMock(return_value={'status': 'SUSPENDED'})))
@@ -89,7 +88,7 @@ class TestNESHelper(TestCase):
             json={'entitlementId': 'test-accountid', 'suspendReason': 'POLICY'},
             timeout=30
         )
-        setex.assert_called_with('nes-state', 'UP', timedelta(minutes=10))
+        self.assertFalse(setex.called)
 
     @patch('zeus.events.suspension.nes_helper.Redis.setex')
     @patch('zeus.events.suspension.nes_helper.requests.get', return_value=MagicMock(status_code=200, json=MagicMock(return_value={'status': 'SUSPENDED'})))
@@ -111,8 +110,7 @@ class TestNESHelper(TestCase):
         # Verify suspension returns true AND that post was not called
         self.assertTrue(self._nes_helper.reinstate('test-accountid', 'test-customerid'))
         self.assertFalse(post.called)
-        # We still will call setex because the get entitlement status function will be successful
-        setex.assert_called_with('nes-state', 'UP', timedelta(minutes=10))
+        self.assertFalse(setex.called)
 
     @patch('zeus.events.suspension.nes_helper.Redis.setex')
     @patch('zeus.events.suspension.nes_helper.requests.get', return_value=MagicMock(status_code=200, json=MagicMock(return_value={'status': 'SUSPENDED'})))
@@ -124,7 +122,7 @@ class TestNESHelper(TestCase):
             headers={'Content-Type': 'application/json', 'x-app-key': 'zeus', 'Authorization': 'sso-jwt testJWT'},
             timeout=30
         )
-        setex.assert_called_with('nes-state', 'UP', timedelta(minutes=10))
+        self.assertFalse(setex.called)
 
     @patch('zeus.events.suspension.nes_helper.Redis.setex')
     @patch('zeus.events.suspension.nes_helper.requests.get', return_value=MagicMock(status_code=404))
@@ -175,5 +173,6 @@ class TestNESHelper(TestCase):
         self.assertFalse(self._nes_helper.get_use_nes({'hosted_status': 'HOSTED'}))
 
     def test_set_nes_state(self):
-        self._nes_helper.set_nes_state('UP')
-        self.assertTrue(self._nes_helper.get_nes_state())
+        self.assertFalse(self._nes_helper.get_nes_state())
+        self._nes_helper.set_nes_state('DOWN')
+        self.assertFalse(self._nes_helper.get_nes_state())

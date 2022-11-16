@@ -1,6 +1,7 @@
 import logging
 import os
 
+import elasticapm
 import yaml
 from celery import Celery, bootsteps
 from csetutils.appsec.logging import get_logging
@@ -18,7 +19,8 @@ from zeus.handlers.foreign_handler import ForeignHandler
 from zeus.handlers.fraud_handler import FraudHandler
 from zeus.handlers.hosted_handler import HostedHandler
 from zeus.handlers.registered_handler import RegisteredHandler
-from zeus.utils.functions import get_host_customer_id_from_dict, get_is_hosted
+from zeus.utils.functions import (get_host_customer_id_from_dict,
+                                  get_host_info_from_dict, get_is_hosted)
 from zeus.utils.shopperapi import ShopperAPI
 
 env = os.getenv('sysenv', 'dev')
@@ -27,7 +29,7 @@ config = config_by_name[env]()
 celery = Celery()
 celery.config_from_object(CeleryConfig(config))
 
-instrument(service_name='zeus', env=env)
+apm_client = instrument(service_name='zeus', env=env)
 
 log_level = os.getenv('LOG_LEVEL', 'INFO')
 
@@ -127,7 +129,13 @@ def get_kelvin_database_handle():
     return KelvinMongo(config.DB_KELVIN, config.DB_KELVIN_URL, config.COLLECTION)
 
 
+def start_transaction() -> None:
+    apm_client.begin_transaction('celery')
+
+
 def check_nes_retry(data: dict, retry_function: callable) -> None:
+    elasticapm.label(product=get_host_info_from_dict(data).get('product', 'unknown'))
+
     # TODO CMAPT-5272: call "get_is_hosted" instead of get_use_nes
     # If we are using NES, check the nes status before trying the suspension
     if nes_helper.get_use_nes(data):
@@ -182,6 +190,7 @@ def customer_warning(ticket_id):
 
 @celery.task(default_retry_delay=300, acks_late=True)
 def intentionally_malicious(ticket_id, investigator_id):
+    start_transaction()
     data = get_database_handle().get_incident(ticket_id)
     check_nes_retry(data, intentionally_malicious)
 
@@ -192,6 +201,7 @@ def intentionally_malicious(ticket_id, investigator_id):
 
 @celery.task(default_retry_delay=300, acks_late=True)
 def suspend(ticket_id, investigator_id=None):
+    start_transaction()
     data = get_database_handle().get_incident(ticket_id)
     check_nes_retry(data, suspend)
 
@@ -231,6 +241,7 @@ def content_removed(ticket_id):
 
 @celery.task(default_retry_delay=300, acks_late=True)
 def repeat_offender(ticket_id):
+    start_transaction()
     data = get_database_handle().get_incident(ticket_id)
     check_nes_retry(data, repeat_offender)
 
@@ -239,6 +250,7 @@ def repeat_offender(ticket_id):
 
 @celery.task(default_retry_delay=300, acks_late=True)
 def extensive_compromise(ticket_id):
+    start_transaction()
     data = get_database_handle().get_incident(ticket_id)
     check_nes_retry(data, extensive_compromise)
 
@@ -247,6 +259,7 @@ def extensive_compromise(ticket_id):
 
 @celery.task(default_retry_delay=300, acks_late=True)
 def shopper_compromise(ticket_id, investigator_id):
+    start_transaction()
     data = get_database_handle().get_incident(ticket_id)
     check_nes_retry(data, shopper_compromise)
 
@@ -304,6 +317,7 @@ def submitted_to_ncmec(ticket_id):
 
 @celery.task(default_retry_delay=300, acks_late=True)
 def suspend_csam(ticket_id, investigator_id=None):
+    start_transaction()
     data = get_kelvin_database_handle().get_incident(ticket_id)
     check_nes_retry(data, suspend_csam)
 
