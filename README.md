@@ -90,10 +90,8 @@ TODO CMAPT-5272: remove all diablo, plesk, vps4, gocentral, and cmap proxy varai
 * `GOCENTRAL_URL` SOAP URL for adding Orion event for suspending GoCentral guid
 * `GOCENTRAL_SSL_CERT` (The path to the SSL Cert white-listed for Orion Web Service `dcu.ecomm.dev.authclient.int.godaddy.com` dev/test use dev, prod uses prod)
 * `GOCENTRAL_SSL_KEY` (The path to the SSL Key white-listed for Orion Web Service `dcu.ecomm.dev.authclient.int.godaddy.com` dev/test use dev, prod uses prod)
-* `CMAP_PROXY_CERT` Path to certificate file (for connecting to CMAP Proxy `proxyuser.cmap.int.godaddy.com` prod only)
-* `CMAP_PROXY_KEY` Path to key file(for connecting to CMAP Proxy `proxyuser.cmap.int.godaddy.com`  prod only)
-* `CMAP_PROXY_USER` (User for CMAP Proxy)
-* `CMAP_PROXY_PASS` (Password for CMAP Proxy)
+* `VERTIGO_USER` (User for Vertigo)
+* `VERTIGO_PASS` (Password for Vertigo)
 * `RESULT_BACKEND_HOSTNAME` (localhost)
 * `ZEUS_CLIENT_CERT` (The path to the Zeus Client Cert for communicating with CRM Alert, Mimir and Shoplocked `zeus.client.cset.int.`)
 * `ZEUS_CLIENT__KEY` (The path to the Zeus Client Key for communicating with CRM Alert, Mimir and Shoplocked `zeus.client.cset.int.`)

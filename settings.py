@@ -78,14 +78,12 @@ class AppConfig(object):
         self.PLESKUSER = os.getenv('PLESKUSER', 'pleskuser')
         self.PLESKPASS = os.getenv('PLESKPASS', 'pleskpass')
 
-        self.CMAP_PROXY_USER = os.getenv('CMAP_PROXY_USER', 'cmapproxyuser')
-        self.CMAP_PROXY_PASS = os.getenv('CMAP_PROXY_PASS', 'cmapproxypass')
-        self.CMAP_PROXY_CERT = os.getenv('CMAP_PROXY_CERT', 'cmapproxy.crt')
-        self.CMAP_PROXY_KEY = os.getenv('CMAP_PROXY_KEY', 'cmapproxy.key')
-
         # VPS4 User/Pass are creds for a DCU Service account in the DCU-PHISHSTORY AD Group
         self.VPS4USER = os.getenv('VPS4USER', 'vps4user')
         self.VPS4PASS = os.getenv('VPS4PASS', 'vps4pass')
+
+        self.VERTIGO_USER = os.getenv('VERTIGO_USER', 'vertigouser')
+        self.VERTIGO_PASS = os.getenv('VERTIGO_PASS', 'vertigopass')
 
         self.CAN_FLOOD = os.getenv('sysenv', 'dev') in ['dev', 'test']
 
@@ -115,7 +113,7 @@ class ProductionAppConfig(AppConfig):
     SSO_URL = 'https://sso.gdcorp.tools'
     MIMIR_URL = 'https://mimir.cset.int.gdcorp.tools'
     SHOPLOCKED_URL = 'https://shoplocked.cset.int.gdcorp.tools'
-    VERT_URL = 'https://vertigo.cmap.proxy.int.godaddy.com/vertigo/v1/container/'
+    VERT_URL = 'https://vertigo.int.gdcorp.tools/vertigo/v1/container/'
     CRMALERT_URL = 'https://crm-alert.cset.int.gdcorp.tools'
 
     # TODO CMAPT-5272: remove all references to VPS4_URLS variable
@@ -253,10 +251,6 @@ class UnitTestConfig(AppConfig):
     VPS4USER = 'vps4user'
     VPS4PASS = 'vps4pass'
 
-    CMAP_PROXY_USER = 'cmapproxyuser'
-    CMAP_PROXY_PASS = 'cmapproxypass'
-    CMAP_PROXY_CERT = 'cmapproxy.crt'
-    CMAP_PROXY_KEY = 'cmapproxy.key'
     GOCENTRAL_SSL_CERT = 'cert'
     GOCENTRAL_SSL_KEY = 'key'
 

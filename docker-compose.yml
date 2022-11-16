@@ -5,12 +5,10 @@ services:
       BROKER_URL: ${BROKER_URL}
       QUEUE_TYPE: 'quorum'
       # TODO CMAPT-5272: remove all CMAP_PROXY*, DIABLO*, GOCENTRAL_*, PLESK4*, and VPS4* variables
-      CMAP_PROXY_CERT: '/tmp/certs/proxyuser.cmap.int.godaddy.com.crt'
-      CMAP_PROXY_KEY: '/tmp/certs/proxyuser.cmap.int.godaddy.com.key'
       CMAP_API_CERT: '/tmp/certs/apiuser.cmap.int.godaddy.com.crt'
       CMAP_API_KEY: '/tmp/certs/apiuser.cmap.int.godaddy.com.key'
-      CMAP_PROXY_PASS: ${CMAP_PROXY_PASS}
-      CMAP_PROXY_USER: ${CMAP_PROXY_USER}
+      VERTIGO_PASS: ${VERTIGO_PASS}
+      VERTIGO_USER: ${VERTIGO_USER}
       DB_PASS: ${DB_PASS}
       DIABLOPASS: ${DIABLOPASS}
       DIABLOUSER: ${DIABLOUSER}
