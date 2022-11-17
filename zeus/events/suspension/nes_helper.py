@@ -112,7 +112,19 @@ class NESHelper():
             self.set_nes_state(self.REDIS_NES_STATE_BAD)
             return False
 
+    def get_entitlement_product(self, entitlement_id: str, customer_id: str) -> str:
+        json_response = self._get_entitlement_data(entitlement_id, customer_id)
+        product = json_response.get('product', {}).get('productType', 'unknown')
+        self._log_info(f'Got entitlement product {product}', entitlement_id, customer_id)
+        return product
+
     def _get_entitlement_status(self, entitlement_id: str, customer_id: str) -> str:
+        json_response = self._get_entitlement_data(entitlement_id, customer_id)
+        entitlement_status = json_response.get('status', '')
+        self._log_info(f'Got entitlement status {entitlement_status}', entitlement_id, customer_id)
+        return entitlement_status
+
+    def _get_entitlement_data(self, entitlement_id: str, customer_id: str) -> dict:
         try:
             url = f'{self._entitlement_url}v2/customers/{customer_id}/entitlements/{entitlement_id}'
             response = requests.get(url, headers=self._headers, timeout=30)
@@ -122,23 +134,18 @@ class NESHelper():
                 self._headers.update({'Authorization': f'sso-jwt {self._get_jwt(self._cert)}'})
                 response = requests.get(url, headers=self._headers, timeout=30)
 
-            # If the response is 200, parse the response for the desired status
+            # If the response is 200, return the response
             if response.status_code == 200:
-                json_response = response.json()
-                entitlement_status = json_response.get('status')
-                self._log_info(f'Got entitlement status {entitlement_status}', entitlement_id, customer_id)
-                return entitlement_status
+                return response.json()
 
-            # If the response is anything else, log the error, and return that error
+            # If the response is anything else, log the error and return empty dict
             self.set_nes_state(self.REDIS_NES_STATE_BAD)
-            error_msg = 'Failed to get entitlement status'
-            self._log_error(error_msg, entitlement_id, customer_id, response.status_code, response.text)
-            return error_msg
+            self._log_error('Failed to get entitlement status', entitlement_id, customer_id, response.status_code, response.text)
+            return {}
         except Exception as e:
             self.set_nes_state(self.REDIS_NES_STATE_BAD)
-            error_msg = 'Exception thrown while trying to get entitlement status'
-            self._log_exception(error_msg, e, entitlement_id, customer_id)
-            return error_msg
+            self._log_exception('Exception thrown while trying to get entitlement status', e, entitlement_id, customer_id)
+            return {}
 
     def _log_error(self, message: str, entitlement_id: str, customer_id: str, status_code: int, response_msg: str) -> None:
         self._logger.error(message, extra={

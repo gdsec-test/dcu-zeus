@@ -200,6 +200,30 @@ def intentionally_malicious(ticket_id, investigator_id):
 
 
 @celery.task(default_retry_delay=300, acks_late=True)
+def reinstate(entitlement_id: str, customer_id: str) -> bool:
+    # ASSUMPTION: If this endpoint is called, we are assuming that we should use NES
+    start_transaction()
+    elasticapm.label(product=nes_helper.get_entitlement_product(entitlement_id, customer_id))
+    if not nes_helper.get_nes_state():
+        reinstate.retry()
+
+    result = nes_helper.reinstate(entitlement_id, customer_id)
+    if result:
+        appseclogger = get_logging(os.getenv("sysenv"), "zeus")
+        appseclogger.info("reinstating shopper", extra={
+            "event": {
+                "kind": "event",
+                "category": "process",
+                "type": ["change", "user"],
+                "outcome": "success",
+                "action": "reinstate"},
+            "user": {
+                "customer_id": customer_id,
+                "entitlement_id": entitlement_id}})
+    return result
+
+
+@celery.task(default_retry_delay=300, acks_late=True)
 def suspend(ticket_id, investigator_id=None):
     start_transaction()
     data = get_database_handle().get_incident(ticket_id)
