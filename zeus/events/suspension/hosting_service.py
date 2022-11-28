@@ -7,7 +7,9 @@ from zeus.events.suspension.nes_helper import NESHelper
 from zeus.events.suspension.vertigo import Vertigo
 from zeus.events.suspension.vps4 import VPS4
 from zeus.persist.notification_timeouts import Throttle
-from zeus.utils.functions import get_host_customer_id_from_dict
+from zeus.utils.functions import (get_host_customer_id_from_dict,
+                                  get_host_info_from_dict)
+from zeus.utils.shopperapi import ShopperAPI
 
 
 class ThrottledHostingService:
@@ -40,6 +42,7 @@ class HostingService(Product):
                           'vps4': VPS4(app_settings),
                           'gocentral': GoCentral(app_settings)}
         self.nes_helper = NESHelper(app_settings)
+        self._shopper_api = ShopperAPI(app_settings)
 
     def suspend(self, product, identifier, data):
         product = product.lower() if product else ''
@@ -50,6 +53,9 @@ class HostingService(Product):
         # TODO CMAPT-5272: remove the if statement and other return statement and just use NES
         if self.nes_helper.get_use_nes(data):
             customer_id = get_host_customer_id_from_dict(data)
+            if not customer_id:
+                host_shopper_id = get_host_info_from_dict(data).get('shopperId', '')
+                customer_id = self._shopper_api.get_customer_id_from_shopper_id(host_shopper_id)
             return self.nes_helper.suspend(identifier, customer_id)
 
         return self._products.get(product).suspend(guid=identifier, data=data)
