@@ -125,7 +125,7 @@ class TestNESHelper(TestCase):
         self.assertFalse(setex.called)
 
     @patch('zeus.events.suspension.nes_helper.Redis.setex')
-    @patch('zeus.events.suspension.nes_helper.requests.get', return_value=MagicMock(status_code=404))
+    @patch('zeus.events.suspension.nes_helper.requests.get', return_value=MagicMock(status_code=500))
     def test_entitlement_status_error(self, get, setex):
         status = self._nes_helper._get_entitlement_status('test-accountid', 'test-customerid')
         self.assertEqual('Failed to get entitlement status', status)
@@ -135,6 +135,18 @@ class TestNESHelper(TestCase):
             timeout=30
         )
         setex.assert_called_with('nes-state', 'DOWN', timedelta(minutes=10))
+
+    @patch('zeus.events.suspension.nes_helper.Redis.setex')
+    @patch('zeus.events.suspension.nes_helper.requests.get', return_value=MagicMock(status_code=404))
+    def test_entitlement_status_404_error(self, get, setex):
+        status = self._nes_helper._get_entitlement_status('test-accountid', 'test-customerid')
+        self.assertEqual('Failed to get entitlement status', status)
+        get.assert_called_with(
+            'localhost/v2/customers/test-customerid/entitlements/test-accountid',
+            headers={'Content-Type': 'application/json', 'x-app-key': 'zeus', 'Authorization': 'sso-jwt testJWT'},
+            timeout=30
+        )
+        self.assertFalse(setex.called)
 
     @patch('zeus.events.suspension.nes_helper.Redis.setex')
     @patch('zeus.events.suspension.nes_helper.requests.get', side_effect=Exception('exception thrown'))
