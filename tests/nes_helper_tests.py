@@ -172,7 +172,11 @@ class TestNESHelper(TestCase):
     def test_get_use_nes_no_product(self):
         self.assertFalse(self._nes_helper.get_use_nes({'hosted_status': 'HOSTED'}))
 
-    def test_set_nes_state(self):
-        self.assertFalse(self._nes_helper.get_nes_state())
+    @patch('zeus.events.suspension.nes_helper.Redis.get', return_value='')
+    def test_set_nes_state_not_set(self, get):
+        # If the state isn't set, we assume it's good
+        self.assertTrue(self._nes_helper.get_nes_state())
+
+    def test_set_nes_state_down(self):
         self._nes_helper.set_nes_state('DOWN')
         self.assertFalse(self._nes_helper.get_nes_state())

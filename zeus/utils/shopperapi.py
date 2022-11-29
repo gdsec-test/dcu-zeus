@@ -13,15 +13,42 @@ class ShopperAPI:
     KEY_SHOPPER_ID = 'shopperId'
     REDIS_EXPIRATION = timedelta(days=5)
     REDIS_CUSTOMER_ID_PREFIX = 'customer-id-key'
+    REDIS_SHOPPER_ID_PREFIX = 'shopper-id-key'
 
     def __init__(self, app_settings):
-        self._customer_url = app_settings.CUSTOMER_URL
+        self._shopper_api_url = app_settings.SHOPPER_API_URL
+
         # NOTE: if you switch this to StrictRedis, you MUST also update the call to 'setex' below.
         # In the version of redis we are currently using, the 'time' and 'value' parameters for 'setex' were flipped:
         #  value first, then time.  In other version of redis, as well as the StrictRedis the parameters are: time, then value.
         self._redis = Redis(app_settings.REDIS)
         self._cert = (app_settings.ZEUS_CLIENT_CERT, app_settings.ZEUS_CLIENT_KEY)
         self._logger = logging.getLogger(__name__)
+
+    def get_customer_id_from_shopper_id(self, shopper_id):
+        """
+        Given a ShopperID, retrieve the customerID
+        """
+        if not shopper_id:
+            return
+
+        redis_key = f'{self.REDIS_SHOPPER_ID_PREFIX}-{shopper_id}'
+        customer_id = self._redis.get(redis_key)
+        if customer_id:
+            return customer_id.decode()
+
+        try:
+            url = f'{self._shopper_api_url}/v1/shoppers/{shopper_id}'
+            params = {'includes': 'contact,preference', 'auditClientIp': 'zeus'}
+            resp = requests.get(url, params=params, cert=self._cert)
+            resp.raise_for_status()
+            data = resp.json()
+            customer_id = data['customerId']
+            self._redis.setex(redis_key, customer_id, self.REDIS_EXPIRATION)
+            return customer_id
+        except Exception as e:
+            self._logger.error(f'Error in getting the shopper info for {shopper_id} : {e}')
+        return
 
     def get_shopper_id_from_customer_id(self, customer_id):
         """
@@ -36,7 +63,8 @@ class ShopperAPI:
             return shopper_id.decode()
 
         try:
-            resp = requests.get(self._customer_url.format(customer_id), params=self.SHOPPER_PARAMS, cert=self._cert)
+            url = f'{self._shopper_api_url}/v1/customers/{customer_id}/shopper'
+            resp = requests.get(url, params=self.SHOPPER_PARAMS, cert=self._cert)
             resp.raise_for_status()
             data = json.loads(resp.text)
             shopper_id = data[self.KEY_SHOPPER_ID]
