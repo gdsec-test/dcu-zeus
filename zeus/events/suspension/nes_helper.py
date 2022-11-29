@@ -129,8 +129,13 @@ class NESHelper():
                 self._log_info(f'Got entitlement status {entitlement_status}', entitlement_id, customer_id)
                 return entitlement_status
 
+            # If the response is 404, don't set redis bad.  Because a 404 most likely means that the customerId / entitlementId
+            # combination is an ORION account and not an entitlement account.  Orion accounts can and will be succesfully
+            # suspended.  If it ISN'T an Orion account, then the suspend call will result in a 404, and we will mark NES bad there
+            if response.status_code != 404:
+                self.set_nes_state(self.REDIS_NES_STATE_BAD)
+
             # If the response is anything else, log the error, and return that error
-            self.set_nes_state(self.REDIS_NES_STATE_BAD)
             error_msg = 'Failed to get entitlement status'
             self._log_error(error_msg, entitlement_id, customer_id, response.status_code, response.text)
             return error_msg
