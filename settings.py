@@ -68,7 +68,6 @@ class AppConfig(object):
 
     def __init__(self):
         self.DB_KELVIN_PASS = urllib.parse.quote(os.getenv('DB_KELVIN_PASS', 'password'))
-        self.DB_KELVIN_URL = 'mongodb://{}:{}@{}/{}'.format(self.DB_KELVIN_USER, self.DB_KELVIN_PASS, self.DB_HOST, self.DB_KELVIN)
 
         # TODO CMAPT-5272: Remove all DIABLO*, PLESK*, CMAP_PROXY*, VPS4* variables
         self.DIABLOUSER = os.getenv('DIABLOUSER', 'diablouser')
@@ -103,6 +102,8 @@ class ProductionAppConfig(AppConfig):
     DB_KELVIN_HOST = '10.22.9.209'
     DB_KELVIN_USER = 'sau_service_kelvinv2'
     DB_PASS = quote(os.getenv('DB_PASS', 'password'))
+    DB_KELVIN_PASS = quote(os.getenv('DB_KELVIN_PASS', 'password'))
+    DB_KELVIN_URL = f'mongodb://{DB_KELVIN_USER}:{DB_KELVIN_PASS}@{DB_HOST}/?authSource={DB_KELVIN}'
     DBURL = f'mongodb://{DB_USER}:{DB_PASS}@{DB_HOST}/?authSource={DB}'
 
     SLACK_CHANNEL = '#dcu_alerts'
@@ -138,6 +139,8 @@ class OTEAppConfig(AppConfig):
     DB_KELVIN = 'ote_dcu_kelvin'
     DB_KELVIN_HOST = '10.22.9.209'
     DB_KELVIN_USER = 'sau_service_otedcu'
+    DB_KELVIN_PASS = quote(os.getenv('DB_KELVIN_PASS', 'password'))
+    DB_KELVIN_URL = f'mongodb://{DB_KELVIN_USER}:{DB_KELVIN_PASS}@{DB_HOST}/?authSource={DB_KELVIN}'
 
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-ote.svc.cluster.local:8080'
 
@@ -170,6 +173,8 @@ class DevelopmentAppConfig(AppConfig):
     DB_KELVIN = 'devkelvin'
     DB_KELVIN_HOST = 'mongodb.cset.int.dev-gdcorp.tools'
     DB_KELVIN_USER = 'devkelvin'
+    DB_KELVIN_PASS = quote(os.getenv('DB_KELVIN_PASS', 'password'))
+    DB_KELVIN_URL = f'mongodb://{DB_KELVIN_USER}:{DB_KELVIN_PASS}@{DB_HOST}/?authSource={DB_KELVIN}&readPreference=primary&directConnection=true&tls=true&tlsCertificateKeyFile={CLIENT_CERT}'
 
     DOMAIN_SERVICE = 'localhost:8080/domains'
     GOCENTRAL_URL = 'http://localhost:8080/orion/account/accountoperations.asmx'
@@ -207,7 +212,8 @@ class TestAppConfig(AppConfig):
     DB_KELVIN = 'testkelvin'
     DB_KELVIN_HOST = 'mongodb.cset.int.dev-gdcorp.tools'
     DB_KELVIN_USER = 'testkelvin'
-
+    DB_KELVIN_PASS = quote(os.getenv('DB_KELVIN_PASS', 'password'))
+    DB_KELVIN_URL = f'mongodb://{DB_KELVIN_USER}:{DB_KELVIN_PASS}@{DB_HOST}/?authSource={DB_KELVIN}&readPreference=primary&directConnection=true&tls=true&tlsCertificateKeyFile={CLIENT_CERT}'
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-test.svc.cluster.local:8080'
 
     DIABLO_URL = 'https://diablo.api.test-godaddy.com/v1/accounts/'
