@@ -1,6 +1,7 @@
 import os
-import urllib.parse
+import urllib
 from collections import OrderedDict
+from urllib.parse import quote
 
 
 class AppConfig(object):
@@ -66,11 +67,7 @@ class AppConfig(object):
     ZEUSQUEUE = 'devzeus'
 
     def __init__(self):
-        self.DB_PASS = urllib.parse.quote(os.getenv('DB_PASS', 'password'))
-        self.DBURL = 'mongodb://{}:{}@{}/{}'.format(self.DB_USER, self.DB_PASS, self.DB_HOST, self.DB)
-
         self.DB_KELVIN_PASS = urllib.parse.quote(os.getenv('DB_KELVIN_PASS', 'password'))
-        self.DB_KELVIN_URL = 'mongodb://{}:{}@{}/{}'.format(self.DB_KELVIN_USER, self.DB_KELVIN_PASS, self.DB_HOST, self.DB_KELVIN)
 
         # TODO CMAPT-5272: Remove all DIABLO*, PLESK*, CMAP_PROXY*, VPS4* variables
         self.DIABLOUSER = os.getenv('DIABLOUSER', 'diablouser')
@@ -95,7 +92,6 @@ class ProductionAppConfig(AppConfig):
     SUCURI_HOLD_TIME = 72 * 60 * 60  # Tickets with domains that have Sucuri malware removal products given 72 hour hold
     FRAUD_REVIEW_TIME = 90  # If it is within 90 days, Fraud can review
     HIGH_VALUE_HOLD_TIME = 72 * 60 * 60  # Tickets with domains identified as High Value given 72 hour hold
-
     ZEUSQUEUE = 'zeus'
 
     DB = 'phishstory'
@@ -105,6 +101,10 @@ class ProductionAppConfig(AppConfig):
     DB_KELVIN = 'dcu_kelvin'
     DB_KELVIN_HOST = '10.22.9.209'
     DB_KELVIN_USER = 'sau_service_kelvinv2'
+    DB_PASS = quote(os.getenv('DB_PASS', 'password'))
+    DB_KELVIN_PASS = quote(os.getenv('DB_KELVIN_PASS', 'password'))
+    DB_KELVIN_URL = f'mongodb://{DB_KELVIN_USER}:{DB_KELVIN_PASS}@{DB_HOST}/?authSource={DB_KELVIN}'
+    DBURL = f'mongodb://{DB_USER}:{DB_PASS}@{DB_HOST}/?authSource={DB}'
 
     SLACK_CHANNEL = '#dcu_alerts'
 
@@ -133,10 +133,14 @@ class OTEAppConfig(AppConfig):
     DB = 'otephishstory'
     DB_HOST = '10.22.9.209'
     DB_USER = 'sau_o_phish'
+    DB_PASS = quote(os.getenv('DB_PASS', 'password'))
+    DBURL = f'mongodb://{DB_USER}:{DB_PASS}@{DB_HOST}/?authSource={DB}'
 
     DB_KELVIN = 'ote_dcu_kelvin'
     DB_KELVIN_HOST = '10.22.9.209'
     DB_KELVIN_USER = 'sau_service_otedcu'
+    DB_KELVIN_PASS = quote(os.getenv('DB_KELVIN_PASS', 'password'))
+    DB_KELVIN_URL = f'mongodb://{DB_KELVIN_USER}:{DB_KELVIN_PASS}@{DB_HOST}/?authSource={DB_KELVIN}'
 
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-ote.svc.cluster.local:8080'
 
@@ -162,10 +166,15 @@ class DevelopmentAppConfig(AppConfig):
     DB = 'devphishstory'
     DB_HOST = 'mongodb.cset.int.dev-gdcorp.tools'
     DB_USER = 'devuser'
+    DB_PASS = quote(os.getenv('DB_PASS', 'password'))
+    CLIENT_CERT = os.getenv("MONGO_CLIENT_CERT", '')
+    DBURL = f'mongodb://{DB_USER}:{DB_PASS}@{DB_HOST}/?authSource={DB}&readPreference=primary&directConnection=true&tls=true&tlsCertificateKeyFile={CLIENT_CERT}'
 
     DB_KELVIN = 'devkelvin'
     DB_KELVIN_HOST = 'mongodb.cset.int.dev-gdcorp.tools'
     DB_KELVIN_USER = 'devkelvin'
+    DB_KELVIN_PASS = quote(os.getenv('DB_KELVIN_PASS', 'password'))
+    DB_KELVIN_URL = f'mongodb://{DB_KELVIN_USER}:{DB_KELVIN_PASS}@{DB_HOST}/?authSource={DB_KELVIN}&readPreference=primary&directConnection=true&tls=true&tlsCertificateKeyFile={CLIENT_CERT}'
 
     DOMAIN_SERVICE = 'localhost:8080/domains'
     GOCENTRAL_URL = 'http://localhost:8080/orion/account/accountoperations.asmx'
@@ -196,11 +205,15 @@ class TestAppConfig(AppConfig):
     DB = 'testphishstory'
     DB_HOST = 'mongodb.cset.int.dev-gdcorp.tools'
     DB_USER = 'testuser'
+    DB_PASS = quote(os.getenv('DB_PASS', 'password'))
+    CLIENT_CERT = os.getenv("MONGO_CLIENT_CERT", '')
+    DBURL = f'mongodb://{DB_USER}:{DB_PASS}@{DB_HOST}/?authSource={DB}&readPreference=primary&directConnection=true&tls=true&tlsCertificateKeyFile={CLIENT_CERT}'
 
     DB_KELVIN = 'testkelvin'
     DB_KELVIN_HOST = 'mongodb.cset.int.dev-gdcorp.tools'
     DB_KELVIN_USER = 'testkelvin'
-
+    DB_KELVIN_PASS = quote(os.getenv('DB_KELVIN_PASS', 'password'))
+    DB_KELVIN_URL = f'mongodb://{DB_KELVIN_USER}:{DB_KELVIN_PASS}@{DB_HOST}/?authSource={DB_KELVIN}&readPreference=primary&directConnection=true&tls=true&tlsCertificateKeyFile={CLIENT_CERT}'
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-test.svc.cluster.local:8080'
 
     DIABLO_URL = 'https://diablo.api.test-godaddy.com/v1/accounts/'
