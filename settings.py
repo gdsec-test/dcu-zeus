@@ -21,6 +21,7 @@ class AppConfig(object):
     DB_KELVIN_USER = 'user'
 
     COLLECTION = 'incidents'
+    EMAIL_COLLECTION = 'acknowledge_email'
     LOGGING_COLLECTION = 'logs'
 
     # Temporary From address for OC Messaging until we determine why emails

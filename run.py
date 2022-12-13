@@ -6,6 +6,7 @@ import yaml
 from celery import Celery, bootsteps
 from csetutils.appsec.logging import get_logging
 from csetutils.celery import instrument
+from dcdatabase.emailmongo import EmailMongo
 from dcdatabase.kelvinmongo import KelvinMongo
 from dcdatabase.phishstorymongo import PhishstoryMongo
 from kombu.common import QoS
@@ -303,6 +304,8 @@ def pci_compliance(shopper_and_domain_list: list) -> list:
 
 @celery.task()
 def send_acknowledgement(source, reporter_email):
+    emaildb = EmailMongo(config)
+    emaildb.add_new_email({'source': source, 'email': reporter_email})
     return reporter_mailer.send_acknowledgement_email(source, reporter_email)
 
 
