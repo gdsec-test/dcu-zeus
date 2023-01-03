@@ -1,29 +1,29 @@
 # TODO CMAPT-5272: delete this entire file
+from unittest import TestCase
+
 from mock import MagicMock, patch
-from nose.tools import assert_false, assert_true
 from requests.exceptions import Timeout
 
 from settings import UnitTestConfig
 from zeus.events.suspension.mwp_one import MWPOne
 
 
-class TestMWPOne:
-    @classmethod
-    def setup(cls):
-        cls._mwp_one = MWPOne(UnitTestConfig)
+class TestMWPOne(TestCase):
+    def setUp(self):
+        self._mwp_one = MWPOne(UnitTestConfig)
 
     @patch('requests.post', side_effect=Timeout())
     def test_suspend_fails(self, post):
-        assert_false(self._mwp_one.suspend('test-accountid'))
+        self.assertFalse(self._mwp_one.suspend('test-accountid'))
 
     @patch('requests.post', return_value=MagicMock(text='true', status_code=200))
     def test_suspend_success(self, post):
-        assert_true(self._mwp_one.suspend('test-accountid'))
+        self.assertTrue(self._mwp_one.suspend('test-accountid'))
 
     @patch('requests.post', side_effect=Timeout())
     def test_reinstate_fails(self, post):
-        assert_false(self._mwp_one.reinstate('test-accountid'))
+        self.assertFalse(self._mwp_one.reinstate('test-accountid'))
 
     @patch('requests.post', return_value=MagicMock(text='true', status_code=200))
     def test_reinstate_success(self, post):
-        assert_true(self._mwp_one.reinstate('test-accountid'))
+        self.assertTrue(self._mwp_one.reinstate('test-accountid'))

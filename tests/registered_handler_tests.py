@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
+from unittest import TestCase
 
 from dcdatabase.phishstorymongo import PhishstoryMongo
 from mock import patch
-from nose.tools import assert_false, assert_true
 
 from settings import UnitTestConfig
 from zeus.events.email.foreign_mailer import ForeignMailer
@@ -20,7 +20,7 @@ from zeus.utils.shopperapi import ShopperAPI
 from zeus.utils.slack import SlackFailures
 
 
-class TestRegisteredHandler:
+class TestRegisteredHandler(TestCase):
     childabuse = 'CHILD_ABUSE'
     current_test_date = datetime.utcnow()
     did = 'test-domain-id'
@@ -98,24 +98,23 @@ class TestRegisteredHandler:
                                                                               KEY_DOMAIN_DATE: current_test_date},
                                                               KEY_IS_DOMAIN_HIGH_VALUE: 'true'}}}
 
-    @classmethod
-    def setup(cls):
-        cls._registered = RegisteredHandler(UnitTestConfig)
+    def setUp(self):
+        self._registered = RegisteredHandler(UnitTestConfig)
 
     def test_process_invalid_mapping(self):
-        assert_false(self._registered.process({}, 'invalid-request'))
+        self.assertFalse(self._registered.process({}, 'invalid-request'))
 
     @patch.object(SlackFailures, 'invalid_hosted_status', return_value=None)
     def test_customer_warning_none(self, invalid_hosting_status):
-        assert_false(self._registered.customer_warning({}))
+        self.assertFalse(self._registered.customer_warning({}))
 
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
     def test_customer_warning_unsupported_type(self, invalid_abuse_type):
-        assert_false(self._registered.customer_warning(self.ticket_invalid_type))
+        self.assertFalse(self._registered.customer_warning(self.ticket_invalid_type))
 
     @patch.object(SlackFailures, 'failed_to_determine_shoppers', return_value=None)
     def test_customer_warning_no_shoppers(self, failed_to_determine_shoppers):
-        assert_false(self._registered.customer_warning(self.ticket_no_shopper))
+        self.assertFalse(self._registered.customer_warning(self.ticket_no_shopper))
 
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
@@ -123,7 +122,7 @@ class TestRegisteredHandler:
     @patch.object(ForeignMailer, 'send_foreign_hosting_notice', return_value=None)
     @patch.object(BasicReview, 'place_in_review', return_value=None)
     def test_customer_warning_failed_registrant_warning(self, review, hosting, registrant, crm, slack):
-        assert_false(self._registered.customer_warning(self.ticket_valid))
+        self.assertFalse(self._registered.customer_warning(self.ticket_valid))
 
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
@@ -131,42 +130,42 @@ class TestRegisteredHandler:
     @patch.object(ForeignMailer, 'send_foreign_hosting_notice', return_value=None)
     @patch.object(HighValueReview, 'place_in_review', return_value=None)
     def test_customer_warning_high_value_domain(self, review, hosting, registrant, crm, slack):
-        assert_true(self._registered.customer_warning(self.ticket_valid_high_value_domain))
+        self.assertTrue(self._registered.customer_warning(self.ticket_valid_high_value_domain))
 
     @patch.object(RegisteredHandler, '_validate_required_args', return_value=False)
     def test_forward_user_gen_complaint_failed_arg_validation(self, validation):
-        assert_false(self._registered.forward_user_gen_complaint({}))
+        self.assertFalse(self._registered.forward_user_gen_complaint({}))
 
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(RegisteredMailer, 'send_user_gen_complaint', return_value=False)
     @patch.object(RegisteredHandler, '_validate_required_args', return_value=True)
     def test_forward_user_gen_complaint_failed_send_mail(self, validation, registrant, slack):
-        assert_false(self._registered.forward_user_gen_complaint({}))
+        self.assertFalse(self._registered.forward_user_gen_complaint({}))
 
     @patch.object(RegisteredMailer, 'send_user_gen_complaint', return_value=True)
     @patch.object(RegisteredHandler, '_validate_required_args', return_value=True)
     def test_forward_user_gen_complaint_successful_validation_email_send(self, validation, registrant):
-        assert_true(self._registered.forward_user_gen_complaint({}))
+        self.assertTrue(self._registered.forward_user_gen_complaint({}))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(SlackFailures, 'invalid_hosted_status', return_value=None)
     def test_intentionally_malicious_none(self, invalid_hosted_status, mock_db):
-        assert_false(self._registered.intentionally_malicious({}))
+        self.assertFalse(self._registered.intentionally_malicious({}))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
     def test_intentionally_malicious_unsupported_type(self, invalid_abuse_type, mock_db):
-        assert_false(self._registered.intentionally_malicious(self.ticket_invalid_type))
+        self.assertFalse(self._registered.intentionally_malicious(self.ticket_invalid_type))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(SlackFailures, 'failed_to_determine_shoppers', return_value=None)
     def test_intentionally_malicious_no_shoppers(self, failed_to_determine_shoppers, mock_db):
-        assert_false(self._registered.intentionally_malicious(self.ticket_no_shopper))
+        self.assertFalse(self._registered.intentionally_malicious(self.ticket_no_shopper))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=False)
     def test_intentionally_malicious_already_suspended(self, throttle, mock_db):
-        assert_false(self._registered.intentionally_malicious(self.ticket_valid))
+        self.assertFalse(self._registered.intentionally_malicious(self.ticket_valid))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
@@ -178,7 +177,7 @@ class TestRegisteredHandler:
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     def test_intentionally_malicious_failed_shopper_email_fraud_hold(self, ssl_mailer, service, crm, registered,
                                                                      slack, shoplocked, mimir, mock_db):
-        assert_false(self._registered.intentionally_malicious(self.ticket_fraud_hold))
+        self.assertFalse(self._registered.intentionally_malicious(self.ticket_fraud_hold))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
@@ -191,7 +190,7 @@ class TestRegisteredHandler:
     @patch.object(SSLMailer, 'send_revocation_email', return_value=False)
     def test_intentionally_malicious_failed_revocation_email(self, ssl_mailer, service, crm, registered, slack,
                                                              slack_sll, shoplocked, mimir, mock_db):
-        assert_false(self._registered.intentionally_malicious(self.ticket_valid))
+        self.assertFalse(self._registered.intentionally_malicious(self.ticket_valid))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
@@ -204,7 +203,7 @@ class TestRegisteredHandler:
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     def test_intentionally_malicious_no_termination_email(self, ssl_mailer, service, crm, registered, handler,
                                                           shoplocked, crmalert, mimir, mock_db):
-        assert_true(self._registered.intentionally_malicious(self.ticket_fraud_hold))
+        self.assertTrue(self._registered.intentionally_malicious(self.ticket_fraud_hold))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
@@ -217,7 +216,7 @@ class TestRegisteredHandler:
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     def test_intentionally_malicious_success(self, ssl_mailer, service, crm, registered, handler, shoplocked,
                                              crmalert, mimir, mock_db):
-        assert_true(self._registered.intentionally_malicious(self.ticket_valid))
+        self.assertTrue(self._registered.intentionally_malicious(self.ticket_valid))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
@@ -290,21 +289,21 @@ class TestRegisteredHandler:
 
     @patch.object(SlackFailures, 'invalid_hosted_status', return_value=None)
     def test_repeat_offender_none(self, invalid_hosted_status):
-        assert_false(self._registered.repeat_offender({}))
+        self.assertFalse(self._registered.repeat_offender({}))
 
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
     def test_repeat_offender_unsupported_type(self, invalid_abuse_type):
-        assert_false(self._registered.repeat_offender(self.ticket_invalid_type))
+        self.assertFalse(self._registered.repeat_offender(self.ticket_invalid_type))
 
     @patch.object(SlackFailures, 'failed_to_determine_shoppers', return_value=None)
     def test_repeat_offender_no_shoppers(self, failed_to_determine_shoppers):
-        assert_false(self._registered.repeat_offender(self.ticket_no_shopper))
+        self.assertFalse(self._registered.repeat_offender(self.ticket_no_shopper))
 
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=False)
     def test_repeat_offender_already_suspended(self, service, crm, mimir):
-        assert_false(self._registered.repeat_offender(self.ticket_valid))
+        self.assertFalse(self._registered.repeat_offender(self.ticket_valid))
 
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
@@ -312,7 +311,7 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     def test_repeat_offender_failed_shopper_email(self, service, crm, registered, slack, mimir):
-        assert_false(self._registered.repeat_offender(self.ticket_valid))
+        self.assertFalse(self._registered.repeat_offender(self.ticket_valid))
 
     @patch.object(SlackFailures, 'failed_to_create_alert', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
@@ -321,22 +320,22 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     def test_repeat_offender_success(self, service, crm, registered, handler, mimir, slack_infractions):
-        assert_true(self._registered.repeat_offender(self.ticket_valid))
+        self.assertTrue(self._registered.repeat_offender(self.ticket_valid))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(SlackFailures, 'invalid_hosted_status', return_value=None)
     def test_shopper_compromise_none(self, invalid_hosted_status, mock_db):
-        assert_false(self._registered.shopper_compromise({}))
+        self.assertFalse(self._registered.shopper_compromise({}))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
     def test_shopper_compromise_unsupported_type(self, invalid_abuse_type, mock_db):
-        assert_false(self._registered.shopper_compromise(self.ticket_invalid_type))
+        self.assertFalse(self._registered.shopper_compromise(self.ticket_invalid_type))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(SlackFailures, 'failed_to_determine_shoppers', return_value=None)
     def test_shopper_compromise_no_shoppers(self, failed_to_determine_shoppers, mock_db):
-        assert_false(self._registered.shopper_compromise(self.ticket_no_shopper))
+        self.assertFalse(self._registered.shopper_compromise(self.ticket_no_shopper))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
@@ -346,7 +345,7 @@ class TestRegisteredHandler:
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     def test_shopper_compromise_already_suspended(self, ssl_mailer, service, crm, shoplocked, mimir,
                                                   mock_db):
-        assert_false(self._registered.shopper_compromise(self.ticket_valid))
+        self.assertFalse(self._registered.shopper_compromise(self.ticket_valid))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
@@ -358,7 +357,7 @@ class TestRegisteredHandler:
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     def test_shopper_compromise_failed_shopper_email(self, ssl_mailer, service, crm, registered, slack,
                                                      shoplocked, mimir, mock_db):
-        assert_false(self._registered.shopper_compromise(self.ticket_valid))
+        self.assertFalse(self._registered.shopper_compromise(self.ticket_valid))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
@@ -370,7 +369,7 @@ class TestRegisteredHandler:
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
     def test_shopper_compromise_success(self, ssl_mailer, service, crm, registered, handler, shoplocked,
                                         mimir, mock_db):
-        assert_true(self._registered.shopper_compromise(self.ticket_valid))
+        self.assertTrue(self._registered.shopper_compromise(self.ticket_valid))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
@@ -404,19 +403,19 @@ class TestRegisteredHandler:
 
     @patch.object(SlackFailures, 'invalid_hosted_status', return_value=None)
     def test_suspend_none(self, invalid_hosted_status):
-        assert_false(self._registered.suspend({}))
+        self.assertFalse(self._registered.suspend({}))
 
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
     def test_suspend_unsupported_type(self, invalid_abuse_type):
-        assert_false(self._registered.suspend(self.ticket_invalid_type))
+        self.assertFalse(self._registered.suspend(self.ticket_invalid_type))
 
     @patch.object(SlackFailures, 'failed_to_determine_shoppers', return_value=None)
     def test_suspend_no_shoppers(self, failed_to_determine_shoppers):
-        assert_false(self._registered.suspend(self.ticket_no_shopper))
+        self.assertFalse(self._registered.suspend(self.ticket_no_shopper))
 
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=False)
     def test_suspend_already_suspended(self, service):
-        assert_false(self._registered.suspend(self.ticket_valid))
+        self.assertFalse(self._registered.suspend(self.ticket_valid))
 
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
@@ -424,7 +423,7 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     def test_suspend_failed_shopper_email(self, service, crm, mailer, slack, mimir):
-        assert_false(self._registered.suspend(self.ticket_valid))
+        self.assertFalse(self._registered.suspend(self.ticket_valid))
 
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
@@ -433,7 +432,7 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     def test_suspend_success(self, service, crm, mailer, handler, crmalert, mimir):
-        assert_true(self._registered.suspend(self.ticket_valid))
+        self.assertTrue(self._registered.suspend(self.ticket_valid))
 
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
@@ -442,36 +441,36 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     def test_csam_suspend_success(self, service, crm, mailer, handler, crmalert, mimir):
-        assert_true(self._registered.suspend_csam(self.ticket_valid_child_abuse))
+        self.assertTrue(self._registered.suspend_csam(self.ticket_valid_child_abuse))
 
     @patch.object(ThrottledDomainService, 'suspend_domain', return_value=True)
     def test_suspend_domain_success(self, service):
-        assert_true(self._registered._suspend_domain({}, 'test-id', 'reason'))
+        self.assertTrue(self._registered._suspend_domain({}, 'test-id', 'reason'))
 
     @patch.object(SlackFailures, 'failed_domain_suspension', return_value=None)
     @patch.object(ThrottledDomainService, 'suspend_domain', return_value=False)
     def test_suspend_domain_failed(self, service, slack):
-        assert_false(self._registered._suspend_domain({}, 'test-id', 'reason'))
+        self.assertFalse(self._registered._suspend_domain({}, 'test-id', 'reason'))
 
     @patch.object(SlackFailures, 'failed_protected_domain_action', return_value=None)
     def test_protected_domain_action(self, slack):
-        assert_false(self._registered.suspend(self.ticket_protected_domain))
+        self.assertFalse(self._registered.suspend(self.ticket_protected_domain))
 
     @patch.object(SlackFailures, 'invalid_hosted_status', return_value=None)
     def test_suspend_csam_none(self, invalid_hosted_status):
-        assert_false(self._registered.suspend_csam({}))
+        self.assertFalse(self._registered.suspend_csam({}))
 
     @patch.object(SlackFailures, 'invalid_abuse_type', return_value=None)
     def test_suspend_csam_unsupported_type(self, invalid_abuse_type):
-        assert_false(self._registered.suspend_csam(self.ticket_invalid_type))
+        self.assertFalse(self._registered.suspend_csam(self.ticket_invalid_type))
 
     @patch.object(SlackFailures, 'failed_to_determine_shoppers', return_value=None)
     def test_suspend_csam_no_shoppers(self, failed_to_determine_shoppers):
-        assert_false(self._registered.suspend_csam(self.ticket_no_shopper))
+        self.assertFalse(self._registered.suspend_csam(self.ticket_no_shopper))
 
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=False)
     def test_suspend_csam_already_suspended(self, service):
-        assert_false(self._registered.suspend_csam(self.ticket_valid_child_abuse))
+        self.assertFalse(self._registered.suspend_csam(self.ticket_valid_child_abuse))
 
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(SlackFailures, 'failed_infraction_creation', return_value=None)
@@ -479,4 +478,4 @@ class TestRegisteredHandler:
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     def test_suspend_csam_failed_shopper_email(self, service, crm, mailer, slack_infraction, slack):
-        assert_false(self._registered.suspend_csam(self.ticket_valid_child_abuse))
+        self.assertFalse(self._registered.suspend_csam(self.ticket_valid_child_abuse))

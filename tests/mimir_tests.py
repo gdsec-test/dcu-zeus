@@ -1,9 +1,9 @@
-from nose.tools import assert_equals
+from unittest import TestCase
 
 from zeus.utils.mimir import Mimir
 
 
-class TestMimir:
+class TestMimir(TestCase):
     def test_inf_with_none_value(self):
         _dict = {'abuseType': 'PHISHING',
                  'domainId': '0001',
@@ -20,7 +20,7 @@ class TestMimir:
                  }
         _clean_dict = Mimir._clean_dict_for_mimir(_dict)
         _dict.pop('ncmecReportID')
-        assert_equals(_dict, _clean_dict)
+        self.assertEqual(_dict, _clean_dict)
 
     def test_non_inf(self):
         _dict = {'abuseType': 'CHILD_ABUSE',
@@ -35,4 +35,4 @@ class TestMimir:
                  'ticketId': 'DCU0001'
                  }
         _clean_dict = Mimir._clean_dict_for_mimir(_dict)
-        assert_equals(_dict, _clean_dict)
+        self.assertEqual(_dict, _clean_dict)

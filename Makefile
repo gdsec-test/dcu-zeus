@@ -40,12 +40,14 @@ tools: flake8 isort
 .PHONY: test
 test:
 	@echo "----- Running tests -----"
-	nosetests tests
+	python -m unittest discover tests "*_tests.py"
 
 .PHONY: testcov
 testcov:
 	@echo "----- Running tests with coverage -----"
-	nosetests tests --with-coverage --cover-erase --cover-package=zeus
+	@coverage run --source=zeus -m unittest discover tests "*_tests.py"
+	@coverage xml
+	@coverage report
 
 
 .PHONY: prep

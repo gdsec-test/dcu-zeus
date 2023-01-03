@@ -1,16 +1,16 @@
 # TODO CMAPT-5272: delete this entire file
+from unittest import TestCase
+
 from mock import MagicMock, patch
-from nose.tools import assert_false, assert_true
 from requests.exceptions import Timeout
 
 from settings import UnitTestConfig
 from zeus.events.suspension.vertigo import Vertigo
 
 
-class TestVertigo:
-    @classmethod
-    def setup(cls):
-        cls.vertigo = Vertigo(UnitTestConfig)
+class TestVertigo(TestCase):
+    def setUp(self):
+        self.vertigo = Vertigo(UnitTestConfig)
 
     @patch('requests.post', side_effect=Timeout())
     def test_suspend_fails(self, post):
@@ -24,7 +24,7 @@ class TestVertigo:
             }
         }
         }
-        assert_false(self.vertigo.suspend('test-guid', data))
+        self.assertFalse(self.vertigo.suspend('test-guid', data))
 
     @patch('requests.post', return_value=MagicMock(status_code=202))
     def test_suspend_success(self, post):
@@ -38,4 +38,4 @@ class TestVertigo:
             }
         }
         }
-        assert_true(self.vertigo.suspend('test-guid', data))
+        self.assertTrue(self.vertigo.suspend('test-guid', data))

@@ -1,6 +1,7 @@
 # TODO CMAPT-5272: delete this entire file
+from unittest import TestCase
+
 from mock import MagicMock, patch
-from nose.tools import assert_equal, assert_false, assert_raises, assert_true
 from requests.exceptions import Timeout
 
 from settings import UnitTestConfig
@@ -12,49 +13,48 @@ class BadTestingConfig():
     GOCENTRAL_SSL_KEY = ''
 
 
-class TestGoCentral:
+class TestGoCentral(TestCase):
     GUID = 'test-guid'
     DATA = {'data': {'domainQuery': {'host': {'shopperId': 'test-shopper'}}}}
 
-    @classmethod
-    def setup(cls):
-        cls._gocentral = GoCentral(UnitTestConfig)
+    def setUp(self):
+        self._gocentral = GoCentral(UnitTestConfig)
 
     # When the request to suspend times out: fail
     @patch('requests.post', side_effect=Timeout())
     def test_suspend_fails(self, mock_post):
-        assert_false(self._gocentral.suspend(guid=self.GUID, data=self.DATA))
+        self.assertFalse(self._gocentral.suspend(guid=self.GUID, data=self.DATA))
         mock_post.assert_called()
 
     # When no guid: fail
     def test_suspend_missing_guid(self):
-        assert_false(self._gocentral.suspend(guid=None, data=self.DATA))
+        self.assertFalse(self._gocentral.suspend(guid=None, data=self.DATA))
 
     # When no hosting shopper: fail
     def test_suspend_missing_host_shopper(self):
-        assert_false(self._gocentral.suspend(guid=self.GUID, data={}))
+        self.assertFalse(self._gocentral.suspend(guid=self.GUID, data={}))
 
     # Successful suspension
     @patch('requests.post', return_value=MagicMock(status_code=200))
     def test_suspend_success(self, mock_post):
-        assert_true(self._gocentral.suspend(guid=self.GUID, data=self.DATA))
+        self.assertTrue(self._gocentral.suspend(guid=self.GUID, data=self.DATA))
         mock_post.assert_called()
 
     # Since we dont have a working reinstate method, it will always return false
     @patch('requests.post', return_value=MagicMock(status_code=200))
     def test_reinstate_success(self, mock_post):
-        assert_false(self._gocentral.reinstate(guid=self.GUID, data=self.DATA))
+        self.assertFalse(self._gocentral.reinstate(guid=self.GUID, data=self.DATA))
         mock_post.assert_not_called()
 
     # Make sure we get back the expected cert/key pair
     def test_set_certs_success(self):
         _expected_certs = ('cert', 'key')
         _certs = GoCentral._set_certs(UnitTestConfig)
-        assert_equal(_expected_certs, _certs)
+        self.assertEqual(_expected_certs, _certs)
 
     # Make sure we get back the expected cert/key pair
     def test_set_certs_exception(self):
-        assert_raises(Exception, GoCentral._set_certs, BadTestingConfig)
+        self.assertRaises(Exception, GoCentral._set_certs, BadTestingConfig)
 
     # Make sure nobody changes the XML structure
     def test_get_xml_body_suspend(self):
@@ -92,4 +92,4 @@ class TestGoCentral:
     </Suspend>
   </soap:Body>
 </soap:Envelope>"""
-        assert_equal(expected_xml, GoCentral._get_xml_body_suspend())
+        self.assertEqual(expected_xml, GoCentral._get_xml_body_suspend())

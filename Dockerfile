@@ -1,15 +1,17 @@
 # Zeus
 
-FROM docker-dcu-local.artifactory.secureserver.net/dcu-python3.7:3.3
+FROM docker-dcu-local.artifactory.secureserver.net/dcu-python3.11:1.1
 LABEL MAINTAINER=dcueng@godaddy.com
 
 USER root
 WORKDIR /tmp
 
 RUN mkdir -p /tmp/build
+RUN apt-get update && apt-get install gcc libffi-dev -y
 COPY requirements.txt /tmp/build/
 COPY pip_config /tmp/build/pip_config
 RUN PIP_CONFIG_FILE=/tmp/build/pip_config/pip.conf pip install -r /tmp/build/requirements.txt
+RUN apt-get remove gcc libffi-dev -y
 
 # Move files to new dir
 COPY *.py /tmp/build/
