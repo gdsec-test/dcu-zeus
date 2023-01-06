@@ -48,7 +48,7 @@ class MongoLogFactory(MongoHandler):
         if self.reuse and _connection:
             self.connection = _connection
         else:
-            self.connection = Connection(host=self.host, port=self.port, connect=False, tls=True, tlsCertificateKeyFile=os.getenv("MONGO_CLIENT_CERT"), **kwargs)
+            self.connection = Connection(f'mongodb://{self.username}:{self.password}@{self.host}/?authSource={self.database_name}&readPreference=primary&directConnection=true&tls=true&tlsCertificateKeyFile={os.getenv("MONGO_CLIENT_CERT")}', **kwargs)
         _connection = self.connection
 
         self.db = self.connection[self.database_name]
