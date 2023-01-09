@@ -31,9 +31,8 @@ class AppConfig(object):
     ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.prod.godaddy.com/'
     SUBSCRIPTIONS_URL = 'https://subscriptions-shim-ext.cp.api.prod.godaddy.com/'
 
-    # TODO CMAPT-5272: remove all references to DIABLO_URL, GOCENTRAL_URL, MWPONE_URL, PLESK_URL, and VERT_URL variables
+    # TODO CMAPT-5272: remove all references to DIABLO_URL, MWPONE_URL, PLESK_URL, and VERT_URL variables
     DIABLO_URL = 'https://cpanelprovapi.prod.phx3.secureserver.net/v1/accounts/'
-    GOCENTRAL_URL = os.getenv('GOCENTRAL_URL')
     MWPONE_URL = 'https://api.servicemanager.godaddy.com/v1/accounts/'
     PLESK_URL = 'https://gdapi.plesk-shared-app.int.gdcorp.tools/v1/accounts/'
     VERT_URL = ''
@@ -52,9 +51,6 @@ class AppConfig(object):
     # Retrieve certs and keys for sending Customer Emails
     ZEUS_CLIENT_CERT = os.getenv('ZEUS_CLIENT_CERT')
     ZEUS_CLIENT_KEY = os.getenv('ZEUS_CLIENT_KEY')
-    # TODO CMAPT-5272: remove GOCENTRAL_SSL_CERT and GOCENTRAL_SSL_KEY
-    GOCENTRAL_SSL_CERT = os.getenv('GOCENTRAL_SSL_CERT')
-    GOCENTRAL_SSL_KEY = os.getenv('GOCENTRAL_SSL_KEY')
     CMAP_API_CERT = os.getenv('CMAP_API_CERT', 'api.crt')
     CMAP_API_KEY = os.getenv('CMAP_API_KEY', 'api.key')
 
@@ -178,7 +174,6 @@ class DevelopmentAppConfig(AppConfig):
     DB_KELVIN_URL = f'mongodb://{DB_KELVIN_USER}:{DB_KELVIN_PASS}@{DB_HOST}/?authSource={DB_KELVIN}&readPreference=primary&directConnection=true&tls=true&tlsCertificateKeyFile={CLIENT_CERT}'
 
     DOMAIN_SERVICE = 'localhost:8080/domains'
-    GOCENTRAL_URL = 'http://localhost:8080/orion/account/accountoperations.asmx'
     MWPONE_URL = 'http://localhost:8080/mwpone/v1/accounts/'
     DIABLO_URL = 'http://localhost:8080/diablo/v1/accounts/'
 
@@ -218,7 +213,6 @@ class TestAppConfig(AppConfig):
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-test.svc.cluster.local:8080'
 
     DIABLO_URL = 'https://diablo.api.test-godaddy.com/v1/accounts/'
-    GOCENTRAL_URL = 'https://services.orion.test.glbt1.gdg/account/accountoperations.asmx'
     MWPONE_URL = 'https://api.servicemanager.test-godaddy.com/v1/accounts/'
     PLESK_URL = 'https://gdapi.plesk-shared-app.int.test-gdcorp.tools/v1/accounts/'
     VERT_URL = ''
@@ -271,9 +265,6 @@ class UnitTestConfig(AppConfig):
     VERTIGO_USER = 'vertigouser'
     VERTIGO_PASS = 'vertigopass'
 
-    GOCENTRAL_SSL_CERT = 'cert'
-    GOCENTRAL_SSL_KEY = 'key'
-
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-dev.svc.cluster.local:8080'
 
     SLACK_URL = 'test-url'
@@ -283,7 +274,6 @@ class UnitTestConfig(AppConfig):
     SSO_URL = ''
     MIMIR_URL = ''
     CRMALERT_URL = ''
-    GOCENTRAL_URL = ''
     ENTITLEMENT_URL = 'localhost/'
     SUBSCRIPTIONS_URL = 'localhost/'
 

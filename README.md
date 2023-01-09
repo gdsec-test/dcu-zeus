@@ -83,13 +83,10 @@ If you would like to run Zeus locally you will need to specify the following env
 * `DB_PASS` (MongoDB password for Phishstory database)
 * `BROKER_PASS` (The Broker Pass for the RabbitMQ server to connect to)
 * `BROKER_URL` (amqp://guest@localhost:5672//)
-TODO CMAPT-5272: remove all diablo, plesk, vps4, gocentral, and cmap proxy varaibles
+TODO CMAPT-5272: remove all diablo, plesk, and vps4.
 * `DIABLOUSER` & `DIABLOPASS` (Account credentials to access the diablo API)
 * `PLESKUSER` & `PLESKPASS` (Account credentials to access the plesk API)
 * `VPS4USER` & `VPS4PASS` (Account credentials to access the vps4 API)
-* `GOCENTRAL_URL` SOAP URL for adding Orion event for suspending GoCentral guid
-* `GOCENTRAL_SSL_CERT` (The path to the SSL Cert white-listed for Orion Web Service `dcu.ecomm.dev.authclient.int.godaddy.com` dev/test use dev, prod uses prod)
-* `GOCENTRAL_SSL_KEY` (The path to the SSL Key white-listed for Orion Web Service `dcu.ecomm.dev.authclient.int.godaddy.com` dev/test use dev, prod uses prod)
 * `VERTIGO_USER` (User for Vertigo)
 * `VERTIGO_PASS` (Password for Vertigo)
 * `RESULT_BACKEND_HOSTNAME` (localhost)

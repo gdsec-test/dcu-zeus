@@ -4,7 +4,7 @@ services:
     environment:
       BROKER_URL: ${BROKER_URL}
       QUEUE_TYPE: 'quorum'
-      # TODO CMAPT-5272: remove all CMAP_PROXY*, DIABLO*, GOCENTRAL_*, PLESK4*, and VPS4* variables
+      # TODO CMAPT-5272: remove all DIABLO*, PLESK4*, and VPS4* variables
       CMAP_API_CERT: '/tmp/certs/apiuser.cmap.int.godaddy.com.crt'
       CMAP_API_KEY: '/tmp/certs/apiuser.cmap.int.godaddy.com.key'
       VERTIGO_PASS: ${VERTIGO_PASS}
@@ -14,9 +14,6 @@ services:
       DIABLOUSER: ${DIABLOUSER}
       DISABLESSL: 'True'
       EMAIL_RECIPIENT: ${EMAIL_RECIPIENT}
-      GOCENTRAL_SSL_CERT: '/tmp/certs/dcu.ecomm.dev.authclient.int.godaddy.com.crt'
-      GOCENTRAL_SSL_KEY: '/tmp/certs/dcu.ecomm.dev.authclient.int.godaddy.com.key'
-      GOCENTRAL_URL: 'https://services.orion.dev.sdl1.gdg/account/accountoperations.asmx'
       PLESKPASS: ${PLESKPASS}
       PLESKUSER: ${PLESKUSER}
       REDIS: redis

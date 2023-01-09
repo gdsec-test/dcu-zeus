@@ -133,16 +133,11 @@ spec:
               configMapKeyRef:
                 name: nes-on-flag
                 key: all
-          # TODO CMAPT-5272: remove CMAP_PROXY_CERT, CMAP_PROXY_KEY, GOCENTRAL_SSL_CERT and GOCENTRAL_SSL_KEY
           #    as well as the volume and volume mounts associated with those
           - name: ZEUS_CLIENT_CERT
             value: /zeus_client_certs/tls.crt
           - name: ZEUS_CLIENT_KEY
             value: /zeus_client_certs/tls.key
-          - name: GOCENTRAL_SSL_CERT
-            value: /ecomm_certs/tls.crt
-          - name: GOCENTRAL_SSL_KEY
-            value: /ecomm_certs/tls.key
           - name: ELASTIC_APM_SERVER_URL
             valueFrom:
               secretKeyRef:
@@ -161,9 +156,6 @@ spec:
             readOnly: true
           - name: tls-zeus-client-cert-files
             mountPath: /zeus_client_certs
-            readOnly: true
-          - name: tls-ecomm-files
-            mountPath: /ecomm_certs
             readOnly: true
           - name: tls-mongo-common-cert-files
             mountPath: /mongo_common_certs
@@ -184,9 +176,6 @@ spec:
         - name: tls-zeus-client-cert-files
           secret:
             secretName: tls-zeus-client-cert
-        - name: tls-ecomm-files
-          secret:
-            secretName: tls-ecomm
         - name: tls-files-api
           secret:
             secretName: tls-cmap-api
