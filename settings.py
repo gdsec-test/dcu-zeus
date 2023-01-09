@@ -233,8 +233,12 @@ class TestAppConfig(AppConfig):
         super(TestAppConfig, self).__init__()
 
 
-class UnitTestConfig():
-    DBURL = 'mongodb://localhost/devphishstory'
+class UnitTestConfig(AppConfig):
+    def __init__(self):
+        super(AppConfig, self).__init__()
+        self.DBURL = 'mongodb://localhost'
+
+    DBURL = 'mongodb://localhost'
     DB = 'test'
     COLLECTION = 'test'
     HOLD_TIME = 1
@@ -274,25 +278,6 @@ class UnitTestConfig():
     GOCENTRAL_URL = ''
     ENTITLEMENT_URL = 'localhost/'
     SUBSCRIPTIONS_URL = 'localhost/'
-
-    VERT_URL = ''
-    NON_PROD_EMAIL_ADDRESS = os.getenv('EMAIL_RECIPIENT', 'dcuinternal@godaddy.com')
-    ENTERED_BY = 'DCU'  # The 'Entered By' field in CRM Shopper Notes
-
-    DIABLO_URL = 'https://cpanelprovapi.prod.phx3.secureserver.net/v1/accounts/'
-    GOCENTRAL_URL = os.getenv('GOCENTRAL_URL')
-    MWPONE_URL = 'https://api.servicemanager.godaddy.com/v1/accounts/'
-    PLESK_URL = 'https://gdapi.plesk-shared-app.int.gdcorp.tools/v1/accounts/'
-    VERT_URL = ''
-    FRAUD_REVIEW_TIME = 365  # Year for testing purposes
-    SUSPEND_HOSTING_LOCK_TIME = SUSPEND_DOMAIN_LOCK_TIME = 60 * 60  # Seconds in an hour
-    SHOPLOCKED_URL = ''
-    CRMALERT_URL = ''
-    ENTERED_BY = 'DCU'  # The 'Entered By' field in CRM Shopper Notes
-    DOMAIN_SERVICE = '0.0.0.0:8080'
-    PROTECTED_DOMAINS = {'myftpupload.com', 'godaddysites.com', 'secureserver.net'}
-    SUCURI_PRODUCT_LIST = ['Website Security Deluxe', 'Website Security Essential', 'Website Security Express',
-                           'Website Security Ultimate']
 
     VPS4_URLS = OrderedDict([('IAD2', ''),
                              ('SIN2', ''),
