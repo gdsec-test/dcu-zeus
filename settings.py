@@ -237,8 +237,8 @@ class UnitTestConfig(AppConfig):
     def __init__(self):
         super(AppConfig, self).__init__()
         self.DBURL = 'mongodb://localhost'
+        self.DB_KELVIN_URL = 'mongodb://localhost'
 
-    DBURL = 'mongodb://localhost'
     DB = 'test'
     COLLECTION = 'test'
     HOLD_TIME = 1

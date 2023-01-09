@@ -4,7 +4,6 @@ from unittest import TestCase
 from dcdatabase.phishstorymongo import PhishstoryMongo
 from mock import patch
 
-from settings import UnitTestConfig
 from zeus.events.email.fraud_mailer import FraudMailer
 from zeus.events.email.hosted_mailer import HostedMailer
 from zeus.events.email.ssl_mailer import SSLMailer
@@ -16,6 +15,9 @@ from zeus.utils.mimir import Mimir
 from zeus.utils.scribe import HostedScribe
 from zeus.utils.shoplocked import Shoplocked
 from zeus.utils.slack import SlackFailures
+from settings import config_by_name
+
+config = config_by_name["unit-test"]()
 
 
 class TestHostedHandler(TestCase):
@@ -27,7 +29,7 @@ class TestHostedHandler(TestCase):
     domain = 'domain'
     ncmecReportID = '5678'
     current_test_date = datetime.utcnow()
-    oldest_valid_fraud_review_test_date = current_test_date - timedelta(days=UnitTestConfig.FRAUD_REVIEW_TIME - 1)
+    oldest_valid_fraud_review_test_date = current_test_date - timedelta(days=config.FRAUD_REVIEW_TIME - 1)
     ticket_no_guid = {'type': phishing}
     ticket_no_shopper = {'type': phishing, 'data': {'domainQuery': {'host': {'guid': guid}}}}
     ticket_valid = {'type': phishing, 'sourceDomainOrIp': domain, 'hosted_status': 'HOSTED',
@@ -54,7 +56,7 @@ class TestHostedHandler(TestCase):
                                                          'sslSubscriptions': ssl_subscription}}}
 
     def setUp(self):
-        self._hosted = HostedHandler(UnitTestConfig)
+        self._hosted = HostedHandler(config)
 
     def test_process_invalid_mapping(self):
         self.assertFalse(self._hosted.process({}, 'invalid-request'))
