@@ -4,6 +4,7 @@ from unittest import TestCase
 from dcdatabase.phishstorymongo import PhishstoryMongo
 from mock import patch
 
+from settings import config_by_name
 from zeus.events.email.fraud_mailer import FraudMailer
 from zeus.events.email.hosted_mailer import HostedMailer
 from zeus.events.email.ssl_mailer import SSLMailer
@@ -15,7 +16,6 @@ from zeus.utils.mimir import Mimir
 from zeus.utils.scribe import HostedScribe
 from zeus.utils.shoplocked import Shoplocked
 from zeus.utils.slack import SlackFailures
-from settings import config_by_name
 
 config = config_by_name["unit-test"]()
 
