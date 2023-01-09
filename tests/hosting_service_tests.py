@@ -51,6 +51,10 @@ class TestHostingService(TestCase):
         actual = self._hosting_service.delete_content('diablo', None)
         self.assertEqual(actual, 'Unsupported Operation: delete_content')
 
+    def test_delete_content_gocentral(self):
+        actual = self._hosting_service.delete_content('gocentral', None)
+        self.assertEqual(actual, 'Unsupported Operation: delete_content')
+
     # TODO CMAPT-5272: remove this test
     @patch('zeus.events.suspension.nes_helper.NESHelper.get_use_nes', return_value=False)
     @patch('zeus.events.suspension.diablo.Diablo.suspend', return_value=True)

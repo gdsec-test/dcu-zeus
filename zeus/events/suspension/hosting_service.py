@@ -34,12 +34,13 @@ class HostingService(Product):
     UNSUPPORTED_OPERATION = "Unsupported Operation: {}"
 
     def __init__(self, app_settings):
+        self.nes_helper = NESHelper(app_settings)
         self._products = {'diablo': Diablo(app_settings),
                           'vertigo': Vertigo(app_settings),
                           'mwp 1.0': MWPOne(app_settings),
                           'plesk': Angelo(app_settings),
-                          'vps4': VPS4(app_settings)}
-        self.nes_helper = NESHelper(app_settings)
+                          'vps4': VPS4(app_settings),
+                          'gocentral': self.nes_helper}
         self._shopper_api = ShopperAPI(app_settings)
 
     def suspend(self, product, identifier, data):
