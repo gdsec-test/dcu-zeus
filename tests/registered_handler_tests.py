@@ -4,7 +4,7 @@ from unittest import TestCase
 from dcdatabase.phishstorymongo import PhishstoryMongo
 from mock import patch
 
-from settings import config_by_name
+from settings import UnitTestConfig
 from zeus.events.email.foreign_mailer import ForeignMailer
 from zeus.events.email.fraud_mailer import FraudMailer
 from zeus.events.email.registered_mailer import RegisteredMailer
@@ -19,8 +19,6 @@ from zeus.utils.shoplocked import Shoplocked
 from zeus.utils.shopperapi import ShopperAPI
 from zeus.utils.slack import SlackFailures
 
-config = config_by_name["unit-test"]()
-
 
 class TestRegisteredHandler(TestCase):
     childabuse = 'CHILD_ABUSE'
@@ -28,7 +26,7 @@ class TestRegisteredHandler(TestCase):
     did = 'test-domain-id'
     domain = 'domain'
     domainId = '1234'
-    oldest_valid_review_test_date = current_test_date - timedelta(days=config.FRAUD_REVIEW_TIME - 1)
+    oldest_valid_review_test_date = current_test_date - timedelta(days=UnitTestConfig.FRAUD_REVIEW_TIME - 1)
     phishing = 'PHISHING'
     protected_domain = 'myftpupload.com'
     reg = 'REGISTERED'
@@ -101,7 +99,7 @@ class TestRegisteredHandler(TestCase):
                                                               KEY_IS_DOMAIN_HIGH_VALUE: 'true'}}}
 
     def setUp(self):
-        self._registered = RegisteredHandler(config)
+        self._registered = RegisteredHandler(UnitTestConfig)
 
     def test_process_invalid_mapping(self):
         self.assertFalse(self._registered.process({}, 'invalid-request'))

@@ -2,13 +2,11 @@ from unittest import TestCase
 
 from mock import patch
 
-from settings import config_by_name
+from settings import UnitTestConfig
 from zeus.events.email.foreign_mailer import ForeignMailer
 from zeus.handlers.foreign_handler import ForeignHandler
 from zeus.reviews.reviews import BasicReview
 from zeus.utils.slack import SlackFailures
-
-config = config_by_name["unit-test"]()
 
 
 class TestForeignHandler(TestCase):
@@ -16,7 +14,7 @@ class TestForeignHandler(TestCase):
     ticket_valid = {'hosted_status': 'FOREIGN', 'type': 'PHISHING'}
 
     def setUp(self):
-        self._foreign = ForeignHandler(config)
+        self._foreign = ForeignHandler(UnitTestConfig)
 
     @patch.object(SlackFailures, 'invalid_hosted_status', return_value=None)
     def test_foreign_notice_unsupported_hosted_status(self, slack):
