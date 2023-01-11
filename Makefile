@@ -4,13 +4,6 @@ DOCKERREPO=docker-dcu-local.artifactory.secureserver.net/zeus
 DATE=$(shell date)
 BUILD_BRANCH=origin/main
 
-define deploy_k8s
-	docker push $(DOCKERREPO):$(2)
-	cd k8s/$(1) && kustomize edit set image $$(docker inspect --format='{{index .RepoDigests 0}}' $(DOCKERREPO):$(2))
-	kubectl --context $(1)-dcu apply -k k8s/$(1)
-	cd k8s/$(1) && kustomize edit set image $(DOCKERREPO):$(1)
-endef
-
 define deploy_k3s
 	docker push $(DOCKERREPO):$(2)
 	cd k8s/$(1) && kustomize edit set image $$(docker inspect --format='{{index .RepoDigests 0}}' $(DOCKERREPO):$(2))
@@ -60,13 +53,11 @@ prep: tools test
 .PHONY: prod
 prod: prep
 	@echo "----- building $(REPONAME) prod -----"
-	  read -p "About to build production image from $(BUILD_BRANCH) branch. Are you sure? (Y/N): " response ; \
+	  read -p "About to deploy a production image. Are you sure? (Y/N): " response ; \
 	  if [[ $$response == 'N' || $$response == 'n' ]] ; then exit 1 ; fi
 	  if [[ `git status --porcelain | wc -l` -gt 0 ]] ; then echo "You must stash your changes before proceeding" ; exit 1 ; fi
-	  git fetch && git checkout $(BUILD_BRANCH)
 	  $(eval COMMIT:=$(shell git rev-parse --short HEAD))
 	  docker build -t $(DOCKERREPO):$(COMMIT) $(BUILDROOT)
-	  git checkout -
 
 .PHONY: ote
 ote: prep
@@ -86,13 +77,13 @@ dev: prep
 .PHONY: prod-deploy
 prod-deploy: prod
 	@echo "----- deploying $(REPONAME) prod -----"
-	$(call deploy_k8s,prod,$(COMMIT))
+	$(call deploy_k3s,prod,$(COMMIT))
 
 
 .PHONY: ote-deploy
 ote-deploy: ote
 	@echo "----- deploying $(REPONAME) ote -----"
-	$(call deploy_k8s,ote,ote)
+	$(call deploy_k3s,ote,ote)
 
 
 .PHONY: test-deploy
