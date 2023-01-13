@@ -65,6 +65,11 @@ class AppConfig(object):
 
     def __init__(self):
         self.DB_KELVIN_PASS = urllib.parse.quote(os.getenv('DB_KELVIN_PASS', 'password'))
+        self.DB_PASS = quote(os.getenv('DB_PASS', 'password'))
+        self.CLIENT_CERT = os.getenv("MONGO_CLIENT_CERT", '')
+        self.DBURL = f'mongodb://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}/?authSource={self.DB}&readPreference=primary&directConnection=true&tls=true&tlsCertificateKeyFile={self.CLIENT_CERT}'
+        self.DB_KELVIN_PASS = quote(os.getenv('DB_KELVIN_PASS', 'password'))
+        self.DB_KELVIN_URL = f'mongodb://{self.DB_KELVIN_USER}:{self.DB_KELVIN_PASS}@{self.DB_HOST}/?authSource={self.DB_KELVIN}&readPreference=primary&directConnection=true&tls=true&tlsCertificateKeyFile={self.CLIENT_CERT}'
 
         # TODO CMAPT-5272: Remove all DIABLO*, PLESK*, CMAP_PROXY*, VPS4* variables
         self.DIABLOUSER = os.getenv('DIABLOUSER', 'diablouser')
@@ -92,16 +97,12 @@ class ProductionAppConfig(AppConfig):
     ZEUSQUEUE = 'zeus'
 
     DB = 'phishstory'
-    DB_HOST = '10.22.9.209'
+    DB_HOST = 'p3plsocritmdb00-00-f0.prod.phx3.gdg'
     DB_USER = 'sau_p_phishv2'
 
     DB_KELVIN = 'dcu_kelvin'
-    DB_KELVIN_HOST = '10.22.9.209'
+    DB_KELVIN_HOST = 'p3plsocritmdb00-00-f0.prod.phx3.gdg'
     DB_KELVIN_USER = 'sau_service_kelvinv2'
-    DB_PASS = quote(os.getenv('DB_PASS', 'password'))
-    DB_KELVIN_PASS = quote(os.getenv('DB_KELVIN_PASS', 'password'))
-    DB_KELVIN_URL = f'mongodb://{DB_KELVIN_USER}:{DB_KELVIN_PASS}@{DB_HOST}/?authSource={DB_KELVIN}'
-    DBURL = f'mongodb://{DB_USER}:{DB_PASS}@{DB_HOST}/?authSource={DB}'
 
     SLACK_CHANNEL = '#dcu_alerts'
 
@@ -128,16 +129,12 @@ class OTEAppConfig(AppConfig):
     ZEUSQUEUE = 'otezeus'
 
     DB = 'otephishstory'
-    DB_HOST = '10.22.9.209'
+    DB_HOST = 'p3plsocritmdb00-00-f0.prod.phx3.gdg'
     DB_USER = 'sau_o_phish'
-    DB_PASS = quote(os.getenv('DB_PASS', 'password'))
-    DBURL = f'mongodb://{DB_USER}:{DB_PASS}@{DB_HOST}/?authSource={DB}'
 
     DB_KELVIN = 'ote_dcu_kelvin'
-    DB_KELVIN_HOST = '10.22.9.209'
+    DB_KELVIN_HOST = 'p3plsocritmdb00-00-f0.prod.phx3.gdg'
     DB_KELVIN_USER = 'sau_service_otedcu'
-    DB_KELVIN_PASS = quote(os.getenv('DB_KELVIN_PASS', 'password'))
-    DB_KELVIN_URL = f'mongodb://{DB_KELVIN_USER}:{DB_KELVIN_PASS}@{DB_HOST}/?authSource={DB_KELVIN}'
 
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-ote.svc.cluster.local:8080'
 
@@ -163,15 +160,10 @@ class DevelopmentAppConfig(AppConfig):
     DB = 'devphishstory'
     DB_HOST = 'mongodb.cset.int.dev-gdcorp.tools'
     DB_USER = 'devuser'
-    DB_PASS = quote(os.getenv('DB_PASS', 'password'))
-    CLIENT_CERT = os.getenv("MONGO_CLIENT_CERT", '')
-    DBURL = f'mongodb://{DB_USER}:{DB_PASS}@{DB_HOST}/?authSource={DB}&readPreference=primary&directConnection=true&tls=true&tlsCertificateKeyFile={CLIENT_CERT}'
 
     DB_KELVIN = 'devkelvin'
     DB_KELVIN_HOST = 'mongodb.cset.int.dev-gdcorp.tools'
     DB_KELVIN_USER = 'devkelvin'
-    DB_KELVIN_PASS = quote(os.getenv('DB_KELVIN_PASS', 'password'))
-    DB_KELVIN_URL = f'mongodb://{DB_KELVIN_USER}:{DB_KELVIN_PASS}@{DB_HOST}/?authSource={DB_KELVIN}&readPreference=primary&directConnection=true&tls=true&tlsCertificateKeyFile={CLIENT_CERT}'
 
     DOMAIN_SERVICE = 'localhost:8080/domains'
     MWPONE_URL = 'http://localhost:8080/mwpone/v1/accounts/'
@@ -201,15 +193,10 @@ class TestAppConfig(AppConfig):
     DB = 'testphishstory'
     DB_HOST = 'mongodb.cset.int.dev-gdcorp.tools'
     DB_USER = 'testuser'
-    DB_PASS = quote(os.getenv('DB_PASS', 'password'))
-    CLIENT_CERT = os.getenv("MONGO_CLIENT_CERT", '')
-    DBURL = f'mongodb://{DB_USER}:{DB_PASS}@{DB_HOST}/?authSource={DB}&readPreference=primary&directConnection=true&tls=true&tlsCertificateKeyFile={CLIENT_CERT}'
 
     DB_KELVIN = 'testkelvin'
     DB_KELVIN_HOST = 'mongodb.cset.int.dev-gdcorp.tools'
     DB_KELVIN_USER = 'testkelvin'
-    DB_KELVIN_PASS = quote(os.getenv('DB_KELVIN_PASS', 'password'))
-    DB_KELVIN_URL = f'mongodb://{DB_KELVIN_USER}:{DB_KELVIN_PASS}@{DB_HOST}/?authSource={DB_KELVIN}&readPreference=primary&directConnection=true&tls=true&tlsCertificateKeyFile={CLIENT_CERT}'
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-test.svc.cluster.local:8080'
 
     DIABLO_URL = 'https://diablo.api.test-godaddy.com/v1/accounts/'
@@ -240,7 +227,9 @@ class TestAppConfig(AppConfig):
 
 
 class UnitTestConfig(AppConfig):
-    DBURL = 'mongodb://localhost/devphishstory'
+    def __init__(self):
+        super(AppConfig, self).__init__()
+        self.DBURL = 'mongodb://localhost'
     DB = 'test'
     COLLECTION = 'test'
     HOLD_TIME = 1
