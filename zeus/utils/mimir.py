@@ -1,6 +1,7 @@
 import json
 import logging
 from enum import Enum
+from time import sleep
 
 import requests
 
@@ -107,6 +108,12 @@ class Mimir:
             response = requests.post(mimir_endpoint, json=body, headers=self._headers)
             if response.status_code in [401, 403]:
                 self._headers.update({'Authorization': f'sso-jwt {self._get_jwt(self._cert)}'})
+                response = requests.post(mimir_endpoint, json=body, headers=self._headers)
+
+            # Retry 5xx errors once to try and prevent conflicting lock issues when bulk working tickets.
+            if response.status_code >= 500:
+                # Debounce the request since they were submitted in bulk.
+                sleep(0.750)
                 response = requests.post(mimir_endpoint, json=body, headers=self._headers)
 
             if response.status_code not in {200, 201}:
