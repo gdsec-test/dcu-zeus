@@ -84,9 +84,10 @@ class NESHelper():
         try:
             # Only perform the suspend / reinstate if it isn't already in that state
             status = self._get_entitlement_status(entitlement_id, customer_id)
-            expected_status = 'SUSPENDED' if url_cmd == self.SUSPEND_CMD else 'ACTIVE'
-            if status == expected_status:
-                self._log_info(f'Account already has correct status of {status}', entitlement_id, customer_id)
+            # If the entitlement is CANCELLED there is nothing for us to suspend.
+            expected_status = ['SUSPENDED', 'CANCELLED'] if url_cmd == self.SUSPEND_CMD else ['ACTIVE']
+            if status in expected_status:
+                self._log_info(f'Account already in acceptable status of {status}', entitlement_id, customer_id)
                 return True
 
             url = f'{self._subscriptions_url}v2/customers/{customer_id}/{url_cmd}'
