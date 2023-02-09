@@ -234,6 +234,41 @@ def suspend(ticket_id, investigator_id=None):
     return result
 
 
+@celery.task(default_retry_delay=300, acks_late=True)
+def reinstate(ticket_id, investigator_id=None):
+    start_transaction()
+    data = get_database_handle().get_incident(ticket_id)
+    check_nes_retry(data, reinstate)
+
+    result = None
+    # Only reinstate hosted products:
+    hosted_status = data.get('hosted_status') or data.get('hostedStatus')
+    if hosted_status == 'HOSTED':
+        result = hosted.reinstate(data)
+
+    if result:
+        appseclogger = get_logging(os.getenv("sysenv"), "zeus")
+
+        # Get the hosted shopperID and customerID
+        shopper_id = shopper_api.get_host_shopper_id_from_dict(data)
+        customer_id = get_host_customer_id_from_dict(data)
+        domain = data.get('sourceDomainOrIp', {})
+        appseclogger.info("reinstating shopper", extra={
+            "event": {
+                "kind": "event",
+                "category": "process",
+                "type": ["change", "user"],
+                "outcome": "success",
+                "action": "suspend"},
+            "user": {
+                "domain": domain,
+                "shopper_id": shopper_id,
+                "customer_id": customer_id,
+                "investigator_id": investigator_id}})
+
+    return result
+
+
 @celery.task()
 def content_removed(ticket_id):
     data = get_database_handle().get_incident(ticket_id)

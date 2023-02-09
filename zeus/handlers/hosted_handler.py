@@ -332,6 +332,24 @@ class HostedHandler(Handler):
 
         return self._suspend_product(data, guid, product)
 
+    def reinstate(self, data):
+        product = get_host_info_from_dict(data).get('product')
+        report_type, guid, shopper_id = self._validate_required_args(data)
+
+        if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
+            return False
+
+        if not self.hosting_service.can_reinstate_hosting_product(guid):
+            self._logger.info("Hosting {} already reinstated".format(guid))
+            return False
+
+        reinstate_result = self.hosting_service.reinstate_hosting(product, guid, data)
+        if not reinstate_result:
+            self.slack.failed_hosting_suspension(guid)
+            return False
+
+        return True
+
     def extensive_compromise(self, data):
         domain = data.get('sourceDomainOrIp')
         subdomain = data.get('sourceSubDomain')
