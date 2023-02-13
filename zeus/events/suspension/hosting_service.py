@@ -22,9 +22,6 @@ class ThrottledHostingService:
     def suspend_hosting(self, product, identifier, data):
         return self._decorated.suspend(product, identifier, data)
 
-    def can_reinstate_hosting_product(self, identifier):
-        return self._throttle.can_reinstate_hosting_product(identifier)
-
     def reinstate_hosting(self, product, identifier, data):
         return self._decorated.reinstate(product, identifier, data)
 
@@ -69,6 +66,8 @@ class HostingService(Product):
         if self.nes_helper.get_use_nes(data):
             customer_id = get_host_customer_id_from_dict(data)
             return self.nes_helper.reinstate(identifier, customer_id)
+
+        return f'Cannot support reinstate.  {product} product is not NES supported.'
 
     # TODO CMAPT-5272: remove the rest of these functions.  They were never used
     def cancel(self, product, identifier):

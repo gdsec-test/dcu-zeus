@@ -72,13 +72,6 @@ class Throttle(object):
             return True
         return False
 
-    def can_reinstate_hosting_product(self, entitlementId: str) -> bool:
-        hosting_key = f'{entitlementId}_hosting_reinstated'
-        if not self._get_anti_spam_key(hosting_key):
-            self._set_anti_spam_key(hosting_key)
-            return True
-        return False
-
     ''' Slack specific time outs '''
 
     def can_slack_message_be_sent(self, key: str) -> bool:

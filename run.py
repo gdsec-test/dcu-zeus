@@ -245,6 +245,8 @@ def reinstate(ticket_id, investigator_id=None):
     hosted_status = data.get('hosted_status') or data.get('hostedStatus')
     if hosted_status == 'HOSTED':
         result = hosted.reinstate(data)
+    else:
+        return 'Cannot reinstate, it is not a hosted product.'
 
     if result:
         appseclogger = get_logging(os.getenv("sysenv"), "zeus")
@@ -253,20 +255,23 @@ def reinstate(ticket_id, investigator_id=None):
         shopper_id = shopper_api.get_host_shopper_id_from_dict(data)
         customer_id = get_host_customer_id_from_dict(data)
         domain = data.get('sourceDomainOrIp', {})
-        appseclogger.info("reinstating shopper", extra={
-            "event": {
-                "kind": "event",
-                "category": "process",
-                "type": ["change", "user"],
-                "outcome": "success",
-                "action": "suspend"},
-            "user": {
-                "domain": domain,
-                "shopper_id": shopper_id,
-                "customer_id": customer_id,
-                "investigator_id": investigator_id}})
-
-    return result
+        appseclogger.info(
+            "reinstating shopper",
+            extra={
+                "event": {
+                    "kind": "event",
+                    "category": "process",
+                    "type": ["change", "user"],
+                    "outcome": "success",
+                    "action": "suspend"},
+                "user": {
+                    "domain": domain,
+                    "shopper_id": shopper_id,
+                    "customer_id": customer_id,
+                    "investigator_id": investigator_id}})
+        return True
+    else:
+        return 'Reinstate failed.  See zeus logs for more details'
 
 
 @celery.task()

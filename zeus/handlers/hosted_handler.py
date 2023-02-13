@@ -336,10 +336,6 @@ class HostedHandler(Handler):
         product = get_host_info_from_dict(data).get('product', '')
         entitlement_id = get_host_info_from_dict(data).get('entitlementId', '')
 
-        if not self.hosting_service.can_reinstate_hosting_product(entitlement_id):
-            self._logger.info("Hosting {} already reinstated".format(entitlement_id))
-            return False
-
         reinstate_result = self.hosting_service.reinstate_hosting(product, entitlement_id, data)
         if not reinstate_result:
             self.slack.failed_hosting_suspension(entitlement_id)
