@@ -48,6 +48,7 @@ class HostingService(Product):
         # Use the correct API
         # TODO CMAPT-5272: remove the if statement and other return statement and just use NES
         if self.nes_helper.get_use_nes(data):
+            identifier = get_host_info_from_dict(data).get('entitlementId')
             customer_id = get_host_customer_id_from_dict(data)
             if not customer_id:
                 host_shopper_id = get_host_info_from_dict(data).get('shopperId', '')
