@@ -252,6 +252,7 @@ class TestRegisteredHandler(TestCase):
                                                          mimir, mock_db):
         self._registered.intentionally_malicious(self.ticket_no_hold_or_reseller)
         fraud.assert_called()
+        shoplocked.assert_called_with('test-id', 'Account locked for Abuse. * DO NOT UNLOCK OR REINSTATE * See http://x.co/dcuwhat2do for proper handling.')
 
     @patch.object(RegisteredHandler, 'suspend', return_value=True)
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
@@ -481,3 +482,21 @@ class TestRegisteredHandler(TestCase):
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
     def test_suspend_csam_failed_shopper_email(self, service, crm, mailer, slack_infraction, slack):
         self.assertFalse(self._registered.suspend_csam(self.ticket_valid_child_abuse))
+
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(CRMAlert, 'create_alert', return_value=None)
+    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(RegisteredHandler, '_suspend_domain', return_value=True)
+    @patch.object(RegisteredMailer, 'send_shopper_intentional_suspension', return_value=True)
+    @patch.object(FraudMailer, 'send_malicious_domain_notification', return_value=None)
+    @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
+    @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=True)
+    @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
+    @patch.object(ShopperAPI, 'get_shopper_id_from_customer_id', return_value='7890')
+    def test_soft_intentionally_malicious_success_fraud_email(self, shopper_api, ssl_mailer, service, crm, fraud,
+                                                              registered, handler, shoplocked, crmalert,
+                                                              mimir, mock_db):
+        self._registered.soft_intentionally_malicious(self.ticket_no_hold_or_reseller)
+        fraud.assert_called()
+        shoplocked.assert_not_called()

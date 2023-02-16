@@ -201,6 +201,17 @@ def intentionally_malicious(ticket_id, investigator_id):
 
 
 @celery.task(default_retry_delay=300, acks_late=True)
+def soft_intentionally_malicious(ticket_id, investigator_id):
+    start_transaction()
+    data = get_database_handle().get_incident(ticket_id)
+    check_nes_retry(data, soft_intentionally_malicious)
+
+    # Add investigator user id to data so its available in _notify_fraud and ssl subscription check
+    data['investigator_user_id'] = investigator_id
+    return route_request(data, ticket_id, 'soft_intentionally_malicious', dual_suspension=True) if data else None
+
+
+@celery.task(default_retry_delay=300, acks_late=True)
 def suspend(ticket_id, investigator_id=None):
     start_transaction()
     data = get_database_handle().get_incident(ticket_id)

@@ -67,6 +67,7 @@ class RegisteredHandler(Handler):
             'customer_warning': self.customer_warning,
             'forward_complaint': self.forward_user_gen_complaint,
             'intentionally_malicious': self.intentionally_malicious,
+            'soft_intentionally_malicious': self.soft_intentionally_malicious,
             'repeat_offender': self.repeat_offender,
             'shopper_compromise': self.shopper_compromise,
             'suspend': self.suspend,
@@ -161,6 +162,12 @@ class RegisteredHandler(Handler):
         return True
 
     def intentionally_malicious(self, data):
+        return self._int_mal_worker(data, lock_shopper=True)
+
+    def soft_intentionally_malicious(self, data):
+        return self._int_mal_worker(data, lock_shopper=False)
+
+    def _int_mal_worker(self, data: dict, lock_shopper: bool):
         domain = data.get('sourceDomainOrIp')
         subdomain = data.get('sourceSubDomain')
         domain_id = get_domain_id_from_dict(data)
@@ -227,7 +234,8 @@ class RegisteredHandler(Handler):
             self.slack.failed_sending_email(domain)
             return False
 
-        self.shoplocked.adminlock(shopper_id, note_mappings['registered']['intentionallyMalicious']['shoplocked'])
+        if lock_shopper:
+            self.shoplocked.adminlock(shopper_id, note_mappings['registered']['intentionallyMalicious']['shoplocked'])
 
         alert = alert_mappings['registered']['suspend'].format(domain=domain, type=report_type)
         self.crmalert.create_alert(shopper_id, alert, report_type, self.crmalert.high_severity, domain)

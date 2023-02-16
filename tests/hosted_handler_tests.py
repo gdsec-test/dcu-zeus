@@ -186,6 +186,7 @@ class TestHostedHandler(TestCase):
     def test_intentionally_malicious_success(self, ssl_mailer, can_suspend, scribe, mailer, suspend,
                                              mimir, shoplocked, crmalert, mock_db):
         self.assertTrue(self._hosted.intentionally_malicious(self.ticket_valid))
+        shoplocked.assert_called_with('test-id', 'Account locked for Abuse. * DO NOT UNLOCK OR REINSTATE * See http://x.co/dcuwhat2do for proper handling.')
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(FraudMailer, 'send_malicious_hosting_notification', return_value=None)
@@ -385,3 +386,17 @@ class TestHostedHandler(TestCase):
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
     def test_csam_suspend_success(self, can_suspend, scribe, mailer, handler, mimir, crmalert):
         self.assertTrue(self._hosted.suspend_csam(self.ticket_valid_child_abuse))
+
+    @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
+    @patch.object(CRMAlert, 'create_alert', return_value=None)
+    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(Mimir, 'write', return_value=None)
+    @patch.object(HostedHandler, '_suspend_product', return_value=True)
+    @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=True)
+    @patch.object(HostedScribe, 'intentionally_malicious', return_value=None)
+    @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=True)
+    @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
+    def test_soft_intentionally_malicious_success(self, ssl_mailer, can_suspend, scribe, mailer, suspend,
+                                                  mimir, shoplocked, crmalert, mock_db):
+        self.assertTrue(self._hosted.soft_intentionally_malicious(self.ticket_valid))
+        shoplocked.assert_not_called()
