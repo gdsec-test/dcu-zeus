@@ -17,10 +17,6 @@ class ShopperAPI:
 
     def __init__(self, app_settings):
         self._shopper_api_url = app_settings.SHOPPER_API_URL
-
-        # NOTE: if you switch this to StrictRedis, you MUST also update the call to 'setex' below.
-        # In the version of redis we are currently using, the 'time' and 'value' parameters for 'setex' were flipped:
-        #  value first, then time.  In other version of redis, as well as the StrictRedis the parameters are: time, then value.
         self._redis = Redis(app_settings.REDIS)
         self._cert = (app_settings.ZEUS_CLIENT_CERT, app_settings.ZEUS_CLIENT_KEY)
         self._logger = logging.getLogger(__name__)
@@ -44,7 +40,7 @@ class ShopperAPI:
             resp.raise_for_status()
             data = resp.json()
             customer_id = data['customerId']
-            self._redis.setex(redis_key, customer_id, self.REDIS_EXPIRATION)
+            self._redis.setex(redis_key, self.REDIS_EXPIRATION, customer_id)
             return customer_id
         except Exception as e:
             self._logger.error(f'Error in getting the shopper info for {shopper_id} : {e}')
@@ -68,7 +64,7 @@ class ShopperAPI:
             resp.raise_for_status()
             data = json.loads(resp.text)
             shopper_id = data[self.KEY_SHOPPER_ID]
-            self._redis.setex(redis_key, shopper_id, self.REDIS_EXPIRATION)
+            self._redis.setex(redis_key, self.REDIS_EXPIRATION, shopper_id)
             return shopper_id
         except Exception as e:
             self._logger.error(f'Error in getting the shopperID: {e}')

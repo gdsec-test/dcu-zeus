@@ -32,10 +32,6 @@ class NESHelper():
         self._cert = (settings.ZEUS_CLIENT_CERT, settings.ZEUS_CLIENT_KEY)
 
         self._headers.update({'Authorization': f'sso-jwt {self._get_jwt(self._cert)}'})
-
-        # NOTE: if you switch this to StrictRedis, you MUST also update the call to 'setex' below.
-        # In the version of redis we are currently using, the 'time' and 'value' parameters for 'setex' were flipped:
-        #  value first, then time.  In other version of redis, as well as the StrictRedis the parameters are: time, then value.
         self._redis = Redis(settings.REDIS)
 
     def suspend(self, entitlement_id: str, customer_id: str) -> bool:
@@ -57,7 +53,7 @@ class NESHelper():
             client = elasticapm.get_client()
             if client:
                 client.capture_message('NES DOWN')
-        self._redis.setex(self.REDIS_NES_STATE_KEY, state, self.REDIS_EXPIRATION)
+        self._redis.setex(self.REDIS_NES_STATE_KEY, self.REDIS_EXPIRATION, state)
 
     # TODO CMAPT-5272: remove this function and all calls to it
     def get_use_nes(self, data: dict) -> bool:

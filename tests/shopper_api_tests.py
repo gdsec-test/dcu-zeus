@@ -87,4 +87,4 @@ class TestShopperApi(TestCase):
             'test_shopper_api/v1/shoppers/123456',
             params={'includes': 'contact,preference', 'auditClientIp': 'zeus'},
             cert=('zeus_test_cert', 'zeus_test_key'))
-        setex.assert_called_with('shopper-id-key-123456', 'customerIdApi', timedelta(days=5))
+        setex.assert_called_with('shopper-id-key-123456', timedelta(days=5), 'customerIdApi')
