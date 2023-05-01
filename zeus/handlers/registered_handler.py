@@ -131,7 +131,7 @@ class RegisteredHandler(Handler):
         note = note_mappings['registered']['customerWarning']['crm'].format(domain=domain,
                                                                             type=report_type,
                                                                             location=source)
-        self.crm.notate_crm_account(shopper_id_list, ticket_id, note, domain)
+        self.crm.notate_crm_account(shopper_id_list, ticket_id, note, domain, 'customerWarning')
 
         self.mimir.write(abuse_type=report_type,
                          domain=domain,
@@ -202,7 +202,7 @@ class RegisteredHandler(Handler):
         note = note_mappings['registered']['intentionallyMalicious']['crm'].format(domain=domain,
                                                                                    type=report_type,
                                                                                    location=source)
-        self.crm.notate_crm_account([shopper_id], ticket_id, note, domain)
+        self.crm.notate_crm_account([shopper_id], ticket_id, note, domain, 'intentionallyMalicious')
 
         '''We do not want to create a second infraction for the domain suspension if the associated hosting is in the
         same customer account'''
@@ -261,7 +261,7 @@ class RegisteredHandler(Handler):
 
         note = note_mappings['registered']['shopperCompromise']['crm'].format(domain=domain, type=report_type,
                                                                               location=source)
-        self.crm.notate_crm_account([shopper_id], ticket_id, note, domain)
+        self.crm.notate_crm_account([shopper_id], ticket_id, note, domain, 'shopperCompromise')
 
         self.mimir.write(abuse_type=report_type,
                          domain=domain,
@@ -311,7 +311,7 @@ class RegisteredHandler(Handler):
         note = note_mappings['registered']['repeatOffender']['crm'].format(domain=domain,
                                                                            type=report_type,
                                                                            location=source)
-        self.crm.notate_crm_account([shopper_id], ticket_id, note, domain)
+        self.crm.notate_crm_account([shopper_id], ticket_id, note, domain, 'repeatOffender')
 
         self.mimir.write(abuse_type=report_type,
                          domain=domain,
@@ -356,7 +356,7 @@ class RegisteredHandler(Handler):
         note = note_mappings['registered']['suspension']['crm'].format(domain=domain,
                                                                        type=report_type,
                                                                        location=source)
-        self.crm.notate_crm_account([shopper_id], ticket_id, note, domain)
+        self.crm.notate_crm_account([shopper_id], ticket_id, note, domain, 'suspension')
 
         self.mimir.write(abuse_type=report_type,
                          domain=domain,
@@ -399,7 +399,7 @@ class RegisteredHandler(Handler):
 
         note = note_mappings['registered']['suspension']['csam']['crm'].format(domain=domain,
                                                                                type=report_type)
-        self.crm.notate_crm_account([shopper_id], ticket_id, note, domain)
+        self.crm.notate_crm_account([shopper_id], ticket_id, note, domain, 'suspension')
 
         '''We do not want to create a second infraction for the domain suspension if the associated hosting is in the
         same customer account'''

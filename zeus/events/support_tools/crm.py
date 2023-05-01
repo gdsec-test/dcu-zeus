@@ -12,11 +12,11 @@ class ThrottledCRM:
         self._decorated = CRM(app_settings)
         self._throttle = Throttle(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)  # one day throttle
 
-    def notate_crm_account(self, shopper_id_list, ticket_id, note, domain_or_guid):
+    def notate_crm_account(self, shopper_id_list, ticket_id, note, domain_or_guid, action_type):
         if not isinstance(shopper_id_list, list):
             shopper_id_list = [shopper_id_list]
 
-        if self._throttle.can_crm_be_notated(domain_or_guid):
+        if self._throttle.can_crm_be_notated(f'{domain_or_guid}-{action_type}'):
             self._decorated.notate_crm_accounts(shopper_id_list, ticket_id, note)
         else:
             self._logger.info(f'CRM for {domain_or_guid} already notated for 24hr hold')
