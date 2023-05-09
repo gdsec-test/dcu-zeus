@@ -168,12 +168,12 @@ class HostedHandler(Handler):
         return True
 
     def intentionally_malicious(self, data):
-        return self._int_mal_worker(data, lock_shopper=True)
+        return self._int_mal_worker(data, lock_shopper=True, suspend_associated=True)
 
     def soft_intentionally_malicious(self, data):
-        return self._int_mal_worker(data, lock_shopper=False)
+        return self._int_mal_worker(data, lock_shopper=False, suspend_associated=False)
 
-    def _int_mal_worker(self, data: dict, lock_shopper: bool):
+    def _int_mal_worker(self, data: dict, lock_shopper: bool, suspend_associated: bool):
         domain = data.get('sourceDomainOrIp')
         subdomain = data.get('sourceSubDomain')
         product = get_host_info_from_dict(data).get('product')
@@ -225,7 +225,7 @@ class HostedHandler(Handler):
         alert = alert_mappings['hosted']['suspend'].format(domain=domain, type=report_type)
         self.crmalert.create_alert(shopper_id, alert, report_type, self.crmalert.high_severity, domain)
 
-        return self._suspend_product(data, guid, product)
+        return self._suspend_product(data, guid, product, suspend_associated=suspend_associated)
 
     def shopper_compromise(self, data):
         domain = data.get('sourceDomainOrIp')
@@ -467,10 +467,10 @@ class HostedHandler(Handler):
                                                      'email sent fraud_intentionally_malicious_domain',
                                                      data.get('investigator_user_id'))
 
-    def _suspend_product(self, data, guid, product):
+    def _suspend_product(self, data, guid, product, suspend_associated: bool = False):
         guid = get_host_info_from_dict(data).get('mwpId') or guid
 
-        suspension_result = self.hosting_service.suspend_hosting(product, guid, data)
+        suspension_result = self.hosting_service.suspend_hosting(product, guid, data, suspend_associated)
         if isinstance(suspension_result, str):
             self.slack.failed_hosting_suspension(guid, info=suspension_result)
         elif not suspension_result:

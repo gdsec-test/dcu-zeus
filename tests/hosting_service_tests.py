@@ -76,3 +76,31 @@ class TestHostingService(TestCase):
     def test_use_nes_product_true_customer_exists(self, suspend, get_use_nes):
         self._hosting_service.suspend('diablo', 'test-guid', self.DATA_WITH_CUSTOMER_ID)
         suspend.assert_called_with('test-entitlementID', '1234-5678-9012')
+
+    @patch('zeus.events.suspension.nes_helper.NESHelper.get_entitlements_from_subscriptions', return_value=['a'])
+    @patch('zeus.events.suspension.nes_helper.NESHelper.get_use_nes', return_value=True)
+    @patch('zeus.events.suspension.nes_helper.NESHelper.suspend', return_value=True)
+    def test_suspend_associated(self, suspend, get_use_nes, from_subs):
+        self._hosting_service.suspend('gocentral', 'test-guid', self.DATA_WITH_CUSTOMER_ID, True)
+        suspend.assert_any_call('test-entitlementID', '1234-5678-9012')
+        self.assertEqual(2, suspend.call_count)
+        suspend.assert_any_call('a', '1234-5678-9012')
+        from_subs.assert_called_with('1234-5678-9012', 'websiteBuilder', 'websitesAndMarketing')
+
+    @patch('zeus.events.suspension.nes_helper.NESHelper.get_entitlements_from_subscriptions', return_value=[])
+    @patch('zeus.events.suspension.nes_helper.NESHelper.get_use_nes', return_value=True)
+    @patch('zeus.events.suspension.nes_helper.NESHelper.suspend', return_value=True)
+    def test_suspend_associated_no_other(self, suspend, get_use_nes, from_subs):
+        self._hosting_service.suspend('gocentral', 'test-guid', self.DATA_WITH_CUSTOMER_ID, True)
+        suspend.assert_any_call('test-entitlementID', '1234-5678-9012')
+        self.assertEqual(1, suspend.call_count)
+        from_subs.assert_called_with('1234-5678-9012', 'websiteBuilder', 'websitesAndMarketing')
+
+    @patch('zeus.events.suspension.nes_helper.NESHelper.get_entitlements_from_subscriptions', return_value=['a'])
+    @patch('zeus.events.suspension.nes_helper.NESHelper.get_use_nes', return_value=True)
+    @patch('zeus.events.suspension.nes_helper.NESHelper.suspend', return_value=True)
+    def test_suspend_associated_wrong_product(self, suspend, get_use_nes, from_subs):
+        self._hosting_service.suspend('diablo', 'test-guid', self.DATA_WITH_CUSTOMER_ID, True)
+        suspend.assert_any_call('test-entitlementID', '1234-5678-9012')
+        self.assertEqual(1, suspend.call_count)
+        from_subs.assert_not_called()

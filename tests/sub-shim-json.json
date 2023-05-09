@@ -1,0 +1,156 @@
+[
+    {
+        "customerId": "769ffce0-819c-4364-8a73-ef884a2d64b9",
+        "subscriptionId": "wsb:15432700",
+        "uri": "/customers/769ffce0-819c-4364-8a73-ef884a2d64b9/subscriptions/wsb:15432700",
+        "metadata": {
+            "createdAt": "2023-05-07T21:39:52.000Z",
+            "revision": 1,
+            "modifiedAt": "2023-05-07T21:40:13.000Z"
+        },
+        "status": "TRIAL",
+        "statusUpdatedAt": "2023-05-07T21:40:13Z",
+        "paidThroughDate": "2023-05-14T07:00:00Z",
+        "canBeRenewed": true,
+        "offer": {
+            "uri": "/customers/31430a42-6f4f-4646-9595-305f614957be/offers/d9e7bde4-7b28-49b3-b2fd-5dc528ab8062",
+            "autoRenew": true,
+            "term": {
+                "termType": "MONTH",
+                "numberOfTerms": 1
+            },
+            "products": [
+                {
+                    "key": "582ca16a-2039-44f4-a23f-1e54bf263498",
+                    "product": {
+                        "ads": true,
+                        "agreements": [
+                            "24694",
+                            "26864"
+                        ],
+                        "businessSections": true,
+                        "cdn": true,
+                        "commerce": false,
+                        "gem": "starter",
+                        "getFound": true,
+                        "multipleListingServices": true,
+                        "onlineBookkeeping": false,
+                        "ordering": true,
+                        "payments": true,
+                        "plan": "businessPlus",
+                        "productFamily": "websiteBuilder",
+                        "productType": "websitesAndMarketing",
+                        "reservations": false,
+                        "resourceType": "product",
+                        "schemaVersion": "1.0.1",
+                        "searchEngineOptimization": true,
+                        "socialMediaManager": true,
+                        "ssl": true,
+                        "term": {
+                            "numberOfTerms": 1,
+                            "termType": "MONTH"
+                        },
+                        "uri": "/customers/31430a42-6f4f-4646-9595-305f614957be/products/6bb45f05-b8f2-4a30-8a9d-092d77967170"
+                    }
+                }
+            ],
+            "plan": "businessPlusFreeMat",
+            "billingPolicyOverride": {
+                "planType": "FREE_TRIAL",
+                "trialInfo": {
+                    "term": {
+                        "termType": "DAY",
+                        "numberOfTerms": 7
+                    }
+                }
+            }
+        },
+        "linkedEntitlements": [
+            {
+                "productKey": "582ca16a-2039-44f4-a23f-1e54bf263498",
+                "entitlementUri": "/customers/769ffce0-819c-4364-8a73-ef884a2d64b9/entitlements/b1352611-ed1f-11ed-81b4-0050569a00bd",
+                "commonName": "hjklhjlhjklhjklkljhkl.test.godaddysites.com",
+                "i18nKey": "MTMzNjcwNQ=="
+            }
+        ],
+        "commonName": "hjklhjlhjklhjklkljhkl.test.godaddysites.com",
+        "i18nKey": "MTMzNjcwNQ=="
+    },
+    {
+        "customerId": "769ffce0-819c-4364-8a73-ef884a2d64b9",
+        "subscriptionId": "wsb:15432698",
+        "uri": "/customers/769ffce0-819c-4364-8a73-ef884a2d64b9/subscriptions/wsb:15432698",
+        "metadata": {
+            "createdAt": "2023-05-07T21:37:01.000Z",
+            "revision": 1,
+            "modifiedAt": "2023-05-07T21:37:36.000Z"
+        },
+        "status": "TRIAL",
+        "statusUpdatedAt": "2023-05-07T21:37:36Z",
+        "paidThroughDate": "2023-05-14T07:00:00Z",
+        "canBeRenewed": true,
+        "offer": {
+            "uri": "/customers/31430a42-6f4f-4646-9595-305f614957be/offers/d9e7bde4-7b28-49b3-b2fd-5dc528ab8062",
+            "autoRenew": true,
+            "term": {
+                "termType": "MONTH",
+                "numberOfTerms": 1
+            },
+            "products": [
+                {
+                    "key": "582ca16a-2039-44f4-a23f-1e54bf263498",
+                    "product": {
+                        "ads": true,
+                        "agreements": [
+                            "24694",
+                            "26864"
+                        ],
+                        "businessSections": true,
+                        "cdn": true,
+                        "commerce": false,
+                        "gem": "starter",
+                        "getFound": true,
+                        "multipleListingServices": true,
+                        "onlineBookkeeping": false,
+                        "ordering": true,
+                        "payments": true,
+                        "plan": "businessPlus",
+                        "productFamily": "websiteBuilder",
+                        "productType": "websitesAndMarketing",
+                        "reservations": false,
+                        "resourceType": "product",
+                        "schemaVersion": "1.0.1",
+                        "searchEngineOptimization": true,
+                        "socialMediaManager": true,
+                        "ssl": true,
+                        "term": {
+                            "numberOfTerms": 1,
+                            "termType": "MONTH"
+                        },
+                        "uri": "/customers/31430a42-6f4f-4646-9595-305f614957be/products/6bb45f05-b8f2-4a30-8a9d-092d77967170"
+                    }
+                }
+            ],
+            "plan": "businessPlusFreeMat",
+            "billingPolicyOverride": {
+                "planType": "FREE_TRIAL",
+                "trialInfo": {
+                    "term": {
+                        "termType": "DAY",
+                        "numberOfTerms": 7
+                    }
+                }
+            }
+        },
+        "linkedEntitlements": [
+            {
+                "productKey": "582ca16a-2039-44f4-a23f-1e54bf263498",
+                "entitlementUri": "/customers/769ffce0-819c-4364-8a73-ef884a2d64b9/entitlements/4b609483-ed1f-11ed-81b4-0050569a00bd",
+                "commonName": "yiuoiyhuoiyuo.test.godaddysites.com",
+                "i18nKey": "MTMzNjcwNQ=="
+            }
+        ],
+        "commonName": "yiuoiyhuoiyuo.test.godaddysites.com",
+        "i18nKey": "MTMzNjcwNQ=="
+    }
+]

@@ -19,8 +19,8 @@ class ThrottledHostingService:
     def can_suspend_hosting_product(self, identifier):
         return self._throttle.can_suspend_hosting_product(identifier)
 
-    def suspend_hosting(self, product, identifier, data):
-        return self._decorated.suspend(product, identifier, data)
+    def suspend_hosting(self, product, identifier, data, suspend_associated: bool = False):
+        return self._decorated.suspend(product, identifier, data, suspend_associated)
 
     def reinstate_hosting(self, product, identifier, data):
         return self._decorated.reinstate(product, identifier, data)
@@ -40,7 +40,7 @@ class HostingService(Product):
                           'gocentral': self.nes_helper}
         self._shopper_api = ShopperAPI(app_settings)
 
-    def suspend(self, product, identifier, data):
+    def suspend(self, product, identifier, data, suspend_associated: bool = False):
         product = product.lower() if product else ''
         if product not in self._products:
             return self.UNSUPPORTED_PRODUCT.format(product)
@@ -53,7 +53,14 @@ class HostingService(Product):
             if not customer_id:
                 host_shopper_id = get_host_info_from_dict(data).get('shopperId', '')
                 customer_id = self._shopper_api.get_customer_id_from_shopper_id(host_shopper_id)
-            return self.nes_helper.suspend(identifier, customer_id)
+            result = self.nes_helper.suspend(identifier, customer_id)
+
+            # Custom handling for W+M products.
+            if result and suspend_associated and product == 'gocentral':
+                entitlements = self.nes_helper.get_entitlements_from_subscriptions(customer_id, 'websiteBuilder', 'websitesAndMarketing')
+                for e in entitlements:
+                    self.nes_helper.suspend(e, customer_id)
+            return result
 
         return self._products.get(product).suspend(guid=identifier, data=data)
 

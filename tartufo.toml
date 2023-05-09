@@ -4,6 +4,7 @@ exclude-path-patterns = [
     { path-pattern = 'tartufo.*'},
     { path-pattern = 'certs/DC1Issuing-CA'},
     { path-pattern = 'certs/DC1Root-CA'},
+    { path-pattern = 'tests/sub-shim-json.json'},
 ]
 exclude-signatures = [
     { signature = '3db60a1e20826138eb7ed12274ded7bbe3f0f09a5479216717a57a757f787a49'},
@@ -24,4 +25,5 @@ exclude-signatures = [
     { signature = 'c9af16818b4c3526825b99620076669210c81135b818f9ac75f3de7e47b7cd91'},
     { signature = '63cbbe28d104a5a517f002967d4982a75e0756ddd04e569322a2ffa9e5d8473d'},
     { signature = '7059db08aaa677319bbd8bc0d7fdf5d129673e5d646e8768158b07e92a4aba1d'},
+    { signature = 'ff4be7033fd44b9a8e9cf20b53c3ef067861ad5b6f96af99425c0ccca6a4ab06'},
 ]

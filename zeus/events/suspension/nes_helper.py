@@ -1,6 +1,7 @@
 import logging
 import os
 from datetime import timedelta
+from typing import List
 
 import elasticapm
 import requests
@@ -11,6 +12,8 @@ from zeus.utils.functions import get_host_info_from_dict
 
 
 class NESHelper():
+    # The Swagger for the API caps us at 250 per call.
+    SUB_SHIM_MAX_RESULTS = 250
     _headers = {'Content-Type': 'application/json', 'x-app-key': 'zeus'}
     SUSPEND_REASON = 'POLICY'  # POLICY - means it's being suspended for ABUSE
 
@@ -177,3 +180,42 @@ class NESHelper():
         except Exception as e:
             self._logger.exception(e)
             return ''
+
+    def get_subscriptions(self, customer_id: str, family: str) -> List[dict]:
+        url = f'{self._subscriptions_url}v2/customers/{customer_id}/subscriptions'
+        max_limit = self.SUB_SHIM_MAX_RESULTS
+        retrieved = self.SUB_SHIM_MAX_RESULTS
+        results = []
+        offset = 0
+        while retrieved == max_limit:
+            params = {
+                'limit': self.SUB_SHIM_MAX_RESULTS,
+                'offset': offset,
+                'productFamilies': family
+            }
+
+            response = requests.get(url, headers=self._headers, timeout=30, params=params)
+
+            # If these credentials aren't accepted, update the JWT and try again
+            if response.status_code in [401, 403]:
+                self._headers.update({'Authorization': f'sso-jwt {self._get_jwt(self._cert)}'})
+                response = requests.get(url, headers=self._headers, timeout=30, params=params)
+            response.raise_for_status()
+            new = response.json()
+            results.extend(new)
+            retrieved = len(new)
+            offset = len(results)
+        return results
+
+    def get_entitlements_from_subscriptions(self, customer_id: str, family: str, product: str) -> List[str]:
+        subscriptions = self.get_subscriptions(customer_id, family)
+        results = []
+        for sub in subscriptions:
+            # filter down products
+            products = [p for p in sub.get('offer', {}).get('products', [])]
+            products = [p.get('key') for p in products if p.get('product', {}).get('productType') == product]
+
+            # This looks sketchy but entitlementUri is a structured field and will always exist in the defined URL format.
+            entitlements = [e.get('entitlementUri').split('/')[-1] for e in sub.get('linkedEntitlements', []) if e.get('productKey') in products]
+            results.extend(entitlements)
+        return results
