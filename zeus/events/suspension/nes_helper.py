@@ -100,12 +100,19 @@ class NESHelper():
 
             # process response and log errors and successes
             if response.status_code not in [200, 204]:
-                self.set_nes_state(self.REDIS_NES_STATE_BAD)
-                self._log_error(f'Failed to perform {url_cmd}', entitlement_id, customer_id, response.status_code, response.text)
-                return False
-            else:
-                self._log_info(f'Successfully performed {url_cmd}', entitlement_id, customer_id)
-                return True
+                # During bulk actions taken by the analysts, it is possible to two tickets suspending two different entitlements in the same
+                # hosting account, which each then try to suspend the other GUID during the intmal process. This can cause a hang up in ecomm
+                # where the entitlement changes status part way through the suspend process and it throws a 502. If the entitlement has ended
+                # up in the correct state we should count this as a success.
+
+                status = self._get_entitlement_status(entitlement_id, customer_id)
+                if status not in expected_status:
+                    self.set_nes_state(self.REDIS_NES_STATE_BAD)
+                    self._log_error(f'Failed to perform {url_cmd}', entitlement_id, customer_id, response.status_code, response.text)
+                    return False
+
+            self._log_info(f'Successfully performed {url_cmd}', entitlement_id, customer_id)
+            return True
 
         except Exception as e:
             self._log_exception(f'Exception thrown while trying to perform {url_cmd}', e, entitlement_id, customer_id)
