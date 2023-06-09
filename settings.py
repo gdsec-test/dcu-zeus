@@ -31,11 +31,10 @@ class AppConfig(object):
     ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.prod.godaddy.com/'
     SUBSCRIPTIONS_URL = 'https://subscriptions-shim-ext.cp.api.prod.godaddy.com/'
 
-    # TODO CMAPT-5272: remove all references to DIABLO_URL, MWPONE_URL, PLESK_URL, and VERT_URL variables
+    # TODO CMAPT-5272: remove all references to DIABLO_URL, MWPONE_URL, and PLESK_URL variables
     DIABLO_URL = 'https://cpanelprovapi.prod.phx3.secureserver.net/v1/accounts/'
     MWPONE_URL = 'https://api.servicemanager.godaddy.com/v1/accounts/'
     PLESK_URL = 'https://gdapi.plesk-shared-app.int.gdcorp.tools/v1/accounts/'
-    VERT_URL = ''
     SHOPPER_API_URL = 'https://shopper.api.int.godaddy.com'
 
     # For SLACK notifications on suspension failures
@@ -198,7 +197,6 @@ class TestAppConfig(AppConfig):
     DIABLO_URL = 'https://diablo.api.test-godaddy.com/v1/accounts/'
     MWPONE_URL = 'https://api.servicemanager.test-godaddy.com/v1/accounts/'
     PLESK_URL = 'https://gdapi.plesk-shared-app.int.test-gdcorp.tools/v1/accounts/'
-    VERT_URL = ''
     SHOPPER_API_URL = 'https://shopper.api.int.test-godaddy.com'
 
     ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.test.godaddy.com/'
