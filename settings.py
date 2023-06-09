@@ -81,9 +81,6 @@ class AppConfig(object):
         self.VPS4USER = os.getenv('VPS4USER', 'vps4user')
         self.VPS4PASS = os.getenv('VPS4PASS', 'vps4pass')
 
-        self.VERTIGO_USER = os.getenv('VERTIGO_USER', 'vertigouser')
-        self.VERTIGO_PASS = os.getenv('VERTIGO_PASS', 'vertigopass')
-
         self.CAN_FLOOD = os.getenv('sysenv', 'dev') in ['dev', 'test']
 
 
@@ -111,7 +108,6 @@ class ProductionAppConfig(AppConfig):
     SSO_URL = 'https://sso.gdcorp.tools'
     MIMIR_URL = 'https://mimir.cset.int.gdcorp.tools'
     SHOPLOCKED_URL = 'https://shoplocked.cset.int.gdcorp.tools'
-    VERT_URL = 'https://vertigo.int.gdcorp.tools/vertigo/v1/container/'
     CRMALERT_URL = 'https://crm-alert.cset.int.gdcorp.tools'
 
     # TODO CMAPT-5272: remove all references to VPS4_URLS variable
@@ -251,8 +247,6 @@ class UnitTestConfig(AppConfig):
     PLESKPASS = 'pleskpass'
     VPS4USER = 'vps4user'
     VPS4PASS = 'vps4pass'
-    VERTIGO_USER = 'vertigouser'
-    VERTIGO_PASS = 'vertigopass'
 
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-dev.svc.cluster.local:8080'
 
