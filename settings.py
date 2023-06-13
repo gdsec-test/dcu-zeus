@@ -31,11 +31,10 @@ class AppConfig(object):
     ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.prod.godaddy.com/'
     SUBSCRIPTIONS_URL = 'https://subscriptions-shim-ext.cp.api.prod.godaddy.com/'
 
-    # TODO CMAPT-5272: remove all references to DIABLO_URL, MWPONE_URL, PLESK_URL, and VERT_URL variables
+    # TODO CMAPT-5272: remove all references to DIABLO_URL, MWPONE_URL, and PLESK_URL variables
     DIABLO_URL = 'https://cpanelprovapi.prod.phx3.secureserver.net/v1/accounts/'
     MWPONE_URL = 'https://api.servicemanager.godaddy.com/v1/accounts/'
     PLESK_URL = 'https://gdapi.plesk-shared-app.int.gdcorp.tools/v1/accounts/'
-    VERT_URL = ''
     SHOPPER_API_URL = 'https://shopper.api.int.godaddy.com'
 
     # For SLACK notifications on suspension failures
@@ -81,9 +80,6 @@ class AppConfig(object):
         self.VPS4USER = os.getenv('VPS4USER', 'vps4user')
         self.VPS4PASS = os.getenv('VPS4PASS', 'vps4pass')
 
-        self.VERTIGO_USER = os.getenv('VERTIGO_USER', 'vertigouser')
-        self.VERTIGO_PASS = os.getenv('VERTIGO_PASS', 'vertigopass')
-
         self.CAN_FLOOD = os.getenv('sysenv', 'dev') in ['dev', 'test']
 
 
@@ -111,7 +107,6 @@ class ProductionAppConfig(AppConfig):
     SSO_URL = 'https://sso.gdcorp.tools'
     MIMIR_URL = 'https://mimir.cset.int.gdcorp.tools'
     SHOPLOCKED_URL = 'https://shoplocked.cset.int.gdcorp.tools'
-    VERT_URL = 'https://vertigo.int.gdcorp.tools/vertigo/v1/container/'
     CRMALERT_URL = 'https://crm-alert.cset.int.gdcorp.tools'
 
     # TODO CMAPT-5272: remove all references to VPS4_URLS variable
@@ -202,7 +197,6 @@ class TestAppConfig(AppConfig):
     DIABLO_URL = 'https://diablo.api.test-godaddy.com/v1/accounts/'
     MWPONE_URL = 'https://api.servicemanager.test-godaddy.com/v1/accounts/'
     PLESK_URL = 'https://gdapi.plesk-shared-app.int.test-gdcorp.tools/v1/accounts/'
-    VERT_URL = ''
     SHOPPER_API_URL = 'https://shopper.api.int.test-godaddy.com'
 
     ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.test.godaddy.com/'
@@ -251,8 +245,6 @@ class UnitTestConfig(AppConfig):
     PLESKPASS = 'pleskpass'
     VPS4USER = 'vps4user'
     VPS4PASS = 'vps4pass'
-    VERTIGO_USER = 'vertigouser'
-    VERTIGO_PASS = 'vertigopass'
 
     DOMAIN_SERVICE = 'domainservice-rest.abuse-api-dev.svc.cluster.local:8080'
 

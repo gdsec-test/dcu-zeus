@@ -7,8 +7,6 @@ services:
       # TODO CMAPT-5272: remove all DIABLO*, PLESK4*, and VPS4* variables
       CMAP_API_CERT: '/tmp/certs/apiuser.cmap.int.godaddy.com.crt'
       CMAP_API_KEY: '/tmp/certs/apiuser.cmap.int.godaddy.com.key'
-      VERTIGO_PASS: ${VERTIGO_PASS}
-      VERTIGO_USER: ${VERTIGO_USER}
       DB_PASS: ${DB_PASS}
       DIABLOPASS: ${DIABLOPASS}
       DIABLOUSER: ${DIABLOUSER}
