@@ -63,7 +63,6 @@ class NESHelper():
         # TODO CMAPT-5272: remove the NES selection flags
         products_use_nes_flag = {
             'diablo': os.environ.get('DIABLO_USE_NES', None),
-            'vertigo': os.environ.get('VERTIGO_USE_NES', None),
             'mwp 1.0': os.environ.get('MWPONE_USE_NES', None),
             'plesk': os.environ.get('ANGELO_USE_NES', None),
             'vps4': os.environ.get('VPS4_USE_NES', None),

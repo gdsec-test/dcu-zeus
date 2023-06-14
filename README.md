@@ -3,7 +3,7 @@
 Zeus is responsible for facilitating automated actions on GoDaddy Products. 
 These are mainly broken up into 1) Registered 2) Hosted) and 3) Fraud actions. Its major functionality currently include
  1. Product Suspensions (Domains, cPanel, MWP 1.0, etc.)
- 2. Customer Warnings (Domains, Vertigo)
+ 2. Customer Warnings (Domains)
 
 ## Cloning
 To clone the repository via SSH perform the following
@@ -87,8 +87,6 @@ TODO CMAPT-5272: remove all diablo, plesk, and vps4.
 * `DIABLOUSER` & `DIABLOPASS` (Account credentials to access the diablo API)
 * `PLESKUSER` & `PLESKPASS` (Account credentials to access the plesk API)
 * `VPS4USER` & `VPS4PASS` (Account credentials to access the vps4 API)
-* `VERTIGO_USER` (User for Vertigo)
-* `VERTIGO_PASS` (Password for Vertigo)
 * `RESULT_BACKEND_HOSTNAME` (localhost)
 * `ZEUS_CLIENT_CERT` (The path to the Zeus Client Cert for communicating with CRM Alert, Mimir and Shoplocked `zeus.client.cset.int.`)
 * `ZEUS_CLIENT__KEY` (The path to the Zeus Client Key for communicating with CRM Alert, Mimir and Shoplocked `zeus.client.cset.int.`)

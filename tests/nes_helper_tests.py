@@ -167,7 +167,7 @@ class TestNESHelper(TestCase):
     def test_get_use_nes_none(self):
         self.assertFalse(self._nes_helper.get_use_nes({'hosted_status': 'HOSTED', 'data': {'domainQuery': {'host': {'product': 'diablo'}}}}))
 
-    @patch.dict(os.environ, {'DIABLO_USE_NES': 'False', 'ALL_USE_NES': 'False', 'VERTIGO_USE_NES': 'True'})
+    @patch.dict(os.environ, {'DIABLO_USE_NES': 'False', 'ALL_USE_NES': 'False'})
     def test_get_use_nes_product_false(self):
         self.assertFalse(self._nes_helper.get_use_nes({'hosted_status': 'HOSTED', 'data': {'domainQuery': {'host': {'product': 'diablo'}}}}))
 

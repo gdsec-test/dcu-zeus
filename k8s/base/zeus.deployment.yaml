@@ -47,7 +47,7 @@ spec:
                 name: db-kelvin-v2
                 key: password
           # TODO CMAPT-5272: Remove DIABLOUSER, DIABLOPASS, PLESKUSER, PLESKPASS,
-          #     VPS4USER, VPS4PASS, VERTIGO_USER and VERTIGO_PASS
+          #     VPS4USER, VPS4PASS
           - name: DIABLOUSER
             valueFrom:
               secretKeyRef:
@@ -82,16 +82,6 @@ spec:
               secretKeyRef:
                 name: auth-vps4-api
                 key: vps4pass
-          - name: VERTIGO_USER
-            valueFrom:
-              secretKeyRef:
-                name: auth-hosting-envs
-                key: vertigouser
-          - name: VERTIGO_PASS
-            valueFrom:
-              secretKeyRef:
-                name: auth-hosting-envs
-                key: vertigopass
           - name: SLACK_HANDLER
             valueFrom:
               secretKeyRef:
@@ -118,11 +108,6 @@ spec:
               configMapKeyRef:
                 name: nes-on-flag
                 key: mwpone
-          - name: VERTIGO_USE_NES
-            valueFrom:
-              configMapKeyRef:
-                name: nes-on-flag
-                key: vertigo
           - name: VPS4_USE_NES
             valueFrom:
               configMapKeyRef:
