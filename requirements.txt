@@ -10,7 +10,7 @@ click-repl==0.2.0
 crm-notate==1.0.2
 csetutils==1.0.8
 dcdatabase==1.8.0
-hermes==1.1.0
+hermes==1.2.1
 idna==2.10
 importlib-metadata==3.10.1
 kombu==5.2.3
@@ -19,7 +19,7 @@ PyAuth==7.2.3
 pymongo==3.11.3
 PyYAML==5.4.1
 redis==4.5.4
-requests==2.25.1
+requests==2.31.0
 sentinels==1.0.0
 six==1.15.0
 suds-py3==1.4.4.1
