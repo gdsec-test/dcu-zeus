@@ -5,6 +5,7 @@ from urllib.parse import quote
 
 
 class AppConfig(object):
+    env = os.getenv('sysenv', 'dev')
     NOTIFICATION_LOCK_TIME = 60  # Just 60 seconds for testing purposes
     SUSPEND_HOSTING_LOCK_TIME = SUSPEND_DOMAIN_LOCK_TIME = 5 * 60  # Seconds in 5 minutes
     HOLD_TIME = 60  # Time to place something in review

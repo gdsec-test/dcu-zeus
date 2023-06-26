@@ -1,8 +1,10 @@
 import logging.config
 from datetime import datetime, timedelta
 
+from csetutils.services.sso import Causes, LockTeamIDs, LockType, SSOClient
 from dcdatabase.phishstorymongo import PhishstoryMongo
 
+from settings import AppConfig
 from zeus.events.email.fraud_mailer import FraudMailer
 from zeus.events.email.hosted_mailer import HostedMailer
 from zeus.events.email.ssl_mailer import SSLMailer
@@ -27,7 +29,7 @@ class HostedHandler(Handler):
     supported_types = ['PHISHING', 'MALWARE', 'CHILD_ABUSE']
     HOSTED = 'HOSTED'
 
-    def __init__(self, app_settings):
+    def __init__(self, app_settings: AppConfig):
         self._logger = logging.getLogger('celery.tasks')
         self.hosted_mailer = HostedMailer(app_settings)
         self.fraud_mailer = FraudMailer(app_settings)
@@ -49,7 +51,7 @@ class HostedHandler(Handler):
         self.HIGH_VALUE_HOLD_TIME = app_settings.HIGH_VALUE_HOLD_TIME
         self.SUCURI_PRODUCT_LIST = app_settings.SUCURI_PRODUCT_LIST
         self.FRAUD_REVIEW_TIME = app_settings.FRAUD_REVIEW_TIME
-
+        self._sso_client = SSOClient(app_settings.SSO_URL, app_settings.ZEUS_CLIENT_CERT, app_settings.ZEUS_CLIENT_KEY, app_settings.env)
         self._db = PhishstoryMongo(app_settings)
 
         self.mapping = {
@@ -180,6 +182,7 @@ class HostedHandler(Handler):
         source = data.get('source')
         target = data.get('target')
         ticket_id = data.get('ticketId')
+        employee = data.get('investigator_user_id')
 
         report_type, guid, shopper_id = self._validate_required_args(data)
         if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
@@ -220,7 +223,14 @@ class HostedHandler(Handler):
             return False
 
         if lock_shopper:
-            self.shoplocked.adminlock(shopper_id, note_mappings['hosted']['intentionallyMalicious']['shoplocked'])
+            self._sso_client.lock_idp(
+                int(shopper_id),
+                LockType.adminTerminated,
+                Causes.Policy,
+                LockTeamIDs.LtSecurity,
+                note_mappings['hosted']['intentionallyMalicious']['shoplocked'],
+                employee
+            )
 
         alert = alert_mappings['hosted']['suspend'].format(domain=domain, type=report_type)
         self.crmalert.create_alert(shopper_id, alert, report_type, self.crmalert.high_severity, domain)
@@ -234,6 +244,7 @@ class HostedHandler(Handler):
         source = data.get('source')
         target = data.get('target')
         ticket_id = data.get('ticketId')
+        employee = data.get('investigator_user_id')
 
         report_type, guid, shopper_id = self._validate_required_args(data)
         if not report_type or not guid or not shopper_id:  # Do not proceed if any values are None
@@ -254,7 +265,14 @@ class HostedHandler(Handler):
 
         self._notify_fraud(data, ticket_id, domain, shopper_id, guid, source, report_type, target)
 
-        self.shoplocked.adminlock(shopper_id, note_mappings['hosted']['shopperCompromise']['shoplocked_lock'])
+        self._sso_client.lock_idp(
+            int(shopper_id),
+            LockType.adminCompromised,
+            Causes.Compromise,
+            LockTeamIDs.LtCompromise,
+            note_mappings['hosted']['shopperCompromise']['shoplocked_lock'],
+            employee
+        )
         self.shoplocked.scrambler(shopper_id, note_mappings['hosted']['shopperCompromise']['shoplocked_scramble'])
 
         if not self.hosting_service.can_suspend_hosting_product(guid):

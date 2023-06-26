@@ -1,8 +1,10 @@
 import logging.config
 from datetime import datetime, timedelta
 
+from csetutils.services.sso import Causes, LockTeamIDs, LockType, SSOClient
 from dcdatabase.phishstorymongo import PhishstoryMongo
 
+from settings import AppConfig
 from zeus.events.email.foreign_mailer import ForeignMailer
 from zeus.events.email.fraud_mailer import FraudMailer
 from zeus.events.email.registered_mailer import RegisteredMailer
@@ -34,7 +36,7 @@ class RegisteredHandler(Handler):
     REGISTERED = 'REGISTERED'
     DOMAIN = 'Domain'
 
-    def __init__(self, app_settings):
+    def __init__(self, app_settings: AppConfig):
         self._logger = logging.getLogger('celery.tasks')
 
         self.registered_mailer = RegisteredMailer(app_settings)
@@ -60,6 +62,7 @@ class RegisteredHandler(Handler):
         self.ENTERED_BY = app_settings.ENTERED_BY
         self.PROTECTED_DOMAINS = app_settings.PROTECTED_DOMAINS
         self.FRAUD_REVIEW_TIME = app_settings.FRAUD_REVIEW_TIME
+        self._sso_client = SSOClient(app_settings.SSO_URL, app_settings.ZEUS_CLIENT_CERT, app_settings.ZEUS_CLIENT_KEY, app_settings.env)
 
         self._db = PhishstoryMongo(app_settings)
 
@@ -178,6 +181,7 @@ class RegisteredHandler(Handler):
         source = data.get('source')
         target = data.get('target')
         ticket_id = data.get('ticketId')
+        employee = data.get('investigator_user_id')
 
         '''When we have a HOSTED IntMal resolution, Zeus will also suspend the domain name in addition to the host.
         This section accounts for the domain and hosting being in different accounts so we do not take all actions of
@@ -235,7 +239,14 @@ class RegisteredHandler(Handler):
             return False
 
         if lock_shopper:
-            self.shoplocked.adminlock(shopper_id, note_mappings['registered']['intentionallyMalicious']['shoplocked'])
+            self._sso_client.lock_idp(
+                int(shopper_id),
+                LockType.adminTerminated,
+                Causes.Policy,
+                LockTeamIDs.LtSecurity,
+                note_mappings['registered']['intentionallyMalicious']['shoplocked'],
+                employee
+            )
 
         alert = alert_mappings['registered']['suspend'].format(domain=domain, type=report_type)
         self.crmalert.create_alert(shopper_id, alert, report_type, self.crmalert.high_severity, domain)
@@ -252,6 +263,7 @@ class RegisteredHandler(Handler):
         source = data.get('source')
         target = data.get('target')
         ticket_id = data.get('ticketId')
+        employee = data.get('investigator_user_id')
 
         if self._is_domain_protected(domain, action='shopper_compromise'):
             return False
@@ -275,7 +287,14 @@ class RegisteredHandler(Handler):
 
         self._notify_fraud(data, ticket_id, domain, shopper_id, report_type, source, target)
 
-        self.shoplocked.adminlock(shopper_id, note_mappings['registered']['shopperCompromise']['shoplocked_lock'])
+        self._sso_client.lock_idp(
+            int(shopper_id),
+            LockType.adminCompromised,
+            Causes.Compromise,
+            LockTeamIDs.LtCompromise,
+            note_mappings['registered']['shopperCompromise']['shoplocked_lock'],
+            employee
+        )
         self.shoplocked.scrambler(shopper_id, note_mappings['registered']['shopperCompromise']['shoplocked_scramble'])
 
         if not self.domain_service.can_suspend_domain(domain):

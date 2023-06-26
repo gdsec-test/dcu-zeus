@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from unittest import TestCase
 
+from csetutils.services.sso import Causes, LockTeamIDs, LockType, SSOClient
 from dcdatabase.phishstorymongo import PhishstoryMongo
 from mock import patch
 
@@ -15,7 +16,6 @@ from zeus.handlers.registered_handler import RegisteredHandler
 from zeus.reviews.reviews import BasicReview, HighValueReview
 from zeus.utils.crmalert import CRMAlert
 from zeus.utils.mimir import Mimir
-from zeus.utils.shoplocked import Shoplocked
 from zeus.utils.shopperapi import ShopperAPI
 from zeus.utils.slack import SlackFailures
 
@@ -32,7 +32,7 @@ class TestRegisteredHandler(TestCase):
     phishing = 'PHISHING'
     protected_domain = 'myftpupload.com'
     reg = 'REGISTERED'
-    sid = 'test-id'
+    sid = '123456789'
     ssl_subscription = '1234'
     ticketID = '4321'
     HOSTED = 'HOSTED'
@@ -171,7 +171,7 @@ class TestRegisteredHandler(TestCase):
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(RegisteredMailer, 'send_shopper_intentional_suspension', return_value=False)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
@@ -183,7 +183,7 @@ class TestRegisteredHandler(TestCase):
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(SlackFailures, 'failed_sending_revocation_email', return_value=None)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(RegisteredMailer, 'send_shopper_intentional_suspension', return_value=True)
@@ -197,7 +197,7 @@ class TestRegisteredHandler(TestCase):
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(RegisteredHandler, '_suspend_domain', return_value=True)
     @patch.object(RegisteredMailer, 'send_shopper_intentional_suspension', return_value=True)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
@@ -210,7 +210,7 @@ class TestRegisteredHandler(TestCase):
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(RegisteredHandler, '_suspend_domain', return_value=True)
     @patch.object(RegisteredMailer, 'send_shopper_intentional_suspension', return_value=True)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
@@ -223,7 +223,7 @@ class TestRegisteredHandler(TestCase):
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(RegisteredHandler, '_suspend_domain', return_value=True)
     @patch.object(RegisteredMailer, 'send_shopper_intentional_suspension', return_value=True)
     @patch.object(FraudMailer, 'send_malicious_domain_notification', return_value=None)
@@ -239,7 +239,7 @@ class TestRegisteredHandler(TestCase):
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(RegisteredHandler, '_suspend_domain', return_value=True)
     @patch.object(RegisteredMailer, 'send_shopper_intentional_suspension', return_value=True)
     @patch.object(FraudMailer, 'send_malicious_domain_notification', return_value=None)
@@ -252,13 +252,13 @@ class TestRegisteredHandler(TestCase):
                                                          mimir, mock_db):
         self._registered.intentionally_malicious(self.ticket_no_hold_or_reseller)
         fraud.assert_called()
-        shoplocked.assert_called_with('test-id', 'Account locked for Abuse. * DO NOT UNLOCK OR REINSTATE * See http://x.co/dcuwhat2do for proper handling.')
+        shoplocked.assert_called_with(123456789, LockType.adminTerminated, Causes.Policy, LockTeamIDs.LtSecurity, 'Account locked for Abuse. * DO NOT UNLOCK OR REINSTATE * See http://x.co/dcuwhat2do for proper handling.', None)
 
     @patch.object(RegisteredHandler, 'suspend', return_value=True)
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(RegisteredHandler, '_suspend_domain', return_value=True)
     @patch.object(RegisteredMailer, 'send_shopper_intentional_suspension', return_value=True)
     @patch.object(FraudMailer, 'send_malicious_domain_notification', return_value=None)
@@ -276,7 +276,7 @@ class TestRegisteredHandler(TestCase):
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(RegisteredHandler, '_suspend_domain', return_value=True)
     @patch.object(RegisteredMailer, 'send_shopper_intentional_suspension', return_value=True)
     @patch.object(FraudMailer, 'send_malicious_domain_notification', return_value=None)
@@ -342,7 +342,7 @@ class TestRegisteredHandler(TestCase):
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(ThrottledDomainService, 'can_suspend_domain', return_value=False)
     @patch.object(SSLMailer, 'send_revocation_email', return_value=True)
@@ -352,7 +352,7 @@ class TestRegisteredHandler(TestCase):
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(RegisteredMailer, 'send_shopper_compromise_suspension', return_value=False)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
@@ -364,7 +364,7 @@ class TestRegisteredHandler(TestCase):
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(RegisteredHandler, '_suspend_domain', return_value=True)
     @patch.object(RegisteredMailer, 'send_shopper_compromise_suspension', return_value=True)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
@@ -377,7 +377,7 @@ class TestRegisteredHandler(TestCase):
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(FraudMailer, 'send_malicious_domain_notification', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(RegisteredHandler, '_suspend_domain', return_value=True)
     @patch.object(RegisteredMailer, 'send_shopper_compromise_suspension', return_value=True)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
@@ -391,7 +391,7 @@ class TestRegisteredHandler(TestCase):
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(RegisteredHandler, '_suspend_domain', return_value=True)
     @patch.object(RegisteredMailer, 'send_shopper_compromise_suspension', return_value=True)
     @patch.object(FraudMailer, 'send_malicious_domain_notification', return_value=None)
@@ -448,12 +448,12 @@ class TestRegisteredHandler(TestCase):
 
     @patch.object(ThrottledDomainService, 'suspend_domain', return_value=True)
     def test_suspend_domain_success(self, service):
-        self.assertTrue(self._registered._suspend_domain({}, 'test-id', 'reason'))
+        self.assertTrue(self._registered._suspend_domain({}, '123456789', 'reason'))
 
     @patch.object(SlackFailures, 'failed_domain_suspension', return_value=None)
     @patch.object(ThrottledDomainService, 'suspend_domain', return_value=False)
     def test_suspend_domain_failed(self, service, slack):
-        self.assertFalse(self._registered._suspend_domain({}, 'test-id', 'reason'))
+        self.assertFalse(self._registered._suspend_domain({}, '123456789', 'reason'))
 
     @patch.object(SlackFailures, 'failed_protected_domain_action', return_value=None)
     def test_protected_domain_action(self, slack):
@@ -486,7 +486,7 @@ class TestRegisteredHandler(TestCase):
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(RegisteredHandler, '_suspend_domain', return_value=True)
     @patch.object(RegisteredMailer, 'send_shopper_intentional_suspension', return_value=True)
     @patch.object(FraudMailer, 'send_malicious_domain_notification', return_value=None)

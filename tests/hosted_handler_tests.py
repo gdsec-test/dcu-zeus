@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from unittest import TestCase
 
+from csetutils.services.sso import Causes, LockTeamIDs, LockType, SSOClient
 from dcdatabase.phishstorymongo import PhishstoryMongo
 from mock import patch
 
@@ -14,7 +15,6 @@ from zeus.reviews.reviews import BasicReview, HighValueReview
 from zeus.utils.crmalert import CRMAlert
 from zeus.utils.mimir import Mimir
 from zeus.utils.scribe import HostedScribe
-from zeus.utils.shoplocked import Shoplocked
 from zeus.utils.slack import SlackFailures
 
 config = config_by_name["unit-test"]()
@@ -24,7 +24,7 @@ class TestHostedHandler(TestCase):
     phishing = 'PHISHING'
     child_abuse = 'CHILD_ABUSE'
     guid = 'test-guid'
-    sid = 'test-id'
+    sid = '123456789'
     ssl_subscription = '1234'
     domain = 'domain'
     ncmecReportID = '5678'
@@ -134,7 +134,7 @@ class TestHostedHandler(TestCase):
         self.assertFalse(self._hosted.intentionally_malicious(self.ticket_valid))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=False)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
@@ -147,7 +147,7 @@ class TestHostedHandler(TestCase):
         self.assertFalse(self._hosted.intentionally_malicious(self.ticket_fraud_hold))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=True)
     @patch.object(SlackFailures, 'failed_sending_revocation_email', return_value=None)
@@ -162,7 +162,7 @@ class TestHostedHandler(TestCase):
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=True)
@@ -176,7 +176,7 @@ class TestHostedHandler(TestCase):
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=True)
@@ -186,12 +186,12 @@ class TestHostedHandler(TestCase):
     def test_intentionally_malicious_success(self, ssl_mailer, can_suspend, scribe, mailer, suspend,
                                              mimir, shoplocked, crmalert, mock_db):
         self.assertTrue(self._hosted.intentionally_malicious(self.ticket_valid))
-        shoplocked.assert_called_with('test-id', 'Account locked for Abuse. * DO NOT UNLOCK OR REINSTATE * See http://x.co/dcuwhat2do for proper handling.')
+        shoplocked.assert_called_with(123456789, LockType.adminTerminated, Causes.Policy, LockTeamIDs.LtSecurity, 'Account locked for Abuse. * DO NOT UNLOCK OR REINSTATE * See http://x.co/dcuwhat2do for proper handling.', None)
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(FraudMailer, 'send_malicious_hosting_notification', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=True)
@@ -206,7 +206,7 @@ class TestHostedHandler(TestCase):
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(FraudMailer, 'send_malicious_hosting_notification', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=True)
@@ -225,7 +225,7 @@ class TestHostedHandler(TestCase):
         self.assertFalse(self._hosted.shopper_compromise({}))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(HostedScribe, 'shopper_compromise', return_value=None)
     @patch.object(ThrottledHostingService, 'can_suspend_hosting_product', return_value=False)
@@ -235,7 +235,7 @@ class TestHostedHandler(TestCase):
         self.assertFalse(self._hosted.shopper_compromise(self.ticket_valid))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(HostedMailer, 'send_shopper_compromise_hosted_suspension', return_value=False)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
@@ -247,7 +247,7 @@ class TestHostedHandler(TestCase):
         self.assertFalse(self._hosted.shopper_compromise(self.ticket_valid))
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_shopper_compromise_hosted_suspension', return_value=True)
@@ -260,7 +260,7 @@ class TestHostedHandler(TestCase):
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(FraudMailer, 'send_malicious_hosting_notification', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(HostedMailer, 'send_shopper_compromise_hosted_suspension', return_value=False)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
@@ -274,7 +274,7 @@ class TestHostedHandler(TestCase):
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(FraudMailer, 'send_malicious_hosting_notification', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_shopper_compromise_hosted_suspension', return_value=True)
@@ -389,7 +389,7 @@ class TestHostedHandler(TestCase):
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(CRMAlert, 'create_alert', return_value=None)
-    @patch.object(Shoplocked, 'adminlock', return_value=None)
+    @patch.object(SSOClient, 'lock_idp', return_value=None)
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(HostedHandler, '_suspend_product', return_value=True)
     @patch.object(HostedMailer, 'send_shopper_hosted_intentional_suspension', return_value=True)
