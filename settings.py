@@ -44,7 +44,7 @@ class AppConfig(object):
 
     ENTERED_BY = 'DCU'  # The 'Entered By' field in CRM Shopper Notes
     DOMAIN_SERVICE = '0.0.0.0:8080'
-    PROTECTED_DOMAINS = {'myftpupload.com', 'godaddysites.com', 'secureserver.net', 'go.studio'}
+    PROTECTED_DOMAINS = {'myftpupload.com', 'godaddysites.com', 'secureserver.net', 'go.studio', 'secureserversites.net'}
     SUCURI_PRODUCT_LIST = ['Website Security Deluxe', 'Website Security Essential', 'Website Security Express',
                            'Website Security Ultimate']
 
