@@ -17,7 +17,7 @@ from zeus.reviews.reviews import BasicReview, HighValueReview
 from zeus.utils.crmalert import CRMAlert
 from zeus.utils.mimir import Mimir
 from zeus.utils.shopperapi import ShopperAPI
-from zeus.utils.slack import SlackFailures
+from zeus.utils.slack import SlackFailures, SlackUtil
 
 config = config_by_name["unit-test"]()
 
@@ -126,12 +126,14 @@ class TestRegisteredHandler(TestCase):
     def test_customer_warning_failed_registrant_warning(self, review, hosting, registrant, crm, slack):
         self.assertFalse(self._registered.customer_warning(self.ticket_valid))
 
+    
+    @patch.object(Mimir, 'write', return_value=None)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)
     @patch.object(RegisteredMailer, 'send_registrant_warning', return_value=True)
     @patch.object(ForeignMailer, 'send_foreign_hosting_notice', return_value=None)
     @patch.object(HighValueReview, 'place_in_review', return_value=None)
-    def test_customer_warning_high_value_domain(self, review, hosting, registrant, crm, slack):
+    def test_customer_warning_high_value_domain(self, review, hosting, registrant, crm, slack, mimir):
         self.assertTrue(self._registered.customer_warning(self.ticket_valid_high_value_domain))
 
     @patch.object(RegisteredHandler, '_validate_required_args', return_value=False)

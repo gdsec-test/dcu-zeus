@@ -192,7 +192,9 @@ class TestNESHelper(TestCase):
         # If the state isn't set, we assume it's good
         self.assertTrue(self._nes_helper.get_nes_state())
 
-    def test_set_nes_state_down(self):
+    @patch('zeus.events.suspension.nes_helper.Redis.get', return_value=b'DOWN')
+    @patch('zeus.events.suspension.nes_helper.Redis.setex', return_value=None)
+    def test_set_nes_state_down(self, redisget, redissetex):
         self._nes_helper.set_nes_state('DOWN')
         self.assertFalse(self._nes_helper.get_nes_state())
 
