@@ -17,7 +17,7 @@ from zeus.reviews.reviews import BasicReview, HighValueReview
 from zeus.utils.crmalert import CRMAlert
 from zeus.utils.mimir import Mimir
 from zeus.utils.shopperapi import ShopperAPI
-from zeus.utils.slack import SlackFailures, SlackUtil
+from zeus.utils.slack import SlackFailures
 
 config = config_by_name["unit-test"]()
 
@@ -126,7 +126,6 @@ class TestRegisteredHandler(TestCase):
     def test_customer_warning_failed_registrant_warning(self, review, hosting, registrant, crm, slack):
         self.assertFalse(self._registered.customer_warning(self.ticket_valid))
 
-    
     @patch.object(Mimir, 'write', return_value=None)
     @patch.object(SlackFailures, 'failed_sending_email', return_value=None)
     @patch.object(ThrottledCRM, 'notate_crm_account', return_value=None)

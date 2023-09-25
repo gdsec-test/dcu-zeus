@@ -1,6 +1,6 @@
 services:
   zeus:
-    image: docker-dcu-local.artifactory.secureserver.net/zeus:dev
+    image: gdartifactory1.jfrog.io/docker-dcu-local/zeus:dev
     environment:
       BROKER_URL: ${BROKER_URL}
       QUEUE_TYPE: 'quorum'

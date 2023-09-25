@@ -11,13 +11,13 @@ patches:
       path: "/spec/template/spec/containers/1"
       value:
         name: wiremock
-        image: docker-dcu-local.artifactory.secureserver.net/zeus/wiremock:dev
+        image: gdartifactory1.jfrog.io/docker-dcu-local/zeus/wiremock:dev
   target:
     kind: Deployment
     name: zeus
 
 images:
-- name: docker-dcu-local.artifactory.secureserver.net/zeus
+- name: gdartifactory1.jfrog.io/docker-dcu-local/zeus
   newTag: dev
 
 configMapGenerator:

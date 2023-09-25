@@ -1,6 +1,6 @@
 REPONAME=digital-crimes/zeus
 BUILDROOT=$(HOME)/dockerbuild/$(REPONAME)
-DOCKERREPO=docker-dcu-local.artifactory.secureserver.net/zeus
+DOCKERREPO=gdartifactory1.jfrog.io/docker-dcu-local/zeus
 DATE=$(shell date)
 BUILD_BRANCH=origin/main
 

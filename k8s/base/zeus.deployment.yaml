@@ -17,10 +17,10 @@ spec:
         app: "zeus"
     spec:
       imagePullSecrets:
-        - name: "dcu-artifactory-creds"
+        - name: "artifactory-saas-creds"
       containers:
         - name: "zeus"
-          image: "docker-dcu-local.artifactory.secureserver.net/zeus"
+          image: "gdartifactory1.jfrog.io/docker-dcu-local/zeus"
           envFrom:
             - configMapRef:
                 name: env-specific-values
