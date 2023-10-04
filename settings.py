@@ -35,6 +35,7 @@ class AppConfig(object):
     # TODO CMAPT-5272: remove all references to DIABLO_URL, MWPONE_URL, and PLESK_URL variables
     DIABLO_URL = 'https://cpanelprovapi.prod.phx3.secureserver.net/v1/accounts/'
     MWPONE_URL = 'https://api.servicemanager.godaddy.com/v1/accounts/'
+    MWPV3_URL = 'https://mwp.api.phx3.dev-godaddy.com'
     PLESK_URL = 'https://gdapi.plesk-shared-app.int.gdcorp.tools/v1/accounts/'
     SHOPPER_API_URL = 'https://shopper.api.int.godaddy.com'
 
@@ -109,6 +110,7 @@ class ProductionAppConfig(AppConfig):
     MIMIR_URL = 'https://mimir.cset.int.gdcorp.tools'
     SHOPLOCKED_URL = 'https://shoplocked.cset.int.gdcorp.tools'
     CRMALERT_URL = 'https://crm-alert.cset.int.gdcorp.tools'
+    MWPV3_URL = 'https://mwp.api.phx3.godaddy.com'
 
     # TODO CMAPT-5272: remove all references to VPS4_URLS variable
     VPS4_URLS = OrderedDict([('IAD2', 'https://vps4.api.iad2.godaddy.com'),
@@ -141,6 +143,7 @@ class OTEAppConfig(AppConfig):
     MIMIR_URL = 'https://mimir.cset.int.ote-gdcorp.tools'
     CRMALERT_URL = 'https://crm-alert.cset.int.ote-gdcorp.tools'
     SHOPPER_API_URL = 'https://shopper.api.int.ote-godaddy.com'
+    MWPV3_URL = 'https://mwp.api.phx3.ote-godaddy.com'
 
     VPS4_URLS = OrderedDict([('IAD2', 'https://vps4.api.test-godaddy.com'),
                              ('SIN2', 'https://vps4.api.test-godaddy.com'),
@@ -164,6 +167,7 @@ class DevelopmentAppConfig(AppConfig):
     DOMAIN_SERVICE = 'localhost:8080/domains'
     MWPONE_URL = 'http://localhost:8080/mwpone/v1/accounts/'
     DIABLO_URL = 'http://localhost:8080/diablo/v1/accounts/'
+    MWPV3_URL = 'https://mwp.api.phx3.dev-godaddy.com'
 
     ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.dp.godaddy.com/'
     SUBSCRIPTIONS_URL = 'https://subscriptions-shim-ext.cp.api.dp.godaddy.com/'
@@ -199,6 +203,7 @@ class TestAppConfig(AppConfig):
     MWPONE_URL = 'https://api.servicemanager.test-godaddy.com/v1/accounts/'
     PLESK_URL = 'https://gdapi.plesk-shared-app.int.test-gdcorp.tools/v1/accounts/'
     SHOPPER_API_URL = 'https://shopper.api.int.test-godaddy.com'
+    MWPV3_URL = 'https://mwp.api.phx3.test-godaddy.com'
 
     ENTITLEMENT_URL = 'https://entitlements-ext.cp.api.test.godaddy.com/'
     SUBSCRIPTIONS_URL = 'https://subscriptions-shim-ext.cp.api.test.godaddy.com/'
