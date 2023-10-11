@@ -486,8 +486,6 @@ class HostedHandler(Handler):
                                                      data.get('investigator_user_id'))
 
     def _suspend_product(self, data, guid, product, suspend_associated: bool = False):
-        guid = get_host_info_from_dict(data).get('mwpId') or guid
-
         suspension_result = self.hosting_service.suspend_hosting(product, guid, data, suspend_associated)
         if isinstance(suspension_result, str):
             self.slack.failed_hosting_suspension(guid, info=suspension_result)
