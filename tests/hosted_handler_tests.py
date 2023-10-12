@@ -186,7 +186,7 @@ class TestHostedHandler(TestCase):
     def test_intentionally_malicious_success(self, ssl_mailer, can_suspend, scribe, mailer, suspend,
                                              mimir, shoplocked, crmalert, mock_db):
         self.assertTrue(self._hosted.intentionally_malicious(self.ticket_valid))
-        shoplocked.assert_called_with(123456789, LockType.adminTerminated, Causes.Policy, LockTeamIDs.LtSecurity, 'Account locked for Abuse. * DO NOT UNLOCK OR REINSTATE * See http://x.co/dcuwhat2do for proper handling.', None)
+        shoplocked.assert_called_with(123456789, LockType.adminTerminated, Causes.Policy, LockTeamIDs.LtSecurity, 'Account locked for Abuse. * DO NOT UNLOCK OR REINSTATE * See http://secure.godaddy/dcuwhat2do for proper handling.', None)
 
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
     @patch.object(FraudMailer, 'send_malicious_hosting_notification', return_value=None)

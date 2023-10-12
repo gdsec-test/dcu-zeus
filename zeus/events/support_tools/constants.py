@@ -1,5 +1,5 @@
 # support document created to provide additional resources to Care Agents
-support_doc = 'See http://x.co/dcuwhat2do for proper handling.'
+support_doc = 'See http://secure.godaddy/dcuwhat2do for proper handling.'
 no_reinstate = '* DO NOT REINSTATE *'
 no_unlock_reinstate = '* DO NOT UNLOCK OR REINSTATE *'
 
@@ -69,10 +69,10 @@ note_mappings = {
 
 alert_mappings = {
     'hosted': {
-        'contentRemoved': '{type} content removed and/or disabled from hosting {domain}. See CRM notes and x.co/dcuwhat2do for proper handling.',
-        'suspend': 'Hosting {domain} suspended for {type} content. See CRM notes and x.co/dcuwhat2do for proper handling.'
+        'contentRemoved': '{type} content removed and/or disabled from hosting {domain}. See CRM notes and secure.godaddy/dcuwhat2do for proper handling.',
+        'suspend': 'Hosting {domain} suspended for {type} content. See CRM notes and secure.godaddy/dcuwhat2do for proper handling.'
     },
     'registered': {
-        'suspend': '{domain} suspended for {type} content. See CRM notes and x.co/dcuwhat2do for proper handling.'
+        'suspend': '{domain} suspended for {type} content. See CRM notes and secure.godaddy/dcuwhat2do for proper handling.'
     }
 }

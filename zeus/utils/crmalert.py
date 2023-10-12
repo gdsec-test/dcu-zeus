@@ -11,7 +11,7 @@ class CRMAlert:
     low_severity = "LOW"
     high_severity = "HIGH"
     initiator = "DCU Zeus Automation"
-    _resolution = "http://x.co/dcuwhat2do"
+    _resolution = "http://secure.godaddy/dcuwhat2do"
 
     def __init__(self, app_settings):
         self._logger = logging.getLogger('celery.tasks')

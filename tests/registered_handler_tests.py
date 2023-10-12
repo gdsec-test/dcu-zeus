@@ -253,7 +253,7 @@ class TestRegisteredHandler(TestCase):
                                                          mimir, mock_db):
         self._registered.intentionally_malicious(self.ticket_no_hold_or_reseller)
         fraud.assert_called()
-        shoplocked.assert_called_with(123456789, LockType.adminTerminated, Causes.Policy, LockTeamIDs.LtSecurity, 'Account locked for Abuse. * DO NOT UNLOCK OR REINSTATE * See http://x.co/dcuwhat2do for proper handling.', None)
+        shoplocked.assert_called_with(123456789, LockType.adminTerminated, Causes.Policy, LockTeamIDs.LtSecurity, 'Account locked for Abuse. * DO NOT UNLOCK OR REINSTATE * See http://secure.godaddy/dcuwhat2do for proper handling.', None)
 
     @patch.object(RegisteredHandler, 'suspend', return_value=True)
     @patch.object(PhishstoryMongo, 'update_actions_sub_document', return_value=None)
