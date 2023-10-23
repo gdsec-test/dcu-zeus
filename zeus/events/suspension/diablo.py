@@ -26,7 +26,7 @@ class Diablo(Product):
         try:
             body = json.dumps({'reason': 'DCU Suspension', 'type': 'abuse', 'enable_ftp': True}, ensure_ascii=False)
 
-            response = requests.post(url, auth=self.auth, headers=self.headers, data=body, verify=False)
+            response = requests.post(url, auth=self.auth, headers=self.headers, data=body)
             response.raise_for_status()
 
             return response.status_code == 200
@@ -45,7 +45,7 @@ class Diablo(Product):
         try:
             body = json.dumps({'reason': 'DCU Reinstatement'}, ensure_ascii=False)
 
-            response = requests.post(url, auth=self.auth, headers=self.headers, data=body, verify=False)
+            response = requests.post(url, auth=self.auth, headers=self.headers, data=body)
             response.raise_for_status()
 
             return response.status_code == 200

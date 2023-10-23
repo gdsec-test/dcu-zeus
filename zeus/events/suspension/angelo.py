@@ -62,7 +62,7 @@ class Angelo(Product):
         try:
             body = json.dumps({'disable_panel': 'true', 'reason': 'DCU Abuse', 'type': 'abuse'}, ensure_ascii=False)
 
-            response = requests.post(url, auth=self.auth, headers=self.headers, data=body, verify=False)
+            response = requests.post(url, auth=self.auth, headers=self.headers, data=body)
             response.raise_for_status()
 
             return response.status_code == 200
