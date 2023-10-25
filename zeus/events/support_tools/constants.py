@@ -1,5 +1,5 @@
 # support document created to provide additional resources to Care Agents
-support_doc = 'See http://secure.godaddy/dcuwhat2do for proper handling.'
+support_doc = 'See http://secure.godaddy/dcuwhat2do for proper handling. Please see your direct leadership for any problems accessing this page.'
 no_reinstate = '* DO NOT REINSTATE *'
 no_unlock_reinstate = '* DO NOT UNLOCK OR REINSTATE *'
 
