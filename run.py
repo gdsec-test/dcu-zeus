@@ -354,10 +354,10 @@ def pci_compliance(shopper_and_domain_list: list) -> list:
 
 
 @celery.task()
-def send_acknowledgement(source, reporter_email):
+def send_acknowledgement(source, reporter_email, dsa=False):
     emaildb = EmailMongo(config)
     emaildb.add_new_email({'source': source, 'email': reporter_email})
-    return reporter_mailer.send_acknowledgement_email(source, reporter_email)
+    return reporter_mailer.send_acknowledgement_email(source, reporter_email, dsa)
 
 
 ''' CSAM Tasks '''
