@@ -29,7 +29,7 @@ class ReporterMailer(Mailer):
         kwargs = self.generate_kwargs_for_hermes()
         ocm_template = 7010
         if dsa:
-            ocm_template = 7236
+            ocm_template = 7237
         try:
             if self._throttle.can_reporter_acknowledge_email_be_sent(reporter_email) or self._CAN_FLOOD:
                 kwargs['recipients'] = [{'email': reporter_email}]
