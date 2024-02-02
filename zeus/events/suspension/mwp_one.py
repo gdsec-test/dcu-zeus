@@ -23,7 +23,10 @@ class MWPOne(Product):
 
     def _get_shopper_jwt(self, shopper_id: str) -> str:
         response = requests.post(f'{self.sso_url}/secure/api/delegation',
-                                 json={'subordinate_user': shopper_id, 'realm': 'idp'}, cert=self.cert)
+                                 json={
+                                     'subordinate_user': shopper_id,
+                                     'realm': 'idp'
+                                 }, cert=self.cert)
         response.raise_for_status()
         return response.json()['data']
 
