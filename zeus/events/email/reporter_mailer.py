@@ -30,10 +30,12 @@ class ReporterMailer(Mailer):
         ocm_template = 7010
         if dsa:
             ocm_template = 7237
+            template = "reporter.mail_reporter_dsa"
         try:
             if self._throttle.can_reporter_acknowledge_email_be_sent(reporter_email) or self._CAN_FLOOD:
                 kwargs['recipients'] = [{'email': reporter_email}]
                 resp = send_mail(template, {}, **kwargs)
+                print("OCM TEMPLATE " + str(ocm_template))
                 resp.update({'type': message_type, 'template': ocm_template})
                 generate_event(source, success_message, **resp)
                 return True
