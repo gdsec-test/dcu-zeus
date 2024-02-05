@@ -25,7 +25,7 @@ class CeleryConfig:
     result_expires = 3600
 
     def __init__(self):
-        self.broker_url = '' # Add your broker url here
+        self.broker_url = ''  # Add your broker url here
 
         queue_args = {'x-queue-type': 'quorum'}
         self.task_routes = {
