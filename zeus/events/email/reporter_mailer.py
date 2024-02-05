@@ -14,7 +14,7 @@ class ReporterMailer(Mailer):
         self._throttle = Throttle(app_settings.REDIS, app_settings.NOTIFICATION_LOCK_TIME)
         self._CAN_FLOOD = app_settings.CAN_FLOOD
 
-    def send_acknowledgement_email(self, source, reporter_email, dsa=False):
+    def send_acknowledgement_email(self, source, reporter_email, dsa=False, plid=1):
         """
         Sends an acknowledgement email to FOS reporters
         :param source:
@@ -30,9 +30,11 @@ class ReporterMailer(Mailer):
         ocm_template = 7010
         if dsa:
             ocm_template = 7237
+            template = 'reporter.mail_reporter_dsa'
         try:
             if self._throttle.can_reporter_acknowledge_email_be_sent(reporter_email) or self._CAN_FLOOD:
                 kwargs['recipients'] = [{'email': reporter_email}]
+                kwargs['plid'] = plid
                 resp = send_mail(template, {}, **kwargs)
                 resp.update({'type': message_type, 'template': ocm_template})
                 generate_event(source, success_message, **resp)
