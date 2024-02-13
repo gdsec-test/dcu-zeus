@@ -63,9 +63,8 @@ class SlackFailures:
         self._logger.error(message)
         self._slack.send_message(key, message)
 
-    def failed_protected_domain_action(self, domain, action):
+    def failed_protected_domain_action(self, domain, action, message: str):
         key = f'{domain}_{action}_action_failed'
-        message = f'{action} Action failed for a Protected Domain: {domain}'
         self._logger.error(message)
         self._slack.send_message(key, message)
 

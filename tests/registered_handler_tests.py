@@ -46,11 +46,13 @@ class TestRegisteredHandler(TestCase):
     KEY_HOST = 'host'
     KEY_HOSTED_STATUS = 'hosted_status'
     KEY_IS_DOMAIN_HIGH_VALUE = 'isDomainHighValue'
+    KEY_PORTFOLIO_TYPE = 'portfolioType'
     KEY_REGISTRAR = 'registrar'
     KEY_SHOPPER_ID = 'shopperId'
     KEY_SHOPPER_INFO = 'shopperInfo'
     KEY_SSL_SUB = 'sslSubscriptions'
     KEY_TYPE = 'type'
+    KEY_VIP = 'vip'
 
     ticket_invalid_type = {KEY_HOSTED_STATUS: reg}
     ticket_no_shopper = {KEY_HOSTED_STATUS: reg, KEY_TYPE: phishing}
@@ -65,6 +67,12 @@ class TestRegisteredHandler(TestCase):
     ticket_protected_domain = {KEY_HOSTED_STATUS: reg, KEY_TYPE: phishing, KEY_DOMAIN: protected_domain,
                                KEY_DATA: {KEY_DOMAIN_QUERY: {KEY_SHOPPER_INFO: {KEY_SHOPPER_ID: sid},
                                                              KEY_SSL_SUB: ssl_subscription}}}
+    ticket_protected_domain_with_portfolio_type = {KEY_HOSTED_STATUS: reg, KEY_TYPE: phishing, KEY_DOMAIN: protected_domain,
+                                                   KEY_DATA: {KEY_DOMAIN_QUERY: {KEY_SHOPPER_INFO: {KEY_SHOPPER_ID: sid, KEY_VIP: {KEY_PORTFOLIO_TYPE: 'CN'}},
+                                                                                 KEY_SSL_SUB: ssl_subscription}}}
+    ticket_unprotected_domain_with_portfolio_type = {KEY_HOSTED_STATUS: reg, KEY_TYPE: phishing, KEY_DOMAIN: domain,
+                                                     KEY_DATA: {KEY_DOMAIN_QUERY: {KEY_SHOPPER_INFO: {KEY_SHOPPER_ID: sid, KEY_VIP: {KEY_PORTFOLIO_TYPE: 'CN'}},
+                                                                                   KEY_SSL_SUB: ssl_subscription}}}
     ticket_valid_api_reseller = {KEY_HOSTED_STATUS: reg, KEY_TYPE: phishing, KEY_DOMAIN: domain,
                                  KEY_DATA: {KEY_DOMAIN_QUERY: {'apiReseller': {'parent': '1234567', 'child': '7654321'},
                                                                KEY_REGISTRAR: {
@@ -459,6 +467,14 @@ class TestRegisteredHandler(TestCase):
     @patch.object(SlackFailures, 'failed_protected_domain_action', return_value=None)
     def test_protected_domain_action(self, slack):
         self.assertFalse(self._registered.suspend(self.ticket_protected_domain))
+
+    @patch.object(SlackFailures, 'failed_protected_domain_action', return_value=None)
+    def test_protected_domain_with_portfolio_type_action(self, slack):
+        self.assertFalse(self._registered.suspend(self.ticket_protected_domain_with_portfolio_type))
+
+    @patch.object(SlackFailures, 'failed_protected_domain_action', return_value=None)
+    def test_unprotected_domain_with_portfolio_type_action(self, slack):
+        self.assertFalse(self._registered.suspend(self.ticket_unprotected_domain_with_portfolio_type))
 
     @patch.object(SlackFailures, 'invalid_hosted_status', return_value=None)
     def test_suspend_csam_none(self, invalid_hosted_status):

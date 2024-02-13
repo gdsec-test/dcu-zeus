@@ -96,8 +96,9 @@ class RegisteredHandler(Handler):
         source = data.get('source')
         ticket_id = data.get('ticketId')
         high_value_domain = get_high_value_domain_from_dict(data)
+        portfolio_type = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('vip', {}).get('portfolioType', '')
 
-        if self._is_domain_protected(domain, action='customer_warning'):
+        if self._is_domain_protected(domain, action='customer_warning', portfolio_type=portfolio_type):
             return False
 
         if not self._validate_required_args(data):
@@ -182,6 +183,7 @@ class RegisteredHandler(Handler):
         target = data.get('target')
         ticket_id = data.get('ticketId')
         employee = data.get('investigator_user_id')
+        portfolio_type = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('vip', {}).get('portfolioType', '')
 
         '''When we have a HOSTED IntMal resolution, Zeus will also suspend the domain name in addition to the host.
         This section accounts for the domain and hosting being in different accounts so we do not take all actions of
@@ -193,7 +195,7 @@ class RegisteredHandler(Handler):
             else:
                 return self.suspend(data)
 
-        if self._is_domain_protected(domain, action='intentionally_malicious'):
+        if self._is_domain_protected(domain, action='intentionally_malicious', portfolio_type=portfolio_type):
             return False
 
         if not self._validate_required_args(data):
@@ -264,8 +266,9 @@ class RegisteredHandler(Handler):
         target = data.get('target')
         ticket_id = data.get('ticketId')
         employee = data.get('investigator_user_id')
+        portfolio_type = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('vip', {}).get('portfolioType', '')
 
-        if self._is_domain_protected(domain, action='shopper_compromise'):
+        if self._is_domain_protected(domain, action='shopper_compromise', portfolio_type=portfolio_type):
             return False
 
         if not self._validate_required_args(data):
@@ -316,8 +319,9 @@ class RegisteredHandler(Handler):
         shopper_id_list = self.shopper_api.get_list_of_ids_to_notify(data)
         source = data.get('source')
         ticket_id = data.get('ticketId')
+        portfolio_type = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('vip', {}).get('portfolioType', '')
 
-        if self._is_domain_protected(domain, action='repeat_offender'):
+        if self._is_domain_protected(domain, action='repeat_offender', portfolio_type=portfolio_type):
             return False
 
         elif not self._validate_required_args(data):
@@ -361,8 +365,9 @@ class RegisteredHandler(Handler):
         shopper_id_list = self.shopper_api.get_list_of_ids_to_notify(data)
         source = data.get('source')
         ticket_id = data.get('ticketId')
+        portfolio_type = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('vip', {}).get('portfolioType', '')
 
-        if self._is_domain_protected(domain, action='suspend'):
+        if self._is_domain_protected(domain, action='suspend', portfolio_type=portfolio_type):
             return False
 
         if not self._validate_required_args(data):
@@ -405,8 +410,9 @@ class RegisteredHandler(Handler):
         domain_id = get_kelvin_domain_id_from_dict(data)
         report_type = data.get('type')
         hosted_status = data.get('hosted_status')
+        portfolio_type = data.get('data', {}).get('domainQuery', {}).get('shopperInfo', {}).get('vip', {}).get('portfolioType', '')
 
-        if self._is_domain_protected(domain, action='suspend_csam'):
+        if self._is_domain_protected(domain, action='suspend_csam', portfolio_type=portfolio_type):
             return False
 
         if not self._validate_required_args(data):
@@ -454,9 +460,19 @@ class RegisteredHandler(Handler):
 
         return domain_create_date >= timeframe
 
-    def _is_domain_protected(self, domain, action):
-        if domain in self.PROTECTED_DOMAINS:
-            self.slack.failed_protected_domain_action(domain, action)
+    def _is_domain_protected(self, domain, action, portfolio_type: str) -> bool:
+        message = f'{action} Action failed for a '
+        if domain in self.PROTECTED_DOMAINS and portfolio_type == 'CN':
+            message += 'Protected Domain with Portfolio Type "CN": {domain}'
+            self.slack.failed_protected_domain_action(domain, action, message)
+            return True
+        elif domain in self.PROTECTED_DOMAINS:
+            message += 'Protected Domain: {domain}'
+            self.slack.failed_protected_domain_action(domain, action, message)
+            return True
+        elif portfolio_type == 'CN':
+            message += 'Domain with Portfolio Type "CN": {domain}'
+            self.slack.failed_protected_domain_action(domain, action, message)
             return True
         return False
 
